@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.SymbolInfoBase">
+    <Position X="6.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAgAAABCAA=</HashCode>
+      <FileName>LangAnaly\Model\Info\SymbolInfoBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.Symbol">
+    <Position X="7.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Produce\Symbol.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.CharSet">
+    <Position X="5.5" Y="3.25" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\CharSet\CharSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.DFAState">
+    <Position X="13.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAQACAAAAAABAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\DFA\DFAState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.EgtEntityBase" Collapsed="true">
+    <Position X="10.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Core\EgtEntityBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.Group">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAQAACAAAAAAgABAAAQgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Produce\Group.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.LALRState">
+    <Position X="15.75" Y="3.25" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\LALR\LALRState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.Produce">
+    <Position X="11.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Produce\Produce.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.DFAEdge" Collapsed="true">
+    <Position X="18.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAACAAIAAAA=</HashCode>
+      <FileName>LangAnaly\Model\DFA\DFAEdge.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.GramerInfo">
+    <Position X="7.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Info\GramerInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.Model.TokenInfo">
+    <Position X="5.5" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Info\TokenInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.EgtManager">
+    <Position X="10.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAwAADAIBAwBEkgACAgAAQAAAAAgEEACiAA=</HashCode>
+      <FileName>LangAnaly\EgtManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.LangAnaly.TokenReader">
+    <Position X="13" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAhAAAAQAAAAEAAAAAAAAAAAAAAQAAAAAAAAAAQAAA=</HashCode>
+      <FileName>LangAnaly\TokenReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="AutoIt.Foundation.Common.LangAnaly.Model.ActionType" Collapsed="true">
+    <Position X="18.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>LangAnaly\Model\LALR\ActionType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AutoIt.Foundation.Common.LangAnaly.Model.AdvanceMode" Collapsed="true">
+    <Position X="20.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCAA=</HashCode>
+      <FileName>LangAnaly\Model\CharSet\AdvanceMode.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AutoIt.Foundation.Common.LangAnaly.Model.EndingMode" Collapsed="true">
+    <Position X="22.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>LangAnaly\Model\CharSet\EndingMode.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AutoIt.Foundation.Common.LangAnaly.Model.SymbolType" Collapsed="true">
+    <Position X="18.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KAgAAAAAAAAABQAAAAAAAAAAAAAAAAAIAAAAAAAIAAA=</HashCode>
+      <FileName>LangAnaly\Model\Produce\SymbolType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AutoIt.Foundation.Common.LangAnaly.Model.TokenState" Collapsed="true">
+    <Position X="20.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIIAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LangAnaly\Model\Info\TokenState.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

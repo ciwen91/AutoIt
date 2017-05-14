@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,8 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Binding\BindInfo.cs" />
-    <Compile Include="Binding\Binding.cs" />
+    <Compile Include="Bind\BindInfo.cs" />
+    <Compile Include="Bind\Binding.cs" />
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
     <Compile Include="Context\Context.cs" />
@@ -53,11 +57,33 @@
     <Compile Include="DataStruct\KeyValue\ObjDictionary.cs" />
     <Compile Include="Expression\ExpressionVisitor.cs" />
     <Compile Include="Expression\MemberVisitor.cs" />
+    <Compile Include="LangAnaly\Model\CharSet\CharSetItem.cs" />
+    <Compile Include="LangAnaly\Model\DFA\DFAEdge.cs" />
+    <Compile Include="LangAnaly\Model\Info\GramerInfo.cs" />
+    <Compile Include="LangAnaly\Model\LALR\ActionType.cs" />
+    <Compile Include="LangAnaly\Model\CharSet\AdvanceMode.cs" />
+    <Compile Include="LangAnaly\Model\CharSet\CharSet.cs" />
+    <Compile Include="LangAnaly\Model\DFA\DFAState.cs" />
+    <Compile Include="LangAnaly\Model\Core\EgtEntityBase.cs" />
+    <Compile Include="LangAnaly\EgtManager.cs" />
+    <Compile Include="LangAnaly\Model\CharSet\EndingMode.cs" />
+    <Compile Include="LangAnaly\Model\LALR\LALRAction.cs" />
+    <Compile Include="LangAnaly\Model\Produce\Group.cs" />
+    <Compile Include="LangAnaly\Model\LALR\LALRState.cs" />
+    <Compile Include="LangAnaly\Model\Produce\Produce.cs" />
+    <Compile Include="LangAnaly\Model\Produce\Symbol.cs" />
+    <Compile Include="LangAnaly\Model\Produce\SymbolType.cs" />
+    <Compile Include="LangAnaly\Model\Info\SymbolInfoBase.cs" />
+    <Compile Include="LangAnaly\Model\Info\TokenInfo.cs" />
+    <Compile Include="LangAnaly\TokenReader.cs" />
+    <Compile Include="LangAnaly\Model\Info\TokenState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DataStruct\KeyValue\KeyValue.cd" />
+    <None Include="LangAnaly\LangAnaly.cd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

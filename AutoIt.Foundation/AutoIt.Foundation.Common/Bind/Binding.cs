@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using AutoIt.Foundation.Common.DataStruct.KeyValue;
 using Compiler.Common;
 
-namespace AutoIt.Foundation.Common.Binding
+namespace AutoIt.Foundation.Common.Bind
 {
     /// <summary>
     /// 绑定
