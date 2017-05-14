@@ -119,8 +119,8 @@ namespace AutoIt.Foundation.Common.Expression
         {
             var result = base.VisitMethodCall(m);
 
-            var obj = GetValue(m.Object);
-            var paramGroup = m.Arguments.Select(item => GetValue(item)).ToArray();
+            var obj = GetCacheValue(m.Object);
+            var paramGroup = m.Arguments.Select(GetCacheValue).ToArray();
             var val = m.Method.Invoke(obj, paramGroup);
             _ValueDic[result] = val;
 

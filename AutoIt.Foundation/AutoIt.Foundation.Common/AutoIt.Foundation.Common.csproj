@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binding\BindInfo.cs" />
+    <Compile Include="Binding\Binding.cs" />
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
     <Compile Include="Context\Context.cs" />
