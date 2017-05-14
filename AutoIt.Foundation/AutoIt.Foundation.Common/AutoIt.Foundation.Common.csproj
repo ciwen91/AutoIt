@@ -60,6 +60,8 @@
     <Compile Include="LangAnaly\Model\CharSet\CharSetItem.cs" />
     <Compile Include="LangAnaly\Model\DFA\DFAEdge.cs" />
     <Compile Include="LangAnaly\Model\Info\GramerInfo.cs" />
+    <Compile Include="LangAnaly\GramerReader.cs" />
+    <Compile Include="LangAnaly\Model\Info\GramerState.cs" />
     <Compile Include="LangAnaly\Model\LALR\ActionType.cs" />
     <Compile Include="LangAnaly\Model\CharSet\AdvanceMode.cs" />
     <Compile Include="LangAnaly\Model\CharSet\CharSet.cs" />
@@ -78,7 +80,6 @@
     <Compile Include="LangAnaly\TokenReader.cs" />
     <Compile Include="LangAnaly\Model\Info\TokenState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DataStruct\KeyValue\KeyValue.cd" />

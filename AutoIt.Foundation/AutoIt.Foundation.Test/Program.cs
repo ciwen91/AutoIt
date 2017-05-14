@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoIt.Foundation.Common.DataStruct.KeyValue;
 
-namespace AutoIt.Foundation.Common
+namespace AutoIt.Foundation.Test
 {
-    class Test
+    class Program
     {
-        public void TestA()
+        static void Main(string[] args)
         {
-           
         }
     }
 }
