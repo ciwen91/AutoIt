@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
+    <Compile Include="Context\Context.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyValue.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyObjValue.cs" />
     <Compile Include="DataStruct\KeyValue\KeyValueForDicGroup.cs" />
