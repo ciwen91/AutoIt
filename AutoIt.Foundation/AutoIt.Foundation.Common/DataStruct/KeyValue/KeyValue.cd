@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AutoIt.Foundation.Common.DataStruct.KeyValue.KeyValueForDicGroup&lt;TKey, TValue&gt;">
+    <Position X="4.75" Y="2.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABABBAAAABAAAAAAAAAAAAgAAAAAEAAA=</HashCode>
+      <FileName>DataStruct\KeyValue\KeyValueForDicGroup.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.DataStruct.KeyValue.KeyValueHelper">
+    <Position X="9" Y="2.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACQAAAAAAAAAAAAAAAAAAAAACAAEAAAAAAAAAAA=</HashCode>
+      <FileName>DataStruct\KeyValue\KeyValueHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AutoIt.Foundation.Common.DataStruct.KeyValue.KeyValueForObjDicGroup">
+    <Position X="4.75" Y="5.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABABAAAAABAAAAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>DataStruct\KeyValue\KeyValueForObjDicGroup.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="AutoIt.Foundation.Common.DataStruct.IKeyObjValue">
+    <Position X="1.25" Y="4.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABABAAAAABAAAAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>DataStruct\KeyValue\Core\IKeyObjValue.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="AutoIt.Foundation.Common.DataStruct.IKeyValue&lt;TKey, TValue&gt;">
+    <Position X="1.5" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABABAAAAABAAAAAAAAAAAAgAAAAAEAAA=</HashCode>
+      <FileName>DataStruct\KeyValue\Core\IKeyValue.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

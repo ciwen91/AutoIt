@@ -40,7 +40,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassHelper\EnumerableHelper.cs" />
+    <Compile Include="ClassHelper\MemberInfoHelper.cs" />
+    <Compile Include="DataStruct\KeyValue\Core\IKeyValue.cs" />
+    <Compile Include="DataStruct\KeyValue\Core\IKeyObjValue.cs" />
+    <Compile Include="DataStruct\KeyValue\KeyValueForDicGroup.cs" />
+    <Compile Include="DataStruct\KeyValue\KeyValueForObjDicGroup.cs" />
+    <Compile Include="DataStruct\KeyValue\KeyValueHelper.cs" />
+    <Compile Include="DataStruct\KeyValue\ObjDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DataStruct\KeyValue\KeyValue.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
