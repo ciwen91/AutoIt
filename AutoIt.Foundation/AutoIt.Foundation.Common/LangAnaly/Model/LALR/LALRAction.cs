@@ -8,5 +8,7 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
         public ActionType ActionType { get; set; }
         [JsonIgnore]
         public LALRState TargetState { get; set; }
+        [JsonIgnore]
+        public Produce TargetRule { get; set; }
     }
 }

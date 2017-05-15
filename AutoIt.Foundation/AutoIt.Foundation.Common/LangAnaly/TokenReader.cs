@@ -26,7 +26,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
         {
             if (_Index == _Str.Length)
             {
-                return new TokenInfo(TokenState.End, null, null, _Line, _Col);
+                return new TokenInfo(TokenState.End, _Egt.SymbolGroup.First(item=>item.Type== SymbolType.EndofFile), null, _Line, _Col);
             }
 
             var index = _Index;

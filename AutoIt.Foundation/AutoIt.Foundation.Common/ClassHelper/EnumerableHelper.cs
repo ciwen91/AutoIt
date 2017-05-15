@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace AutoIt.Foundation.Common.ClassHelper
 {
@@ -15,5 +18,17 @@ namespace AutoIt.Foundation.Common.ClassHelper
 
             return group;
         }
+
+        public static string JoinStr<T>(this IEnumerable<T> group, string seperator)
+        {
+           return string.Join(seperator, group);
+        }
+
+        public static string JoinStr<T, TResult>(this IEnumerable<T> group, string seperator, Func<T, TResult> castFunc)
+        {
+            return string.Join(seperator, group.Select(castFunc));
+        }
+
+
     }
 }

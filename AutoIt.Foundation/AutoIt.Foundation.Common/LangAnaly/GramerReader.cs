@@ -42,19 +42,21 @@ namespace AutoIt.Foundation.Common.LangAnaly
                 }
                 else if (action.ActionType == ActionType.Reduce)
                 {
-                    var produce = _EgtManager.ProduceGroup.First(item => item.NonTerminal == action.Symbol);
+                    var produce = action.TargetRule;
                     var prodSymbolCount = produce.SymbolGroup.Count;
 
                     var group = EnumerableHelper.For(prodSymbolCount)
-                        .Select(item => _GrammerGroup.Pop().Item2)
+                        .Select(item => _GrammerGroup.Pop())
                         .Reverse()
                         .ToList();
-                    var gramerSymbol = new GramerInfo(GramerState.Reduce, null) //???
+                    var gramerSymbol = new GramerInfo(GramerState.Reduce, group.First().Item2.StartToken)
                     {
-                        ChildGroup = group.Select(item => (SymbolInfoBase) item).ToList() //???
+                        ChildGroup = group.Select(item=>item.Item2).ToList(),
+                        Value = group.JoinStr(string.Empty,item=>item.Item2.Value),
+                        Symbol = produce.NonTerminal
                     };
 
-                    _GrammerGroup.Push(new Tuple<LALRState, GramerInfo>(action.TargetState, gramerSymbol));
+                    _GrammerGroup.Push(new Tuple<LALRState, GramerInfo>(_GrammerGroup.Peek().Item1.GetAction(produce.NonTerminal).TargetState, gramerSymbol));
 
                     return gramerSymbol;
                 }

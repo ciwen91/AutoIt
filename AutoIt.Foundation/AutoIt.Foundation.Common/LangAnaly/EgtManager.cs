@@ -278,7 +278,14 @@ namespace AutoIt.Foundation.Common.LangAnaly
                         var targetIndex = (int) ReadEntity(stream);
                         var reserve2 = ReadEntity(stream);
 
-                        Binding.Bind(() => elm.TargetState, () => LALRStateGroup[targetIndex]);
+                        if (elm.ActionType == ActionType.Shift||elm.ActionType== ActionType.Goto)
+                        {
+                            Binding.Bind(() => elm.TargetState, () => LALRStateGroup[targetIndex]);
+                        }
+                        else if (elm.ActionType == ActionType.Reduce)
+                        {
+                            elm.TargetRule = ProduceGroup[targetIndex];
+                        }
 
                         return elm;
                     })
