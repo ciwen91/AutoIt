@@ -21,7 +21,7 @@ namespace AutoIt.Foundation.Test
                 return setting;
             };
             
-            var manager = new MyLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
+            var manager = new PrintLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
 
             manager.Analy(@"
 1.23+   3*1");

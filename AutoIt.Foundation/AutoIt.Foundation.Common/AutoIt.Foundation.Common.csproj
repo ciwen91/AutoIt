@@ -57,7 +57,9 @@
     <Compile Include="DataStruct\KeyValue\ObjDictionary.cs" />
     <Compile Include="Expression\ExpressionVisitor.cs" />
     <Compile Include="Expression\MemberVisitor.cs" />
-    <Compile Include="LangAnaly\LangManager.cs" />
+    <Compile Include="LangAnaly\Lang\CalculateLangManager.cs" />
+    <Compile Include="LangAnaly\Lang\PrintLangManager.cs" />
+    <Compile Include="LangAnaly\LangManagerBase.cs" />
     <Compile Include="LangAnaly\Model\CharSet\CharSetItem.cs" />
     <Compile Include="LangAnaly\Model\DFA\DFAEdge.cs" />
     <Compile Include="LangAnaly\Model\Info\GramerInfo.cs" />

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,11 +7,11 @@ using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Common.LangAnaly
 {
-   public class LangManager
+   public abstract class LangManagerBase
    {
        private EgtManager _EgtManager;
 
-        public LangManager(string egtPath)
+        public LangManagerBase(string egtPath)
         {
             this._EgtManager = EgtManager.CreateFromFile(egtPath);
         }
@@ -72,29 +71,4 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
        }
    }
-
-    public class MyLangManager:LangManager
-    {
-        public MyLangManager(string egtPath) : base(egtPath)
-        {
-        }
-
-        public override void TokenRead(TokenInfo tokenInfo)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(tokenInfo.Symbol.Name+","+tokenInfo.Value);
-        }
-
-        public override void GramerRead(GramerInfo gramerInfo)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(gramerInfo.Symbol.Name + "," + gramerInfo.Value);
-        }
-
-        public override void GramerAccept(GramerInfo gramerInfo)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(gramerInfo.Symbol.Name + "," + gramerInfo.Value);
-        }
-    }
 }
