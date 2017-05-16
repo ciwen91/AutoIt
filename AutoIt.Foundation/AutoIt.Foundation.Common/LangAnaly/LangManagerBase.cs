@@ -10,14 +10,23 @@ namespace AutoIt.Foundation.Common.LangAnaly
    public abstract class LangManagerBase
    {
        private EgtManager _EgtManager;
+       protected GramerInfo _ResultGramerInfo;
 
         public LangManagerBase(string egtPath)
         {
             this._EgtManager = EgtManager.CreateFromFile(egtPath);
         }
 
-       public void Analy(string val)
+        public object GetValue(string val)
+        {
+            Analy(val);
+            return _ResultGramerInfo?.Data;
+        }
+
+        public void Analy(string val)
        {
+            _ResultGramerInfo = null;
+
            var tokenReader = new TokenReader(_EgtManager, val);
            var gramerReader = new GramerReader(_EgtManager);
 
@@ -38,8 +47,9 @@ namespace AutoIt.Foundation.Common.LangAnaly
                        }
                        else if (gramer.GramerState == GramerState.Accept)
                        {
+                            _ResultGramerInfo = gramer;
                             GramerAccept(gramer);
-                        }
+                       }
 
                        if (gramer.GramerState != GramerState.Reduce)
                        {

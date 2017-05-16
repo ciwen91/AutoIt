@@ -53,7 +53,8 @@ namespace AutoIt.Foundation.Common.LangAnaly
                     {
                         ChildGroup = group.Select(item=>item.Item2).ToList(),
                         Value = group.JoinStr(string.Empty,item=>item.Item2.Value),
-                        Symbol = produce.NonTerminal
+                        Symbol = produce.NonTerminal,
+                        Produce = produce
                     };
 
                     _GrammerGroup.Push(new Tuple<LALRState, GramerInfo>(_GrammerGroup.Peek().Item1.GetAction(produce.NonTerminal).TargetState, gramerSymbol));
@@ -62,7 +63,16 @@ namespace AutoIt.Foundation.Common.LangAnaly
                 }
                 else if (action.ActionType == ActionType.Accept)
                 {
-                    return new GramerInfo(GramerState.Accept, tokenInfo);
+                    var gramerInfo = _GrammerGroup.Peek().Item2;
+
+                    var gramerSymbol = new GramerInfo(GramerState.Accept, tokenInfo)
+                    {
+                        ChildGroup = new List<GramerInfo>() {gramerInfo},
+                        Value =gramerInfo.Value,
+                        Data = gramerInfo.Data
+                    };
+
+                    return gramerSymbol;
                 }
                 else
                 {

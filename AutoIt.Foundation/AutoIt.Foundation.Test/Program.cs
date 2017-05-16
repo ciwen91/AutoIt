@@ -20,11 +20,15 @@ namespace AutoIt.Foundation.Test
                 //setting.Formatting= Formatting.Indented;
                 return setting;
             };
-            
-            var manager = new PrintLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
 
-            manager.Analy(@"
-1.23+   3*1");
+
+//            var manager1 = new PrintLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
+//            manager1.GetValue(@"
+//1.23+   3*1");
+            var manager = new CalculateLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
+           var result= manager.GetValue(@"
+(1.23+   3)*1.5-2/0.3+(1.2-2)*1.3 ");
+            Console.WriteLine(result);
         }
     }
 }

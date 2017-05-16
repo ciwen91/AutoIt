@@ -7,6 +7,7 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
     {
         public GramerState GramerState { get; set; }
         public TokenInfo StartToken { get; set; }
+        public Produce Produce { get; set; }
         [JsonIgnore]
         public List<GramerInfo> ChildGroup { get; set; }=new List<GramerInfo>();
 
@@ -15,6 +16,7 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
         {
             this.GramerState = gramerState;
             this.StartToken = startToken;
+            this.Data = startToken.Data;
         }
     }
 }
