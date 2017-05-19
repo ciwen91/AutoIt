@@ -54,6 +54,7 @@
     <None Include="App.config" />
     <None Include="Data\Calculate.egt" />
     <None Include="Data\Calculate.grm" />
+    <None Include="Data\XML.grm" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
