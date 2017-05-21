@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoIt.Foundation.Common.LangAnaly.Model;
 using Newtonsoft.Json;
@@ -11,6 +13,8 @@ namespace AutoIt.Foundation.Common.LangAnaly
    {
        private EgtManager _EgtManager;
        protected GramerInfo _ResultGramerInfo;
+
+        public List<string> ContentNameGroup = new List<string>();
 
         public LangManagerBase(string egtPath)
         {
@@ -43,12 +47,33 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
                        if (gramer.GramerState == GramerState.Reduce)
                        {
+                           var gramerVal = val.Substring(gramer.Index, token.Index - gramer.Index);
+                          
+                           if (ContentNameGroup.Contains(gramer.Symbol.Name))
+                           {
+                             
+                               var index = gramer.Index - 1;
+                                while (index>=0&&(val[index]==' '||val[index]=='\r'||val[index]=='\n'))
+                               {
+                                   index--;
+                               }
+                               index = index + 1;
+                                                         
+                               gramerVal =val.Substring(index,gramer.Index-index) + gramerVal;//index,line,col
+                           }
+                           else
+                           {
+                               gramerVal = gramerVal.Trim();
+                           }
+
+                           gramer.Value = gramerVal;
+
                            GramerRead(gramer);
                        }
                        else if (gramer.GramerState == GramerState.Accept)
                        {
-                            _ResultGramerInfo = gramer;
-                            GramerAccept(gramer);
+                           _ResultGramerInfo = gramer;
+                           GramerAccept(gramer);
                        }
 
                        if (gramer.GramerState != GramerState.Reduce)
@@ -56,7 +81,6 @@ namespace AutoIt.Foundation.Common.LangAnaly
                            break;
                        }
                    }
-
                }
 
                if (token.State == TokenState.End)
@@ -65,7 +89,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                }
            }
        }
-
+        
        public virtual void TokenRead(TokenInfo tokenInfo)
        {
               

@@ -49,10 +49,14 @@ namespace AutoIt.Foundation.Common.LangAnaly
                         .Select(item => _GrammerGroup.Pop())
                         .Reverse()
                         .ToList();
-                    var gramerSymbol = new GramerInfo(GramerState.Reduce, group.First().Item2.StartToken)
+                    var gramerSymbol = new GramerInfo(GramerState.Reduce,
+                        group.Count > 0
+                            ? group.First().Item2.StartToken
+                            : new TokenInfo(TokenState.Accept, null, null, tokenInfo.Index, tokenInfo.Line,
+                                tokenInfo.Col))
                     {
-                        ChildGroup = group.Select(item=>item.Item2).ToList(),
-                        Value = group.JoinStr(string.Empty,item=>item.Item2.Value),
+                        ChildGroup = group.Select(item => item.Item2).ToList(),
+                        Value = group.JoinStr(string.Empty, item => item.Item2.Value),
                         Symbol = produce.NonTerminal,
                         Produce = produce
                     };

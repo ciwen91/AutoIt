@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoIt.Foundation.Common.ClassHelper;
+using AutoIt.Foundation.Common.DataStruct;
 using AutoIt.Foundation.Common.LangAnaly.Model;
 
 namespace AutoIt.Foundation.Common.LangAnaly
@@ -26,7 +28,8 @@ namespace AutoIt.Foundation.Common.LangAnaly
         {
             if (_Index == _Str.Length)
             {
-                return new TokenInfo(TokenState.End, _Egt.SymbolGroup.First(item=>item.Type== SymbolType.EndofFile), null, _Line, _Col);
+                return new TokenInfo(TokenState.End, _Egt.SymbolGroup.First(item=>item.Type== SymbolType.EndofFile), null, 
+                    _Index,_Line, _Col);
             }
 
             var index = _Index;
@@ -64,14 +67,14 @@ namespace AutoIt.Foundation.Common.LangAnaly
                     {
                         var token = new TokenInfo(TokenState.Accept, acceptSymbol,
                             _Str.Substring(startIndex, accpetIndex - startIndex + 1),
-                            _Line, _Col);
+                            _Index, _Line, _Col);
                         Consumn(token.Value);
                         return token;
                     }
                     else
                     {
                         var token = new TokenInfo(TokenState.Error, null, _Str[startIndex].ToString(),
-                            _Line, _Col);
+                            _Index, _Line, _Col);
                         Consumn(token.Value);
 
                         return token;
@@ -82,24 +85,11 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
         private void Consumn(string val)
         {
-            foreach (var item in val)
-            {
-                if (item == '\n')
-                {
-                    _Line += 1;
-                    _Col = 0;
-                }
-                else if (item == '\r')
-                {
+            var linePoint = _Str.NextPoint(val.Length, new LinePoint(_Index, _Line, _Col));
 
-                }
-                else
-                {
-                    _Col += 1;
-                }
-            }
-
-            _Index += val.Length;
+            _Index = linePoint.Index;
+            _Line = linePoint.Y;
+            _Col = linePoint.X;
         }
     }
 }

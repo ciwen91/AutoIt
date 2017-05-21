@@ -4,8 +4,8 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
     {
         public TokenState State { get; set; }
 
-        public TokenInfo(TokenState state, Symbol symbol, string value,
-            int line,int col):base(symbol,value,line,col)
+        public TokenInfo(TokenState state, Symbol symbol, string value,int index,
+            int line,int col):base(symbol,value,index,line,col)
         {
             this.State = state;
         }

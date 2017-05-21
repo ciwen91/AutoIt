@@ -54,7 +54,12 @@
     <None Include="App.config" />
     <None Include="Data\Calculate.egt" />
     <None Include="Data\Calculate.grm" />
-    <None Include="Data\XML.grm" />
+    <None Include="Data\Xml.egt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Xml.grm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +67,12 @@
       <Project>{aa5a1883-4eb2-48f0-86a3-376dadc19b56}</Project>
       <Name>AutoIt.Foundation.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Xml.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

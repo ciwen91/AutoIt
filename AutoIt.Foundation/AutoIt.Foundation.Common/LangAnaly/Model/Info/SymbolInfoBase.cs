@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 
 namespace AutoIt.Foundation.Common.LangAnaly.Model
 {
-   public abstract class SymbolInfoBase
+    public abstract class SymbolInfoBase
     {
         public Symbol Symbol { get; set; }
         public string Value { get; set; }
         public int Line { get; set; }
         public int Col { get; set; }
+        public int Index { get; set; }
 
-       public object Data { get; set; }
+    public object Data { get; set; }
 
-       public SymbolInfoBase(Symbol symbol, string value,
+       public SymbolInfoBase(Symbol symbol, string value,int index,
             int line, int col)
         {
             this.Symbol = symbol;
             this.Value = value;
+            this.Index = index;
             this.Line = line;
             this.Col = col;
         }

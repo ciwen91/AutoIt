@@ -48,6 +48,7 @@
     <Compile Include="Bind\Binding.cs" />
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
+    <Compile Include="ClassHelper\StringHelper.cs" />
     <Compile Include="Context\Context.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyValue.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyObjValue.cs" />
@@ -55,11 +56,14 @@
     <Compile Include="DataStruct\KeyValue\KeyValueForObjDicGroup.cs" />
     <Compile Include="DataStruct\KeyValue\KeyValueHelper.cs" />
     <Compile Include="DataStruct\KeyValue\ObjDictionary.cs" />
+    <Compile Include="DataStruct\LinePoint.cs" />
+    <Compile Include="DataStruct\Point.cs" />
     <Compile Include="Expression\ExpressionVisitor.cs" />
     <Compile Include="Expression\MemberVisitor.cs" />
     <Compile Include="LangAnaly\Lang\CalculateLangManager.cs" />
     <Compile Include="LangAnaly\Lang\PrintLangManager.cs" />
     <Compile Include="LangAnaly\LangManagerBase.cs" />
+    <Compile Include="LangAnaly\Lang\XmlLangManager.cs" />
     <Compile Include="LangAnaly\Model\CharSet\CharSetItem.cs" />
     <Compile Include="LangAnaly\Model\DFA\DFAEdge.cs" />
     <Compile Include="LangAnaly\Model\Info\GramerInfo.cs" />
