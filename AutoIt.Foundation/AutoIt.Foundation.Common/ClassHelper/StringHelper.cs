@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoIt.Foundation.Common.DataStruct;
 
@@ -62,6 +63,44 @@ namespace AutoIt.Foundation.Common.ClassHelper
             var endPoint = new LinePoint(startPoint.Index + count, x, y);
 
             return endPoint;
+        }
+
+        public static string MatchNext(this string str, string regex, int? index)
+        {
+            if (index == null)
+            {
+                index = 0;
+            }
+
+            if (index >= str.Length)
+            {
+                return null;
+            }
+
+            var val = str.Substring(index.Value);
+            var result = Regex.Match(val, regex, RegexOptions.IgnoreCase | RegexOptions.Multiline).Value;
+
+            return result;
+        }
+
+        public static string MatchPre(this string str, string regex, int? index)
+        {
+            if (index ==null)
+            {
+                index = str.Length - 1;
+            }
+
+            if (index < 0)
+            {
+                return null;
+            }
+
+            var val = str.Substring(0, index.Value + 1);
+            var result =
+                Regex.Match(val, regex, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.RightToLeft)
+                    .Value;
+
+            return result;
         }
     }
 }

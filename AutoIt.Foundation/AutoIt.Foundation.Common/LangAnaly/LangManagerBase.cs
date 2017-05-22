@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoIt.Foundation.Common.ClassHelper;
+using AutoIt.Foundation.Common.DataStruct;
 using AutoIt.Foundation.Common.LangAnaly.Model;
 using Newtonsoft.Json;
 
@@ -48,25 +50,28 @@ namespace AutoIt.Foundation.Common.LangAnaly
                        if (gramer.GramerState == GramerState.Reduce)
                        {
                            var gramerVal = val.Substring(gramer.Index, token.Index - gramer.Index);
-                          
+
                            if (ContentNameGroup.Contains(gramer.Symbol.Name))
                            {
-                             
-                               var index = gramer.Index - 1;
-                                while (index>=0&&(val[index]==' '||val[index]=='\r'||val[index]=='\n'))
+                               var preWhiteSpace = val.MatchPre(@"\s+", gramer.Index - 1);
+
+                               if (preWhiteSpace != null)
                                {
-                                   index--;
+                                   gramerVal = preWhiteSpace + gramerVal;
+                                   var newPoint = val.PrePoint(preWhiteSpace.Length,
+                                       new LinePoint(gramer.Index, gramer.Col, gramer.Line));
+                                   gramer.Index = newPoint.Index;
+                                   gramer.Line = newPoint.Y;
+                                   gramer.Col = newPoint.X;
                                }
-                               index = index + 1;
-                                                         
-                               gramerVal =val.Substring(index,gramer.Index-index) + gramerVal;//index,line,col
+                               gramer.Value = gramerVal;
+                               //index,line,col
                            }
                            else
                            {
                                gramerVal = gramerVal.Trim();
+                               gramer.Value = gramerVal;
                            }
-
-                           gramer.Value = gramerVal;
 
                            GramerRead(gramer);
                        }
