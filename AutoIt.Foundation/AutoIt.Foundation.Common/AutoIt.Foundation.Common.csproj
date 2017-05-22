@@ -77,7 +77,7 @@
     <Compile Include="LangAnaly\EgtManager.cs" />
     <Compile Include="LangAnaly\Model\CharSet\EndingMode.cs" />
     <Compile Include="LangAnaly\Model\LALR\LALRAction.cs" />
-    <Compile Include="LangAnaly\Model\Produce\Group.cs" />
+    <Compile Include="LangAnaly\Model\CharSet\Group.cs" />
     <Compile Include="LangAnaly\Model\LALR\LALRState.cs" />
     <Compile Include="LangAnaly\Model\Produce\Produce.cs" />
     <Compile Include="LangAnaly\Model\Produce\Symbol.cs" />
