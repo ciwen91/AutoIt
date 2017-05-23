@@ -1,3 +1,5 @@
-﻿class  GramerReader {
-    
-}
+﻿//namespace CodeEdit.LangAnaly {
+//    export class GramerReader {
+//        private _
+//    }
+//}

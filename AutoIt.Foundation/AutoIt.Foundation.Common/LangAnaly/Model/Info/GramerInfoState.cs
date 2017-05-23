@@ -1,6 +1,6 @@
 namespace AutoIt.Foundation.Common.LangAnaly.Model
 {
-    public  enum  GramerState
+    public  enum  GramerInfoState
     {
         Shift=0,
         Reduce,

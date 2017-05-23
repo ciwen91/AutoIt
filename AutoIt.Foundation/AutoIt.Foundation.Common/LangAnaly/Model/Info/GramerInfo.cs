@@ -6,7 +6,7 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
 {
     public class GramerInfo : SymbolInfoBase
     {
-        public GramerState GramerState { get; set; }
+        public GramerInfoState GramerState { get; set; }
         public TokenInfo StartToken { get; set; }
         public Produce Produce { get; set; }
 
@@ -43,7 +43,7 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
             }
         }
 
-        public GramerInfo(GramerState gramerState, TokenInfo startToken)
+        public GramerInfo(GramerInfoState gramerState, TokenInfo startToken)
             : base(startToken.Symbol, startToken.Value,startToken.Index ,startToken.Line, startToken.Col)
         {
             this.GramerState = gramerState;

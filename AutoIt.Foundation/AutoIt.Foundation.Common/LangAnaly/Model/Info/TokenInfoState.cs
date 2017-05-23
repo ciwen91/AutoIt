@@ -1,6 +1,6 @@
 namespace AutoIt.Foundation.Common.LangAnaly.Model
 {
-    public enum TokenState
+    public enum TokenInfoState
     {
         Accept,
         Error,

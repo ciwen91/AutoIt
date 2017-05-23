@@ -29,13 +29,13 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
             if (action == null)
             {
-                return new GramerInfo(GramerState.Error, tokenInfo);
+                return new GramerInfo(GramerInfoState.Error, tokenInfo);
             }
             else
             {
                 if (action.ActionType == ActionType.Shift)
                 {
-                    var gramerSymbol = new GramerInfo(GramerState.Shift, tokenInfo);
+                    var gramerSymbol = new GramerInfo(GramerInfoState.Shift, tokenInfo);
                     _GrammerGroup.Push(new Tuple<LALRState, GramerInfo>(action.TargetState, gramerSymbol));
 
                     return gramerSymbol;
@@ -49,10 +49,10 @@ namespace AutoIt.Foundation.Common.LangAnaly
                         .Select(item => _GrammerGroup.Pop())
                         .Reverse()
                         .ToList();
-                    var gramerSymbol = new GramerInfo(GramerState.Reduce,
+                    var gramerSymbol = new GramerInfo(GramerInfoState.Reduce,
                         group.Count > 0
                             ? group.First().Item2.StartToken
-                            : new TokenInfo(TokenState.Accept, null, null, tokenInfo.Index, tokenInfo.Line,
+                            : new TokenInfo(TokenInfoState.Accept, null, null, tokenInfo.Index, tokenInfo.Line,
                                 tokenInfo.Col))
                     {
                         ChildGroup = group.Select(item => item.Item2).ToList(),
@@ -69,7 +69,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                 {
                     var gramerInfo = _GrammerGroup.Peek().Item2;
 
-                    var gramerSymbol = new GramerInfo(GramerState.Accept, tokenInfo)
+                    var gramerSymbol = new GramerInfo(GramerInfoState.Accept, tokenInfo)
                     {
                         ChildGroup = new List<GramerInfo>() {gramerInfo},
                         Value =gramerInfo.Value,

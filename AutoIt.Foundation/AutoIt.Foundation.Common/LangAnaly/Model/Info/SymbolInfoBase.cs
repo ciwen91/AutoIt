@@ -13,10 +13,9 @@ namespace AutoIt.Foundation.Common.LangAnaly.Model
         public int Line { get; set; }
         public int Col { get; set; }
         public int Index { get; set; }
+        public object Data { get; set; }
 
-    public object Data { get; set; }
-
-       public SymbolInfoBase(Symbol symbol, string value,int index,
+        public SymbolInfoBase(Symbol symbol, string value, int index,
             int line, int col)
         {
             this.Symbol = symbol;

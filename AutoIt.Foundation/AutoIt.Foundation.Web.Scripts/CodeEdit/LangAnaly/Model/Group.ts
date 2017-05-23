@@ -1,0 +1,11 @@
+module CodeEdit.LangAnaly.Model {
+    export class Group {
+        Name: string;
+        Container: CodeEdit.LangAnaly.Model.Symbol;
+        Start: CodeEdit.LangAnaly.Model.Symbol;
+        End: CodeEdit.LangAnaly.Model.Symbol;
+        AdvanceMode: CodeEdit.LangAnaly.Model.AdvanceMode;
+        EndingMode: CodeEdit.LangAnaly.Model.EndingMode;
+        NestGroup: List<CodeEdit.LangAnaly.Model.Symbol>;
+    }
+}

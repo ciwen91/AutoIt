@@ -22,6 +22,14 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
+    <None Include="Scripts\jquery-1.11.3.intellisense.js" />
+    <Content Include="Scripts\jquery-1.11.3.js" />
+    <Content Include="Scripts\jquery-1.11.3.min.js" />
+    <Content Include="Scripts\jquery-1.11.3.min.map" />
+    <None Include="Scripts\jquery.linq-vsdoc.js" />
+    <Content Include="Scripts\jquery.linq.js" />
+    <Content Include="Scripts\jquery.linq.min.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -33,9 +41,33 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtManager.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />
-    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\Core\EgtEntityBase.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\ActionType.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\AdvanceMode.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\CharSet.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\CharSetItem.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\DFAEdge.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\DFAState.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\EgtEntityBase.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\EndingMode.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\GramerInfo.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\GramerInfoState.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\Group.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\LALRAction.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\LALRState.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\Produce.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\Symbol.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\SymbolInfoBase.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\SymbolType.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\TokenInfo.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\TokenInfoState.ts" />
+    <TypeScriptCompile Include="Context\Context.ts" />
     <TypeScriptCompile Include="DataStruct\List.ts" />
+    <TypeScriptCompile Include="Scripts\TypeDefine\easyui.d.ts" />
+    <TypeScriptCompile Include="Scripts\TypeDefine\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\TypeDefine\linq.d.ts" />
+    <TypeScriptCompile Include="Scripts\TypeDefine\linq.jquery.d.ts" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
@@ -67,6 +99,17 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>UMD</TypeScriptModuleKind>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>

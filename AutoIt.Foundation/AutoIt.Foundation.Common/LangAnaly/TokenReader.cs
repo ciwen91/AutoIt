@@ -28,7 +28,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
         {
             if (_Index == _Str.Length)
             {
-                return new TokenInfo(TokenState.End, _Egt.SymbolGroup.First(item=>item.Type== SymbolType.EndofFile), null, 
+                return new TokenInfo(TokenInfoState.End, _Egt.SymbolGroup.First(item=>item.Type== SymbolType.EndofFile), null, 
                     _Index,_Line, _Col);
             }
 
@@ -65,7 +65,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                 {
                     if (acceptSymbol != null)
                     {
-                        var token = new TokenInfo(TokenState.Accept, acceptSymbol,
+                        var token = new TokenInfo(TokenInfoState.Accept, acceptSymbol,
                             _Str.Substring(startIndex, accpetIndex - startIndex + 1),
                             _Index, _Line, _Col);
                         Consumn(token.Value);
@@ -73,7 +73,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                     }
                     else
                     {
-                        var token = new TokenInfo(TokenState.Error, null, _Str[startIndex].ToString(),
+                        var token = new TokenInfo(TokenInfoState.Error, null, _Str[startIndex].ToString(),
                             _Index, _Line, _Col);
                         Consumn(token.Value);
 

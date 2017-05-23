@@ -1,6 +1,6 @@
-var GramerReader = (function () {
-    function GramerReader() {
-    }
-    return GramerReader;
-}());
+//namespace CodeEdit.LangAnaly {
+//    export class GramerReader {
+//        private _
+//    }
+//} 
 //# sourceMappingURL=GramerReader.js.map

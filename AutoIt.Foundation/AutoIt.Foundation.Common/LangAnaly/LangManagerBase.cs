@@ -47,7 +47,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                    {
                        var gramer = gramerReader.ReadGramer(token);
 
-                       if (gramer.GramerState == GramerState.Reduce)
+                       if (gramer.GramerState == GramerInfoState.Reduce)
                        {
                            var gramerVal = val.Substring(gramer.Index, token.Index - gramer.Index);
 
@@ -75,20 +75,20 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
                            GramerRead(gramer);
                        }
-                       else if (gramer.GramerState == GramerState.Accept)
+                       else if (gramer.GramerState == GramerInfoState.Accept)
                        {
                            _ResultGramerInfo = gramer;
                            GramerAccept(gramer);
                        }
 
-                       if (gramer.GramerState != GramerState.Reduce)
+                       if (gramer.GramerState != GramerInfoState.Reduce)
                        {
                            break;
                        }
                    }
                }
 
-               if (token.State == TokenState.End)
+               if (token.State == TokenInfoState.End)
                {
                    break;
                }
