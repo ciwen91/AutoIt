@@ -17,9 +17,8 @@ var CodeEdit;
             var CharSet = (function (_super) {
                 __extends(CharSet, _super);
                 function CharSet() {
-                    var _this = _super !== null && _super.apply(this, arguments) || this;
-                    _this.Group = new List();
-                    return _this;
+                    _super.apply(this, arguments);
+                    this.Group = new List();
                 }
                 return CharSet;
             }(EgtEntityBase));
@@ -46,7 +45,7 @@ var CodeEdit;
             var Symbol = (function (_super) {
                 __extends(Symbol, _super);
                 function Symbol() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                    _super.apply(this, arguments);
                 }
                 return Symbol;
             }(EgtEntityBase));
@@ -63,10 +62,43 @@ var CodeEdit;
             var Produce = (function (_super) {
                 __extends(Produce, _super);
                 function Produce() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                    _super.apply(this, arguments);
                 }
                 return Produce;
             }(EgtEntityBase));
+            var DFAState = (function (_super) {
+                __extends(DFAState, _super);
+                function DFAState() {
+                    _super.apply(this, arguments);
+                    this.EdgGroup = new List();
+                }
+                return DFAState;
+            }(EgtEntityBase));
+            var DFAEdge = (function () {
+                function DFAEdge() {
+                }
+                return DFAEdge;
+            }());
+            var LALRState = (function (_super) {
+                __extends(LALRState, _super);
+                function LALRState() {
+                    _super.apply(this, arguments);
+                    this.ActionGroup = new List();
+                }
+                return LALRState;
+            }(EgtEntityBase));
+            var LALRAction = (function () {
+                function LALRAction() {
+                }
+                return LALRAction;
+            }());
+            var ActionType;
+            (function (ActionType) {
+                ActionType[ActionType["Shift"] = 1] = "Shift";
+                ActionType[ActionType["Reduce"] = 2] = "Reduce";
+                ActionType[ActionType["Goto"] = 3] = "Goto";
+                ActionType[ActionType["Accept"] = 4] = "Accept";
+            })(ActionType || (ActionType = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));

@@ -51,4 +51,32 @@
         NonTerminal: Symbol;
         SymbolGroup:List<Symbol>;
    }
+
+    class DFAState extends  EgtEntityBase {
+        AcceptSymbol: Symbol;
+        EdgGroup:List<DFAEdge>=new List<DFAEdge>();
+    }
+
+    class DFAEdge {
+        CharSet: CharSet;
+        TargetState:DFAState;
+    }
+
+    class LALRState extends EgtEntityBase {
+        ActionGroup:List<LALRAction>=new List<LALRAction>();
+    }
+
+    class LALRAction {
+        Symbol: Symbol;
+        ActionType: ActionType;
+        TargetState: LALRState;
+        TargetRule:Produce;
+    }
+
+    enum ActionType {
+        Shift = 1,
+        Reduce = 2,
+        Goto = 3,
+        Accept = 4
+    }
 }
