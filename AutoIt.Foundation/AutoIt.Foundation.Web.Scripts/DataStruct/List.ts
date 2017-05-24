@@ -5,7 +5,16 @@
         return this._Data.length;
     }
 
-    public Get(index: number): T {
+    public Contains(val: T):boolean {
+        return $.Enumerable.From(this._Data)
+            .Any(item => item == val);
+    }
+
+    public Get(index?: number): T {
+        if (!index) {
+            index = this.Count() - 1;
+        }
+
         return  this._Data[index];
     }
 
@@ -19,12 +28,12 @@
         return this;
     }
 
-    public Remove(val: T, index?: number): List<T> {
+    public Remove(index?: number): List<T> {
         if (!index) {
             index = this.Count() - 1;
         }
 
-        this._Data.splice(index,0);
+        this._Data.splice(index, 0);
 
         return this;
     }

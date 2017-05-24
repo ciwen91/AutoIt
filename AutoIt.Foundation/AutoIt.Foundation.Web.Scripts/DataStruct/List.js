@@ -5,7 +5,14 @@ var List = (function () {
     List.prototype.Count = function () {
         return this._Data.length;
     };
+    List.prototype.Contains = function (val) {
+        return $.Enumerable.From(this._Data)
+            .Any(function (item) { return item == val; });
+    };
     List.prototype.Get = function (index) {
+        if (!index) {
+            index = this.Count() - 1;
+        }
         return this._Data[index];
     };
     List.prototype.Set = function (val, index) {
@@ -15,7 +22,7 @@ var List = (function () {
         this._Data[index] = val;
         return this;
     };
-    List.prototype.Remove = function (val, index) {
+    List.prototype.Remove = function (index) {
         if (!index) {
             index = this.Count() - 1;
         }
