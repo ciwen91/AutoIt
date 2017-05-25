@@ -69,10 +69,24 @@ function ToDict(obj: Object): Dictionary<string, Object> {
     return dic;
 }
 
-//function InitObj<T>(obj: T, initFunc: Action<T>): T {
-//    initFunc(obj);
-//    return obj;
-//}
+class Loop {
+    static For(count:number):linq.Enumerable<number> {
+        var group:number[] = [];
+
+        for (var i = 0; i < count; i++) {
+            group.push(i);
+        }
+
+        return $.Enumerable.From(group);
+    }
+}
+
+function InitObj<T>(obj: T, initFunc: ActionOne<T>): T {
+    initFunc(obj);
+    return obj;
+}
+
+
 //function InitControl<T>(obj: T, parent: Control = null, initFunc: Action<T> = null): T {
 //    if (initFunc) {
 //        initFunc(obj);

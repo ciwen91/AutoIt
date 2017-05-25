@@ -64,10 +64,22 @@ function ToDict(obj) {
     });
     return dic;
 }
-//function InitObj<T>(obj: T, initFunc: Action<T>): T {
-//    initFunc(obj);
-//    return obj;
-//}
+var Loop = (function () {
+    function Loop() {
+    }
+    Loop.For = function (count) {
+        var group = [];
+        for (var i = 0; i < count; i++) {
+            group.push(i);
+        }
+        return $.Enumerable.From(group);
+    };
+    return Loop;
+}());
+function InitObj(obj, initFunc) {
+    initFunc(obj);
+    return obj;
+}
 //function InitControl<T>(obj: T, parent: Control = null, initFunc: Action<T> = null): T {
 //    if (initFunc) {
 //        initFunc(obj);
