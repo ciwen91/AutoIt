@@ -1,3 +1,7 @@
-﻿interface Func<T1, T2> {
-    (t1: T1): T2;
+﻿interface Func<TResult> {
+    (): TResult;
+}
+
+interface FuncOne<T,TResult> {
+    (t:T):TResult
 }

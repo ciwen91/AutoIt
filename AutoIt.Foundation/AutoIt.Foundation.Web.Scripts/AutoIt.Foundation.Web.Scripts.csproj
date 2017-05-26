@@ -40,6 +40,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Bind\BindInfo.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtManager.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\ActionType.ts" />
@@ -68,6 +69,7 @@
     <TypeScriptCompile Include="DataStruct\List.ts" />
     <TypeScriptCompile Include="DataStruct\Stream.ts" />
     <TypeScriptCompile Include="DataStruct\Tuple.ts" />
+    <TypeScriptCompile Include="Expression\MemberVisitor.ts" />
     <TypeScriptCompile Include="Global.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\easyui.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\jquery.d.ts" />
