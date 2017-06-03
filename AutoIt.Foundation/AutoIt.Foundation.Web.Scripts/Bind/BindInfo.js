@@ -11,4 +11,18 @@ var BindInfo = (function () {
     };
     return BindInfo;
 }());
+var Binding = (function () {
+    function Binding() {
+    }
+    Binding.Bind = function (target, source) {
+        var group = Context.Current();
+        var key = "Binding";
+        if (group.Get(key) == None) {
+            group.Set(key, new List());
+        }
+        var bindGroup = Cast(group.Get(key));
+        bindGroup.Set(new BindInfo(target, source));
+    };
+    return Binding;
+}());
 //# sourceMappingURL=BindInfo.js.map

@@ -1,4 +1,4 @@
-﻿var None = new Object();
+﻿var None:any = new Object();
 
 function Cast<T>(obj: any) {
     return <T>obj;
@@ -86,6 +86,14 @@ function InitObj<T>(obj: T, initFunc: ActionOne<T>): T {
     return obj;
 }
 
+
+var enumerable: any = $.Enumerable; 
+
+enumerable.prototype.ToList = function () {
+    var group = new List<any>();
+    this.ForEach(item => group.Set(item));
+    return group;
+}
 
 //function InitControl<T>(obj: T, parent: Control = null, initFunc: Action<T> = null): T {
 //    if (initFunc) {

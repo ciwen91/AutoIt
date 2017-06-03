@@ -1,0 +1,49 @@
+"Start Symbol"= <Doc>
+              
+! --------------------------------------------------------------------
+
+{Str} = {Printable} - ["]
+{TextNormal} = {Printable} - [<>&"=] - {Letter} - {Whitespace}
+             
+! --------------------------------------------------------------------
+
+Name= {Letter} ({Alphanumeric}|[._-])*
+Val= '"' {Str}* '"'
+TextNormal={TextNormal}
+TextCharName= '&' {Letter}+ ';'
+CharNumber  = '&#' {Digit}+ ';'
+
+! --------------------------------------------------------------------
+
+<Doc> ::= '<?' Name <Attributes> '?>' <Elm> | <Elm>
+
+! --------------------------------------------------------------------
+
+<Elm> ::=<Start Tag> <Content> <End Tag>
+       | <SelfClose Tag>
+<Elms>::=<Elms> <Elm> | <Elm>
+      
+<Start Tag> ::= '<' Name <Attributes> '>'
+<End Tag> ::= '</' Name '>'
+<SelfClose Tag> ::= '<' Name <Attributes> '/>'
+             
+<Attributes>::= <Attribute><Attributes>    |
+<Attribute>::=Name '=' Val
+
+! --------------------------------------------------------------------
+
+<Content> ::= <Elms> | <Text>
+<Text>::= <Text> <Word> |
+<Word>::= Name
+       | Val
+       | TextNormal
+       | TextCharName 
+       | CharNumber       
+       | '>'
+       | '"'
+       | '='       
+                 
+                      
+                 
+  
+       

@@ -1,0 +1,23 @@
+! Welcome to GOLD Parser Builder 5.2
+
+"Start Symbol" = <Exp>
+
+! =============================================================================
+! Comments
+! =============================================================================
+Comment Start = '/*'
+Comment End   = '*/'
+Comment Line  = '--'
+
+!intVal=1
+floatVal={Number}+|{Number}+'.'{Number}+
+    
+<Exp>::=<Exp>'+'<ExpMul>
+       |<Exp>'-'<ExpMul>
+       |<ExpMul>
+       
+<ExpMul>::=<ExpMul>'*'<Value>
+       |<ExpMul>'/'<Value>
+       |<Value>
+       
+<Value>::=floatVal|'('<Exp>')'     

@@ -176,7 +176,7 @@ var CodeEdit;
                         edge.CharSet = _this.CharSetGroup[_this.ReadEntity(stream)];
                         var dfaStateIndex = _this.ReadEntity(stream);
                         var reserve2 = _this.ReadEntity(stream);
-                        //Binding.Bind(() => edge.TargetState, () => this.DFAStateGroup[dfaStateIndex]);//???
+                        Binding.Bind(function () { return edge.TargetState; }, function () { return _this.DFAStateGroup[dfaStateIndex]; });
                         return edge;
                     })
                         .ToList();
@@ -198,6 +198,7 @@ var CodeEdit;
                     var targetIndex = _this.ReadEntity(stream);
                     var reserve2 = _this.ReadEntity(stream);
                     if (elm.ActionType == ActionType.Shift || elm.ActionType == ActionType.Goto) {
+                        Binding.Bind(function () { return elm.TargetState; }, function () { return _this.LALRStateGroup[targetIndex]; });
                     }
                     else if (elm.ActionType == ActionType.Reduce) {
                         elm.TargetRule = _this.ProduceGroup[targetIndex];

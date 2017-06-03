@@ -172,7 +172,7 @@ declare namespace linq {
         LastIndexOf(item: T): number;
         // Convert Methods
         ToArray(): T[];
-        ToList():List<T>; //$+ ???
+        ToList():List<T>; //$+
         ToLookup<TKey, TValue>(keySelector: ($: T) => TKey, elementSelector?: ($: T) => TValue, compareSelector?: (key: TKey) => any): Lookup<TKey, TValue>;
         ToLookup(keySelector: string, elementSelector?: string, compareSelector?: string): Lookup<any, any>;
         ToObject(keySelector: ($: T) => string, elementSelector: ($: T) => any): any;

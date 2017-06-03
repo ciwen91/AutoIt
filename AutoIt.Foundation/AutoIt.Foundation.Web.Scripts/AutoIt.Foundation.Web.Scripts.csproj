@@ -22,13 +22,26 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\Xml.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="packages.config" />
+    <Content Include="Data\Calculate.egt" />
+    <Content Include="Data\Calculate.grm" />
+    <Content Include="Data\Xml.egt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Xml.grm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Scripts\jquery-1.11.3.intellisense.js" />
     <Content Include="Scripts\jquery-1.11.3.js" />
     <Content Include="Scripts\jquery-1.11.3.min.js" />
     <Content Include="Scripts\jquery-1.11.3.min.map" />
     <Content Include="Scripts\jquery.linq.js" />
     <Content Include="Scripts\jquery.linq.min.js" />
+    <Content Include="Test.html" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -110,8 +123,9 @@
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>UMD</TypeScriptModuleKind>
-    <TypeScriptOutFile />
+    <TypeScriptModuleKind>
+    </TypeScriptModuleKind>
+    <TypeScriptOutFile>AutoIt.js</TypeScriptOutFile>
     <TypeScriptOutDir />
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>

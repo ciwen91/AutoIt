@@ -1,3 +1,4 @@
+///<reference path="SymbolInfoBase.ts"/>>
 module CodeEdit.LangAnaly.Model {
     export  class  GramerInfo extends  CodeEdit.LangAnaly.Model.SymbolInfoBase {
         GramerState: CodeEdit.LangAnaly.Model.GramerInfoState;

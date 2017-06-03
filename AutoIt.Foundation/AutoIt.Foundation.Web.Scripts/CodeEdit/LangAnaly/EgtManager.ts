@@ -1,6 +1,4 @@
 ﻿namespace CodeEdit.LangAnaly {
-    import LalrAction = CodeEdit.LangAnaly.Model.LALRAction;
-    import ActionType = CodeEdit.LangAnaly.Model.ActionType;
 
     export class  EgtManager {
         Info: string;
@@ -19,12 +17,12 @@
             Context.Do(() => {
                 manager.ReadInfo(stream);
 
-                while (stream.Position<str.length) {//???
+                while (stream.Position<str.length) {
                     manager.ReadRecord(stream);
                 }
             });
 
-            //Binding.Update
+            Binding.Update();
 
             return manager;
         }
@@ -164,10 +162,10 @@
 
             var produce = new Model.Produce();
             produce.ID = index;
-            produce.NonTerminal = this.SymbolGroup[nonIndex]
+            produce.NonTerminal = this.SymbolGroup.Get(nonIndex);
             produce.SymbolGroup = Loop.For(entityNum)
                 .Select(item => <number> this.ReadEntity(stream))
-                .Select(item => this.SymbolGroup[item])
+                .Select(item => this.SymbolGroup.Get(item))
                 .ToList();
 
             this.ProduceGroup.Set(produce);
@@ -189,16 +187,16 @@
 
             var dfaState = new Model.DFAState();
             dfaState.ID = index,
-                dfaState.AcceptSymbol = isAcceptState ? this.SymbolGroup[acceptIndex] : null,
+                dfaState.AcceptSymbol = isAcceptState ? this.SymbolGroup.Get(acceptIndex) : null,
                 dfaState.EdgGroup = Loop.For(entityNum / 3)
                     .Select(item => {
                         var edge = new Model.DFAEdge();
 
-                        edge.CharSet = this.CharSetGroup[<number>this.ReadEntity(stream)];
+                        edge.CharSet = this.CharSetGroup.Get(<number>this.ReadEntity(stream));
                         var dfaStateIndex = <number> this.ReadEntity(stream);
                         var reserve2 = this.ReadEntity(stream);
 
-                        //Binding.Bind(() => edge.TargetState, () => this.DFAStateGroup[dfaStateIndex]);//???
+                        Binding.Bind(() => edge.TargetState, () => this.DFAStateGroup.Get(dfaStateIndex));
 
                         return edge;
                     })
@@ -216,18 +214,18 @@
             lalrState.ID = index;
             lalrState.ActionGroup = Loop.For(entityNum / 4)
                 .Select(item => {
-                    var elm = new LalrAction();
+                    var elm = new Model.LALRAction();
 
                     var symbolIndex = <number> this.ReadEntity(stream);
-                    elm.Symbol = this.SymbolGroup[symbolIndex];
+                    elm.Symbol = this.SymbolGroup.Get(symbolIndex);
                     elm.ActionType = <Model.ActionType> this.ReadEntity(stream);
                     var targetIndex = <number> this.ReadEntity(stream);
                     var reserve2 = this.ReadEntity(stream);
 
-                    if (elm.ActionType == ActionType.Shift || elm.ActionType == ActionType.Goto) {
-                        //Binding.Bind(() => elm.TargetState, () => LALRStateGroup[targetIndex]); ???
-                    } else if (elm.ActionType == ActionType.Reduce) {
-                        elm.TargetRule = this.ProduceGroup[targetIndex];
+                    if (elm.ActionType == Model.ActionType.Shift || elm.ActionType == Model.ActionType.Goto) {
+                        Binding.Bind(() => elm.TargetState, () => this.LALRStateGroup.Get(targetIndex)); 
+                    } else if (elm.ActionType == Model.ActionType.Reduce) {
+                        elm.TargetRule = this.ProduceGroup.Get(targetIndex);
                     }
 
                     return elm;
@@ -268,7 +266,7 @@
             while (true) {
                 var num = this.ReadNum(stream, 2);
                 if (num > 0) {
-                    str += num.toString(); //??? ToChar
+                    str += String.fromCharCode(num); 
                 } else {
                     break;
                 }
