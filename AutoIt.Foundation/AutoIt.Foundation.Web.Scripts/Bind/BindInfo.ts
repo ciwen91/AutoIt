@@ -1,8 +1,8 @@
 ﻿class BindInfo {
-    Target: Func<any>;
+    Target: FuncOne<any, any>;
     Source: Func<any>;
 
-    constructor(target: Func<any>, source: Func<any>) {
+    constructor(target: FuncOne<any, any>, source: Func<any>) {
         this.Target = target;
         this.Source = source;
     }
@@ -20,7 +20,7 @@
 class Binding {
     static Key:string="Binding";
 
-    static Bind(target: Func<any>, source: Func<any>) {
+    static Bind(target: FuncOne<any, any>, source: Func<any>) {
         var group = Context.Current();
 
         if (group.Get(this.Key) == None) {

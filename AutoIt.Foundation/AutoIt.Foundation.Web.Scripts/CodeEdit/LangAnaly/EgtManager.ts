@@ -196,7 +196,7 @@
                         var dfaStateIndex = <number> this.ReadEntity(stream);
                         var reserve2 = this.ReadEntity(stream);
 
-                        Binding.Bind(() => edge.TargetState, () => this.DFAStateGroup.Get(dfaStateIndex));
+                        Binding.Bind(val => edge.TargetState = val, () => this.DFAStateGroup.Get(dfaStateIndex));
 
                         return edge;
                     })
@@ -223,7 +223,7 @@
                     var reserve2 = this.ReadEntity(stream);
 
                     if (elm.ActionType == Model.ActionType.Shift || elm.ActionType == Model.ActionType.Goto) {
-                        Binding.Bind(() => elm.TargetState, () => this.LALRStateGroup.Get(targetIndex)); 
+                        Binding.Bind(val => elm.TargetState = val, () => this.LALRStateGroup.Get(targetIndex)); 
                     } else if (elm.ActionType == Model.ActionType.Reduce) {
                         elm.TargetRule = this.ProduceGroup.Get(targetIndex);
                     }

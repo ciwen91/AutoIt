@@ -214,7 +214,7 @@ var CodeEdit;
                         edge.CharSet = _this.CharSetGroup.Get(_this.ReadEntity(stream));
                         var dfaStateIndex = _this.ReadEntity(stream);
                         var reserve2 = _this.ReadEntity(stream);
-                        Binding.Bind(function () { return edge.TargetState; }, function () { return _this.DFAStateGroup.Get(dfaStateIndex); });
+                        Binding.Bind(function (val) { return edge.TargetState = val; }, function () { return _this.DFAStateGroup.Get(dfaStateIndex); });
                         return edge;
                     })
                         .ToList();
@@ -236,7 +236,7 @@ var CodeEdit;
                     var targetIndex = _this.ReadEntity(stream);
                     var reserve2 = _this.ReadEntity(stream);
                     if (elm.ActionType == LangAnaly.Model.ActionType.Shift || elm.ActionType == LangAnaly.Model.ActionType.Goto) {
-                        Binding.Bind(function () { return elm.TargetState; }, function () { return _this.LALRStateGroup.Get(targetIndex); });
+                        Binding.Bind(function (val) { return elm.TargetState = val; }, function () { return _this.LALRStateGroup.Get(targetIndex); });
                     }
                     else if (elm.ActionType == LangAnaly.Model.ActionType.Reduce) {
                         elm.TargetRule = _this.ProduceGroup.Get(targetIndex);
@@ -759,8 +759,8 @@ var MemberVisitor = (function () {
         return func();
     };
     MemberVisitor.prototype.SetValue = function (func, value) {
-        debugger;
-        return this; //???
+        func(value);
+        return this;
     };
     return MemberVisitor;
 }());

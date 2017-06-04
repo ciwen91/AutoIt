@@ -3,8 +3,8 @@
         return func();
     }
 
-    SetValue(func: Func<any>, value: any): MemberVisitor {
-        debugger;
-        return this;//???
+    SetValue(func: FuncOne<any, any>, value: any): MemberVisitor {
+        func(value);
+        return this;
     }
 }
