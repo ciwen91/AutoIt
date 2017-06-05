@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -66,8 +61,8 @@ var CodeEdit;
                     while (stream.Position < str.length) {
                         manager.ReadRecord(stream);
                     }
+                    Binding.Update();
                 });
-                Binding.Update();
                 return manager;
             };
             EgtManager.prototype.ReadInfo = function (stream) {
@@ -307,7 +302,7 @@ var CodeEdit;
             function GramerReader(edgManager) {
                 this._GrammerGroup = new List();
                 this._EgtManager = edgManager;
-                var topInfo = new Tuple(edgManager.LALRStateGroup.Get[0], null);
+                var topInfo = new Tuple(edgManager.LALRStateGroup.Get(0), null);
                 this._GrammerGroup.Set(topInfo);
             }
             GramerReader.prototype.ReadGramer = function (tokenInfo) {
@@ -431,6 +426,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Lang;
         (function (Lang) {
+            ///<reference path="../LangManagerBase.ts"/>
             var PrintLangManager = (function (_super) {
                 __extends(PrintLangManager, _super);
                 function PrintLangManager(egtStr) {
@@ -543,6 +539,10 @@ var CodeEdit;
             var DFAEdge = (function () {
                 function DFAEdge() {
                 }
+                DFAEdge.prototype.IsFit = function (cha) {
+                    var code = cha.charCodeAt(0);
+                    return $.Enumerable.From(this.CharSet.Group.ToArray()).Any(function (item) { return code >= item.Start && code <= item.End; });
+                };
                 return DFAEdge;
             }());
             Model.DFAEdge = DFAEdge;
@@ -562,6 +562,11 @@ var CodeEdit;
                     _this.EdgGroup = new List();
                     return _this;
                 }
+                DFAState.prototype.GetEdge = function (cha) {
+                    var edge = $.Enumerable.From(this.EdgGroup.ToArray())
+                        .FirstOrDefault(null, function (item) { return item.IsFit(cha); });
+                    return edge;
+                };
                 return DFAState;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
             Model.DFAState = DFAState;
@@ -612,7 +617,7 @@ var CodeEdit;
             var GramerInfo = (function (_super) {
                 __extends(GramerInfo, _super);
                 function GramerInfo(gramerState, startToken) {
-                    var _this = _super.call(this, startToken.Symbol, startToken.Value, startToken.Index, startToken.Line, startToken.Col) || this;
+                    var _this = _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index) || this;
                     _this._ChildGroup = new List();
                     _this.GramerState = gramerState;
                     _this.StartToken = startToken;
@@ -774,7 +779,7 @@ var CodeEdit;
             var TokenInfo = (function (_super) {
                 __extends(TokenInfo, _super);
                 function TokenInfo(state, symbol, value, index, line, col) {
-                    var _this = _super.call(this, symbol, value, index, line, col) || this;
+                    var _this = _super.call(this, symbol, value, line, col, index) || this;
                     _this.State = state;
                     return _this;
                 }
@@ -819,7 +824,7 @@ var CodeEdit;
                 }
                 var index = this._Index;
                 var startIndex = index;
-                var state = this._Egt.DFAStateGroup[0];
+                var state = this._Egt.DFAStateGroup.Get(0);
                 var acceptSymbol = null;
                 var accpetIndex = -1;
                 while (true) {
@@ -851,7 +856,7 @@ var CodeEdit;
                 }
             };
             TokenReader.prototype.Consumn = function (val) {
-                var linePoint = this._Str.NextPoint(val.length, new LinePoint(this._Index, this._Line, this._Col));
+                var linePoint = this._Str.NextPoint(val.length, new LinePoint(this._Index, this._Col, this._Line));
                 this._Index = linePoint.Index;
                 this._Line = linePoint.Y;
                 this._Col = linePoint.X;
@@ -901,7 +906,7 @@ String.prototype.MatchNext = function (regex, index) {
         return null;
     }
     var val = this.substr(index);
-    var result = new RegExp(regex).exec(val)[0];
+    var result = new RegExp(regex, "gm").exec(val)[0];
     return result;
 };
 String.prototype.MatchPre = function (regex, index) {
@@ -909,8 +914,9 @@ String.prototype.MatchPre = function (regex, index) {
     if (index < 0) {
         return null;
     }
-    var val = this.substr(0, index + 1);
-    var result = new RegExp(regex).exec(val)[0];
+    var val = this.substr(0, index + 1).Reverse();
+    var result = new RegExp(regex, "gm").exec(val)[0];
+    result = result.Reverse();
     return result;
 };
 String.prototype.Repeat = function (count) {
@@ -919,6 +925,9 @@ String.prototype.Repeat = function (count) {
         val += this;
     }
     return val;
+};
+String.prototype.Reverse = function () {
+    return this.split('').reverse().join('');
 };
 var List = (function () {
     function List() {
@@ -932,23 +941,23 @@ var List = (function () {
             .Any(function (item) { return item == val; });
     };
     List.prototype.Get = function (index) {
-        if (!index) {
+        if (typeof (index) == "undefined") {
             index = this.Count() - 1;
         }
         return this._Data[index];
     };
     List.prototype.Set = function (val, index) {
-        if (!index) {
+        if (typeof (index) == "undefined") {
             index = this.Count();
         }
         this._Data[index] = val;
         return this;
     };
     List.prototype.Remove = function (index) {
-        if (!index) {
+        if (typeof (index) == "undefined") {
             index = this.Count() - 1;
         }
-        var group = this._Data.splice(index, 0);
+        var group = this._Data.splice(index, 1);
         return group[0];
     };
     List.prototype.ToArray = function () {
@@ -1024,7 +1033,6 @@ var LinePoint = (function () {
     function LinePoint(index, x, y) {
         this.Index = index;
         this.X = x;
-        "".length;
         this.Y = y;
     }
     return LinePoint;

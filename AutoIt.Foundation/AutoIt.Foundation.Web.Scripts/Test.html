@@ -27,13 +27,13 @@
         function (data) {
             data = base64ToBin(data);
            // console.log(data)
-            //var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
+          //  var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
             //console.log(egtManager);
-
+            //return;
             
             var fun=function() {
-                /*<root a=""1"" b=""2"">
-                  <page width=""400px"" height=""500px""> 
+                /*<root a="1" b="2">
+                  <page width="400px" height="500px"> 
                    jj, kll, </page>
                 </root>*/
             }
@@ -42,6 +42,8 @@
             console.log(xml);
 
             var manager = new CodeEdit.LangAnaly.Lang.PrintLangManager(data);
+            manager.ContentNameGroup = $.Enumerable.From(["Word", "Text", "Content"]).ToList();
+            //manager.PrintToken = true;
             manager.Analy(xml);
         });
 </script>

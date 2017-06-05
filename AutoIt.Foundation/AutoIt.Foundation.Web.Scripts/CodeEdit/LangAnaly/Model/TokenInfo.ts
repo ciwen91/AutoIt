@@ -8,7 +8,7 @@ module CodeEdit.LangAnaly.Model {
             index: number,
             line: number,
             col: number) {
-            super(symbol, value, index, line, col);
+            super(symbol, value, line, col, index);
             this.State = state;
         }
     }

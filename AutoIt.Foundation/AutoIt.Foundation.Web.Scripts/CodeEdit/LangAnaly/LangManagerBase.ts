@@ -18,7 +18,7 @@
 
             var tokenReader = new TokenReader(this._EgtManager, val);
             var gramerReader = new GramerReader(this._EgtManager);
-
+            
             while (true) {
                 var token = tokenReader.ReadToken();
                 this.TokenRead(token);

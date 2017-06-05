@@ -5,7 +5,7 @@
 
     constructor(index: number, x: number, y: number) {
         this.Index = index;
-        this.X = x;"".length
+        this.X = x;
         this.Y = y;
     }
 }

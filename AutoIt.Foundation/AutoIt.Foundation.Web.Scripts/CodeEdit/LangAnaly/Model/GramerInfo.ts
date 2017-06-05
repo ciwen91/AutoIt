@@ -26,7 +26,7 @@ module CodeEdit.LangAnaly.Model {
        
 
         constructor(gramerState: GramerInfoState, startToken: TokenInfo) {
-            super(startToken.Symbol, startToken.Value, startToken.Index, startToken.Line, startToken.Col);
+            super(startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);
 
             this.GramerState = gramerState;
             this.StartToken = startToken;

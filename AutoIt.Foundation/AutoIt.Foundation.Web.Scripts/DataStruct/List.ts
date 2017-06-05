@@ -11,7 +11,7 @@
     }
 
     public Get(index?: number): T {
-        if (!index) {
+        if (typeof (index) == "undefined") {
             index = this.Count() - 1;
         }
 
@@ -19,7 +19,7 @@
     }
 
     public Set(val: T, index?: number): List<T> {
-        if (!index) {
+        if (typeof (index)=="undefined") {
             index = this.Count();
         }
 
@@ -29,11 +29,11 @@
     }
 
     public Remove(index?: number): T {
-        if (!index) {
+        if (typeof (index) == "undefined") {
             index = this.Count() - 1;
         }
 
-        var group = this._Data.splice(index, 0);
+        var group = this._Data.splice(index,1);
 
         return group[0];
     }

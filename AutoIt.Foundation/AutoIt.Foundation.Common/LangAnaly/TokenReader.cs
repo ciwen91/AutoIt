@@ -85,7 +85,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
         private void Consumn(string val)
         {
-            var linePoint = _Str.NextPoint(val.Length, new LinePoint(_Index, _Line, _Col));
+            var linePoint = _Str.NextPoint(val.Length, new LinePoint(_Index, _Col, _Line));
 
             _Index = linePoint.Index;
             _Line = linePoint.Y;

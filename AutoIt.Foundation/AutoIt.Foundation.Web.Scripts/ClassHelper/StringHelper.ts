@@ -3,7 +3,8 @@
     PrePoint(count: number, startPoint: LinePoint): LinePoint;
     MatchNext(regex: string, index?: number);
     MatchPre(regex: string, index?: number);
-    Repeat(count:number):string;
+    Repeat(count: number): string;
+    Reverse():string;
 }
 
 String.prototype.NextPoint=function(count, startPoint) {
@@ -59,7 +60,7 @@ String.prototype.MatchNext = function(regex, index) {
     }
 
     var val = this.substr(index);
-    var result = new RegExp(regex).exec(val)[0]; 
+    var result = new RegExp(regex, "gm").exec(val)[0];
 
     return result;
 }
@@ -71,8 +72,9 @@ String.prototype.MatchPre = function (regex, index) {
         return null;
     }
 
-    var val = this.substr(0, index + 1);
-    var result = new RegExp(regex).exec(val)[0];
+    var val = this.substr(0, index + 1).Reverse();
+    var result = new RegExp(regex, "gm").exec(val)[0];
+    result = result.Reverse();
 
     return result;
 }
@@ -85,4 +87,8 @@ String.prototype.Repeat=function(count) {
     }
 
     return val;
+}
+
+String.prototype.Reverse=function() {
+    return this.split('').reverse().join('');
 }

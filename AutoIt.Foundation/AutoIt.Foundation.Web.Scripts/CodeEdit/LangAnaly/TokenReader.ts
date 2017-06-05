@@ -28,7 +28,7 @@
             var index = this._Index;
             var startIndex = index;
 
-            var state = this._Egt.DFAStateGroup[0];
+            var state = this._Egt.DFAStateGroup.Get(0);
             var acceptSymbol: Model.Symbol = null;
             var accpetIndex = -1;
 
@@ -75,7 +75,8 @@
         }
 
         private Consumn(val: string) {
-            var linePoint = this._Str.NextPoint(val.length, new LinePoint(this._Index, this._Line, this._Col));
+      
+            var linePoint = this._Str.NextPoint(val.length, new LinePoint(this._Index, this._Col, this._Line));
 
             this._Index = linePoint.Index;
             this._Line = linePoint.Y;

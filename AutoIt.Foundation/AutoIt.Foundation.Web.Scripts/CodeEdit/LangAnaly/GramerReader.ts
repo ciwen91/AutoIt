@@ -6,7 +6,7 @@
         constructor(edgManager: EgtManager) {
             this._EgtManager = edgManager;
 
-            var topInfo = new Tuple<Model.LALRState, Model.GramerInfo>(edgManager.LALRStateGroup.Get[0], null);
+            var topInfo = new Tuple<Model.LALRState, Model.GramerInfo>(edgManager.LALRStateGroup.Get(0), null);
             this._GrammerGroup.Set(topInfo);
         }
 

@@ -16,24 +16,24 @@ namespace AutoIt.Foundation.Test
     {
         static void Main(string[] args)
         {
-//            JsonConvert.DefaultSettings = () =>
-//            {
-//                var setting = new JsonSerializerSettings();
-//                setting.Converters.Add(new StringEnumConverter());
-//                //setting.Formatting= Formatting.Indented;
-//                return setting;
-//            };
+            //            JsonConvert.DefaultSettings = () =>
+            //            {
+            //                var setting = new JsonSerializerSettings();
+            //                setting.Converters.Add(new StringEnumConverter());
+            //                //setting.Formatting= Formatting.Indented;
+            //                return setting;
+            //            };
 
 
-//            var manager1 = new PrintLangManager(@"Data\xml.egt")
-//            {
-//                ContentNameGroup = new List<string>() {"Word", "Text", "Content"}
-//            };
-//            manager1.Analy(@"
-//<root a=""1"" b=""2"">
-//  <page width=""400px"" height=""500px""> 
-//   jj, kll, </page>
-//</root>");
+            var manager1 = new PrintLangManager(@"Data\xml.egt")
+            {
+                ContentNameGroup = new List<string>() { "Word", "Text", "Content" }
+            };
+            manager1.Analy(@"
+<root a=""1"" b=""2"">
+  <page width=""400px"" height=""500px""> 
+   jj, kll, </page>
+</root>");
 
             //            var manager = new CalculateLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
             //           var result= manager.GetValue(@"
@@ -44,7 +44,7 @@ namespace AutoIt.Foundation.Test
             //var element = XElement.Parse(File.ReadAllText("Data/xml.xml"));
             //Console.WriteLine(element.Value);
 
-            ToBase64File(@"D:\项目\AutoIt\AutoIt.Foundation\AutoIt.Foundation.Web.Scripts\Data\Xml.egt");
+            //ToBase64File(@"D:\项目\AutoIt\AutoIt.Foundation\AutoIt.Foundation.Web.Scripts\Data\Xml.egt");
         }
 
         static void ToBase64File(string path)

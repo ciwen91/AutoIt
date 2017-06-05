@@ -20,9 +20,9 @@
                 while (stream.Position<str.length) {
                     manager.ReadRecord(stream);
                 }
-            });
 
-            Binding.Update();
+                Binding.Update();
+            });
 
             return manager;
         }
