@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -437,7 +442,7 @@ var CodeEdit;
                     }
                 };
                 PrintLangManager.prototype.GramerRead = function (gramerInfo) {
-                    console.log("%c" + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
+                    console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
                         "," + gramerInfo.Value + "$", "color:green;");
                 };
                 PrintLangManager.prototype.GramerAccept = function (gramerInfo) {
@@ -907,6 +912,13 @@ String.prototype.MatchPre = function (regex, index) {
     var val = this.substr(0, index + 1);
     var result = new RegExp(regex).exec(val)[0];
     return result;
+};
+String.prototype.Repeat = function (count) {
+    var val = "";
+    for (var i = 0; i < count; i++) {
+        val += this;
+    }
+    return val;
 };
 var List = (function () {
     function List() {

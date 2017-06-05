@@ -78,7 +78,7 @@
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\TokenInfo.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\TokenInfoState.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\TokenReader.ts" />
-    <TypeScriptCompile Include="CodeEdit\StringHelper.ts" />
+    <TypeScriptCompile Include="ClassHelper\StringHelper.ts" />
     <TypeScriptCompile Include="Context\Context.ts" />
     <TypeScriptCompile Include="DataStruct\Action.ts" />
     <TypeScriptCompile Include="DataStruct\Dictionary.ts" />
@@ -94,9 +94,7 @@
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.jquery.d.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ClassHelper\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

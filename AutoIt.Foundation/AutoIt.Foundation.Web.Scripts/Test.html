@@ -27,8 +27,22 @@
         function (data) {
             data = base64ToBin(data);
            // console.log(data)
-            var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
-            console.log(egtManager);
+            //var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
+            //console.log(egtManager);
+
+            
+            var fun=function() {
+                /*<root a=""1"" b=""2"">
+                  <page width=""400px"" height=""500px""> 
+                   jj, kll, </page>
+                </root>*/
+            }
+            var myregexp = /\/\*([\w\W]+)\*\//img;
+            var xml = myregexp.exec(fun.toString())[1];
+            console.log(xml);
+
+            var manager = new CodeEdit.LangAnaly.Lang.PrintLangManager(data);
+            manager.Analy(xml);
         });
 </script>
 </body>

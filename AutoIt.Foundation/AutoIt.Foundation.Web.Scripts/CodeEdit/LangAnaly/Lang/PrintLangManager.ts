@@ -13,7 +13,7 @@
         }
 
         GramerRead(gramerInfo: Model.GramerInfo) {
-            console.log("%c" + /*new String(' ', gramerInfo.GetLevel() * 3)???+ */ gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
+            console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
                 "," + gramerInfo.Value + "$", "color:green;");
         }
 

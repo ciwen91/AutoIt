@@ -3,6 +3,7 @@
     PrePoint(count: number, startPoint: LinePoint): LinePoint;
     MatchNext(regex: string, index?: number);
     MatchPre(regex: string, index?: number);
+    Repeat(count:number):string;
 }
 
 String.prototype.NextPoint=function(count, startPoint) {
@@ -74,4 +75,14 @@ String.prototype.MatchPre = function (regex, index) {
     var result = new RegExp(regex).exec(val)[0];
 
     return result;
+}
+
+String.prototype.Repeat=function(count) {
+    var val = "";
+
+    for (var i = 0; i < count; i++) {
+        val += this;
+    }
+
+    return val;
 }
