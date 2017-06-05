@@ -8,6 +8,10 @@ module CodeEdit.LangAnaly.Model {
         Parent: GramerInfo;
         private _ChildGroup: List<GramerInfo> = new List<GramerInfo>();
 
+        SetChildGroup(childGroup: List<GramerInfo>){
+            this._ChildGroup = childGroup;
+            $.each(this._ChildGroup.ToArray(), (i, item) => item.Parent = this);
+        }
         GetLevel():number {
             if (this.Produce == null) {
                 return -1;
@@ -17,6 +21,16 @@ module CodeEdit.LangAnaly.Model {
             } else {
                 return  $.Enumerable.From(this._ChildGroup.ToArray()).Max(item => item.GetLevel() + 1);
             }
+        }
+
+       
+
+        constructor(gramerState: GramerInfoState, startToken: TokenInfo) {
+            super(startToken.Symbol, startToken.Value, startToken.Index, startToken.Line, startToken.Col);
+
+            this.GramerState = gramerState;
+            this.StartToken = startToken;
+            this.Data = startToken.Data;
         }
     }
 }

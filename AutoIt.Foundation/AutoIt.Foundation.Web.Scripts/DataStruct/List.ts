@@ -28,14 +28,14 @@
         return this;
     }
 
-    public Remove(index?: number): List<T> {
+    public Remove(index?: number): T {
         if (!index) {
             index = this.Count() - 1;
         }
 
-        this._Data.splice(index, 0);
+        var group = this._Data.splice(index, 0);
 
-        return this;
+        return group[0];
     }
 
     public ToArray(): T[] {
