@@ -38,6 +38,14 @@ var Binding = (function () {
     return Binding;
 }());
 Binding.Key = "Binding";
+//import * as CodeMirror from "../../../Scripts/typings/codemirror/index"
+//CodeMirror.defineMode("xml",(config,options) => {
+//    return  {
+//        token: (stream, state) => {
+//            return null;
+//        }
+//    };
+//}); 
 var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;

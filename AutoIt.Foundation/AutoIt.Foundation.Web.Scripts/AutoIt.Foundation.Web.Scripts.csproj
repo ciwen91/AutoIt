@@ -172,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Bind\BindInfo.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\Xml.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtManager.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\LangManagerBase.ts" />
@@ -211,6 +212,11 @@
     <TypeScriptCompile Include="Scripts\TypeDefine\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\codemirror\codemirror-matchbrackets.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\codemirror\codemirror-runmode.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\codemirror\codemirror-showhint.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\codemirror\index.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\codemirror\searchcursor.d.ts" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
@@ -246,8 +252,7 @@
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>
-    </TypeScriptModuleKind>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
     <TypeScriptOutFile>AutoIt.js</TypeScriptOutFile>
     <TypeScriptOutDir />
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>

@@ -6,6 +6,8 @@
     <script type="text/javascript" src="AutoIt.js"></script>
 </head>
 <body>
+<textarea id="code"></textarea>
+
 <script type="text/javascript">
     var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
 
@@ -24,20 +26,20 @@
     }
 
     $.get("data/xml.egt.base64",
-        function (data) {
+        function(data) {
             data = base64ToBin(data);
-           // console.log(data)
-          //  var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
+            // console.log(data)
+            //  var egtManager = new CodeEdit.LangAnaly.EgtManager.CreateFromStr(data);
             //console.log(egtManager);
             //return;
-            
-            var fun=function() {
+
+            var fun = function() {
                 /*<root a="1" b="2">
                   <page width="400px" height="500px"> 
                    jj, kll, </page>
                 </root>*/
             }
-            fun=function() {
+            fun = function() {
                 /*<a b="3">kkkk;'5@!!"s"</a>*/
             }
             var myregexp = /\/\*([\w\W]+)\*\//img;
