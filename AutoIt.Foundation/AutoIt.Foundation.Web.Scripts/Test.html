@@ -1,8 +1,10 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" type="text/css"  href="Scripts/codemirror-2.37/lib/codemirror.css"/>
     <script type="text/javascript" src="Scripts/jquery-1.11.3.js"></script>
     <script type="text/javascript" src="Scripts/jquery.linq.js"></script>
+    <script type="text/javascript" src="Scripts/codemirror-2.37/lib/codemirror.js"></script>
     <script type="text/javascript" src="AutoIt.js"></script>
 </head>
 <body>
@@ -24,6 +26,16 @@
         }
         return bitString.substr(0, bitString.length - tail * 2);
     }
+
+
+    CodeMirror.defineMIME("text/xml", "xml");
+
+    var editor =CodeMirror.fromTextArea(document.getElementById("code"),
+   {
+       mode: 'text/xml',
+       lineNumbers: true
+       //theme: 'seti'
+   });
 
     $.get("data/xml.egt.base64",
         function(data) {

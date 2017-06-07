@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -38,14 +43,15 @@ var Binding = (function () {
     return Binding;
 }());
 Binding.Key = "Binding";
-//import * as CodeMirror from "../../../Scripts/typings/codemirror/index"
-//CodeMirror.defineMode("xml",(config,options) => {
-//    return  {
-//        token: (stream, state) => {
-//            return null;
-//        }
-//    };
-//}); 
+CodeMirror.defineMode("xml", function () {
+    //console.log("token1");
+    return {
+        token: function () {
+            console.log("token");
+            return "error";
+        }
+    };
+});
 var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
@@ -505,6 +511,7 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="EgtEntityBase.ts"/>>
 var CodeEdit;
+///<reference path="EgtEntityBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
@@ -617,6 +624,7 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="SymbolInfoBase.ts"/>>
 var CodeEdit;
+///<reference path="SymbolInfoBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
@@ -1187,4 +1195,3 @@ enumerable.prototype.ToList = function () {
 //$.fn.ToHtml = function (): string {
 //    return $(this)[0].outerHTML;
 //} 
-//# sourceMappingURL=AutoIt.js.map

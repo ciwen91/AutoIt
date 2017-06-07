@@ -3,8 +3,6 @@
 // Definitions by: mihailik <https://github.com/mihailik>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-export = CodeMirror;
-export as namespace CodeMirror;
 
 declare function CodeMirror(host: HTMLElement, options?: CodeMirror.EditorConfiguration): CodeMirror.Editor;
 declare function CodeMirror(callback: (host: HTMLElement) => void , options?: CodeMirror.EditorConfiguration): CodeMirror.Editor;
