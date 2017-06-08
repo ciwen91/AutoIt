@@ -60,7 +60,8 @@ String.prototype.MatchNext = function(regex, index) {
     }
 
     var val = this.substr(index);
-    var result = new RegExp(regex, "gm").exec(val)[0];
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
 
     return result;
 }
@@ -73,7 +74,8 @@ String.prototype.MatchPre = function (regex, index) {
     }
 
     var val = this.substr(0, index + 1).Reverse();
-    var result = new RegExp(regex, "gm").exec(val)[0];
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
     result = result.Reverse();
 
     return result;

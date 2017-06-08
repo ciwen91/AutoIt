@@ -23,9 +23,7 @@
                     var result = manager.Analy(xml);
                     console.log(result);
                 });
-   
-            var config = editorConfig;
-            console.log(config);
+        
             return "tag";
         }
     };

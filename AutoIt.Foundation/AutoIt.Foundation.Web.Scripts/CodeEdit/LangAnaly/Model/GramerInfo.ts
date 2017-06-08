@@ -8,6 +8,9 @@ module CodeEdit.LangAnaly.Model {
         Parent: GramerInfo;
         private _ChildGroup: List<GramerInfo> = new List<GramerInfo>();
 
+        GetChildGroup(): List<GramerInfo> {
+            return this._ChildGroup;
+        }
         SetChildGroup(childGroup: List<GramerInfo>){
             this._ChildGroup = childGroup;
             $.each(this._ChildGroup.ToArray(), (i, item) => item.Parent = this);

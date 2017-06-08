@@ -38,6 +38,11 @@
         return group[0];
     }
 
+    public Clear(): List<T> {
+        this._Data = [];
+        return this;
+    }
+
     public ToArray(): T[] {
         return this._Data.concat([]);
     } 

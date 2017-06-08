@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -58,8 +63,6 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 var result = manager.Analy(xml);
                 console.log(result);
             });
-            var config = editorConfig;
-            console.log(config);
             return "tag";
         }
     };
@@ -401,6 +404,7 @@ var CodeEdit;
         var LangManagerBase = (function () {
             function LangManagerBase(egtStr) {
                 this.ContentNameGroup = new List();
+                this._EroGrammerGroup = new List();
                 this._EgtManager = LangAnaly.EgtManager.CreateFromStr(egtStr);
             }
             LangManagerBase.prototype.GetValue = function (val) {
@@ -408,6 +412,7 @@ var CodeEdit;
                 return acceptGramer ? acceptGramer.Data : None;
             };
             LangManagerBase.prototype.Analy = function (val) {
+                this._EroGrammerGroup.Clear();
                 var tokenReader = new LangAnaly.TokenReader(this._EgtManager, val);
                 var gramerReader = new LangAnaly.GramerReader(this._EgtManager);
                 while (true) {
@@ -416,6 +421,7 @@ var CodeEdit;
                     if (token.Symbol == null || token.Symbol.Type != LangAnaly.Model.SymbolType.Noise) {
                         while (true) {
                             var gramer = gramerReader.ReadGramer(token);
+                            ;
                             if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Reduce) {
                                 var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
                                 if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
@@ -437,7 +443,10 @@ var CodeEdit;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Accept) {
                                 this.GramerAccept(gramer);
-                                return gramer;
+                                return gramer.GetChildGroup().Get(0);
+                            }
+                            else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
+                                this._EroGrammerGroup.Set(gramer);
                             }
                             if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                                 break;
@@ -448,6 +457,7 @@ var CodeEdit;
                         break;
                     }
                 }
+                console.log(this._EroGrammerGroup);
                 return null;
             };
             LangManagerBase.prototype.TokenRead = function (tokenInfo) {
@@ -667,6 +677,9 @@ var CodeEdit;
                     _this.Data = startToken.Data;
                     return _this;
                 }
+                GramerInfo.prototype.GetChildGroup = function () {
+                    return this._ChildGroup;
+                };
                 GramerInfo.prototype.SetChildGroup = function (childGroup) {
                     var _this = this;
                     this._ChildGroup = childGroup;
@@ -949,7 +962,8 @@ String.prototype.MatchNext = function (regex, index) {
         return null;
     }
     var val = this.substr(index);
-    var result = new RegExp(regex, "gm").exec(val)[0];
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
     return result;
 };
 String.prototype.MatchPre = function (regex, index) {
@@ -958,7 +972,8 @@ String.prototype.MatchPre = function (regex, index) {
         return null;
     }
     var val = this.substr(0, index + 1).Reverse();
-    var result = new RegExp(regex, "gm").exec(val)[0];
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
     result = result.Reverse();
     return result;
 };
@@ -1002,6 +1017,10 @@ var List = (function () {
         }
         var group = this._Data.splice(index, 1);
         return group[0];
+    };
+    List.prototype.Clear = function () {
+        this._Data = [];
+        return this;
     };
     List.prototype.ToArray = function () {
         return this._Data.concat([]);

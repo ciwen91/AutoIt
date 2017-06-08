@@ -77,7 +77,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
                        }
                        else if (gramer.GramerState == GramerInfoState.Accept)
                        {
-                           _ResultGramerInfo = gramer;
+                           _ResultGramerInfo = gramer.ChildGroup[0];
                            GramerAccept(gramer);
                        }
 
