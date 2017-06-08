@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -43,15 +38,47 @@ var Binding = (function () {
     return Binding;
 }());
 Binding.Key = "Binding";
-CodeMirror.defineMode("xml", function () {
-    //console.log("token1");
+CodeMirror.defineMode("xml", function (editorConfig, config) {
+    var editorKey = editorConfig.EditorKey;
     return {
-        token: function () {
-            console.log("token");
-            return "error";
+        startState: function () {
+            return { Line: -1 };
+        },
+        token: function (stream, state) {
+            var editor = Cast(window[editorKey]);
+            while (!stream.eol()) {
+                stream.next();
+            }
+            $.get("data/xml.egt.base64", function (egt) {
+                var xml = editor.getValue();
+                egt = base64ToBin(egt);
+                var manager = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
+                manager.ContentNameGroup = $.Enumerable.From(["Word", "Text", "Content"]).ToList();
+                console.clear();
+                var result = manager.Analy(xml);
+                console.log(result);
+            });
+            var config = editorConfig;
+            console.log(config);
+            return "tag";
         }
     };
 });
+var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
+function base64ToBin(str) {
+    var bitString = "";
+    var tail = 0;
+    for (var i = 0; i < str.length; i++) {
+        if (str[i] != "=") {
+            var decode = code.indexOf(str[i]).toString(2);
+            bitString += (new Array(7 - decode.length)).join("0") + decode;
+        }
+        else {
+            tail++;
+        }
+    }
+    return bitString.substr(0, bitString.length - tail * 2);
+}
 var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
@@ -377,11 +404,10 @@ var CodeEdit;
                 this._EgtManager = LangAnaly.EgtManager.CreateFromStr(egtStr);
             }
             LangManagerBase.prototype.GetValue = function (val) {
-                this.Analy(val);
-                return this._ResultGramerInfo ? this._ResultGramerInfo.Data : None;
+                var acceptGramer = this.Analy(val);
+                return acceptGramer ? acceptGramer.Data : None;
             };
             LangManagerBase.prototype.Analy = function (val) {
-                this._ResultGramerInfo = null;
                 var tokenReader = new LangAnaly.TokenReader(this._EgtManager, val);
                 var gramerReader = new LangAnaly.GramerReader(this._EgtManager);
                 while (true) {
@@ -410,8 +436,8 @@ var CodeEdit;
                                 this.GramerRead(gramer);
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Accept) {
-                                this._ResultGramerInfo = gramer;
                                 this.GramerAccept(gramer);
+                                return gramer;
                             }
                             if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                                 break;
@@ -422,6 +448,7 @@ var CodeEdit;
                         break;
                     }
                 }
+                return null;
             };
             LangManagerBase.prototype.TokenRead = function (tokenInfo) {
             };

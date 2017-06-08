@@ -11,31 +11,20 @@
 <textarea id="code"></textarea>
 
 <script type="text/javascript">
-    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
-
-    function base64ToBin(str) {
-        var bitString = "";
-        var tail = 0;
-        for (var i = 0; i < str.length; i++) {
-            if (str[i] != "=") {
-                var decode = code.indexOf(str[i]).toString(2);
-                bitString += (new Array(7 - decode.length)).join("0") + decode;
-            } else {
-                tail++;
-            }
-        }
-        return bitString.substr(0, bitString.length - tail * 2);
-    }
-
+  
 
     CodeMirror.defineMIME("text/xml", "xml");
+    CodeMirror.defaults.EditorKey = null;
 
-    var editor =CodeMirror.fromTextArea(document.getElementById("code"),
-   {
-       mode: 'text/xml',
-       lineNumbers: true
-       //theme: 'seti'
-   });
+    var option = {
+        mode: 'text/xml',
+        lineNumbers: true,
+        EditorKey: Math.random()
+        //theme: 'seti'
+    };
+    var editor =CodeMirror.fromTextArea(document.getElementById("code"),option
+   );
+    window[option.EditorKey] = editor;
 
     $.get("data/xml.egt.base64",
         function(data) {
@@ -56,12 +45,12 @@
             }
             var myregexp = /\/\*([\w\W]+)\*\//img;
             var xml = myregexp.exec(fun.toString())[1];
-            console.log(xml);
+           // console.log(xml);
 
             var manager = new CodeEdit.LangAnaly.Lang.PrintLangManager(data);
             manager.ContentNameGroup = $.Enumerable.From(["Word", "Text", "Content"]).ToList();
             manager.PrintToken = true;
-            manager.Analy(xml);
+            //manager.Analy(xml);
         });
 </script>
 </body>

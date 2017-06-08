@@ -1,7 +1,6 @@
 ﻿module CodeEdit.LangAnaly {
     export abstract class LangManagerBase {
         private _EgtManager: EgtManager;
-        protected _ResultGramerInfo: Model.GramerInfo;
         ContentNameGroup: List<string> = new List<string>();
 
         constructor(egtStr: string) {
@@ -9,13 +8,11 @@
         }
 
         GetValue(val: string): Object {
-            this.Analy(val);
-            return this._ResultGramerInfo ? this._ResultGramerInfo.Data : None;
+            var acceptGramer = this.Analy(val);
+            return acceptGramer ? acceptGramer.Data : None;
         }
 
-        Analy(val: string) {
-            this._ResultGramerInfo = null;
-
+        Analy(val: string):Model.GramerInfo {
             var tokenReader = new TokenReader(this._EgtManager, val);
             var gramerReader = new GramerReader(this._EgtManager);
             
@@ -51,8 +48,8 @@
                             this.GramerRead(gramer);
                         }
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
-                            this._ResultGramerInfo = gramer;
                             this.GramerAccept(gramer);
+                            return gramer;
                         }
 
                         if (gramer.GramerState != Model.GramerInfoState.Reduce) {
@@ -65,6 +62,8 @@
                     break;
                 }
             }
+
+            return null;
         }
 
         TokenRead(tokenInfo: Model.TokenInfo) {
