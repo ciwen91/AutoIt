@@ -1,9 +1,11 @@
 ﻿module CodeEdit.LangAnaly {
     export abstract class LangManagerBase {
         private _EgtManager: EgtManager;
-        ContentNameGroup: List<string> = new List<string>();
+        private _TokenReader: TokenReader;
+        private _GramerReader:GramerReader;
 
-        private _ResultGrammer:Model.GramerInfo=null;
+        ContentNameGroup: List<string> = new List<string>();
+        
         private _EroGrammerGroup:List<Model.GramerInfo>=new List<Model.GramerInfo>();
 
         constructor(egtStr: string) {
@@ -16,19 +18,18 @@
         }
 
         Analy(val: string): Model.GramerInfo {
-            this._ResultGrammer = null;
             this._EroGrammerGroup.Clear();
 
-            var tokenReader = new TokenReader(this._EgtManager, val);
-            var gramerReader = new GramerReader(this._EgtManager);
-            
+            this._TokenReader = new TokenReader(this._EgtManager, val);
+            this._GramerReader = new GramerReader(this._EgtManager);
+           
             while (true) {
-                var token = tokenReader.ReadToken();
+                var token = this._TokenReader.ReadToken();
                 this.TokenRead(token);
 
                 if (token.Symbol == null || token.Symbol.Type != Model.SymbolType.Noise) {
                     while (true) {
-                        var gramer = gramerReader.ReadGramer(token);
+                        var gramer = this._GramerReader.ReadGramer(token);
                        
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
@@ -55,10 +56,10 @@
                         }
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
                             this.GramerAccept(gramer);
-                            this._ResultGrammer = gramer.GetChildGroup().Get(0);
-                            return this._ResultGrammer;
-                        }
-                        else if (gramer.GramerState == Model.GramerInfoState.Error) {
+                            var resultGrammer = gramer.GetChildGroup().Get(0);
+
+                            return resultGrammer;
+                        } else if (gramer.GramerState == Model.GramerInfoState.Error) {
                             this._EroGrammerGroup.Set(gramer);
                         }
 
@@ -86,8 +87,8 @@
            var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
 
-            if (grammer == null && this._ResultGrammer != null) {
-                var grammerGroup = $.Enumerable.From([this._ResultGrammer]).ToList();
+            if (grammer == null) {
+                var grammerGroup = $.Enumerable.From(this._GramerReader.GetGramerGroup().ToArray()).ToList();
 
                 while (grammerGroup.Count() > 0) {
                     var item = grammerGroup.Remove(0);
@@ -96,7 +97,8 @@
                     if (itemChildGroup.Count()>0) {
                         grammerGroup.SetRange(itemChildGroup);
                     }
-                    else if (item.Line == line && item.Col == col) {
+                    else if (item.Line == line && item.Col == col && item.Value) {
+                        grammer = item;
                         return grammer;
                     }
                 }

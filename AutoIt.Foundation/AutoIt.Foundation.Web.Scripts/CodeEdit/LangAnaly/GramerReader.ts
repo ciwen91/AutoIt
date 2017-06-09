@@ -60,5 +60,12 @@
                 }
             }
         }
+
+        GetGramerGroup(): List<Model.GramerInfo> {
+            return $.Enumerable.From(this._GrammerGroup.ToArray())
+                .Select(item => item.Item2)
+                .Where(item => item != null)
+                .ToList();
+        }
     }
 }

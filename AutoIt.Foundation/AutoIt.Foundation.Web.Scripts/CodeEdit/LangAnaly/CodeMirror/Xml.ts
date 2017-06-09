@@ -15,13 +15,17 @@
         startState: () => {
             return { Line: -1 };
         },
+        /**
+          跨行如何处理？
+         */
         token: (stream, state) => {
             var editor = Cast<CodeMirror.EditorFromTextArea>(window[editorKey]);
             var xml = editor.getValue();
             if (xml != val) {
                 manger.Analy(xml);
+                val = xml;
+                console.clear();
             }
-
             if (stream.start == 0) {
                 state.Line += 1;
             }
@@ -29,10 +33,14 @@
             var col = stream.start;
             var gramerInfo= manger.GetGramerInfo(line, col);
             console.log(gramerInfo);
+           
 
-            while (!stream.eol()) {
+            for (var i = 0; i < gramerInfo.Value.length; i++) {
                 stream.next();
             }
+            //while (!stream.eol()) {
+               
+            //}
 
             return "tag";
         }
