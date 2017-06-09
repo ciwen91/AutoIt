@@ -2,6 +2,8 @@
     export abstract class LangManagerBase {
         private _EgtManager: EgtManager;
         ContentNameGroup: List<string> = new List<string>();
+
+        private _ResultGrammer:Model.GramerInfo=null;
         private _EroGrammerGroup:List<Model.GramerInfo>=new List<Model.GramerInfo>();
 
         constructor(egtStr: string) {
@@ -14,6 +16,7 @@
         }
 
         Analy(val: string): Model.GramerInfo {
+            this._ResultGrammer = null;
             this._EroGrammerGroup.Clear();
 
             var tokenReader = new TokenReader(this._EgtManager, val);
@@ -26,7 +29,7 @@
                 if (token.Symbol == null || token.Symbol.Type != Model.SymbolType.Noise) {
                     while (true) {
                         var gramer = gramerReader.ReadGramer(token);
-                       ;
+                       
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
 
@@ -52,8 +55,9 @@
                         }
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
                             this.GramerAccept(gramer);
-                            return gramer.GetChildGroup().Get(0);
-                       }
+                            this._ResultGrammer = gramer.GetChildGroup().Get(0);
+                            return this._ResultGrammer;
+                        }
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
                             this._EroGrammerGroup.Set(gramer);
                         }
@@ -69,9 +73,36 @@
                 }
             }
 
-            console.log(this._EroGrammerGroup);
+            //$.Enumerable.From(this._EroGrammerGroup.ToArray())
+            //.ForEach(item => {
+            //        console.log(item.Index + "," + item.Line + "-" + item.Col + ":" + item.Value);
+            //    });
+            //console.log();
 
             return null;
+        }
+
+        GetGramerInfo(line: number, col: number): Model.GramerInfo {
+           var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
+                .FirstOrDefault(null, item => item.Line == line && item.Col == col);
+
+            if (grammer == null && this._ResultGrammer != null) {
+                var grammerGroup = $.Enumerable.From([this._ResultGrammer]).ToList();
+
+                while (grammerGroup.Count() > 0) {
+                    var item = grammerGroup.Remove(0);
+                    var itemChildGroup = item.GetChildGroup();
+
+                    if (itemChildGroup.Count()>0) {
+                        grammerGroup.SetRange(itemChildGroup);
+                    }
+                    else if (item.Line == line && item.Col == col) {
+                        return grammer;
+                    }
+                }
+            }
+
+            return grammer;
         }
 
         TokenRead(tokenInfo: Model.TokenInfo) {

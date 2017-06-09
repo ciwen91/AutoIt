@@ -5,9 +5,12 @@
         return this._Data.length;
     }
 
+    public Index(val: T): number {
+        return this._Data.indexOf(val);
+    }
+
     public Contains(val: T):boolean {
-        return $.Enumerable.From(this._Data)
-            .Any(item => item == val);
+        return this.Index(val) >= 0;
     }
 
     public Get(index?: number): T {
@@ -19,12 +22,20 @@
     }
 
     public Set(val: T, index?: number): List<T> {
-        if (typeof (index)=="undefined") {
+        if (typeof (index) == "undefined") {
             index = this.Count();
         }
 
-        this._Data[index] = val;
-               
+        this._Data.splice(index, 0, val);
+
+        return this;
+    }
+
+    public SetRange(group: List<T>,index?:number):List<T> {
+        $.Enumerable.From(group.ToArray().reverse()).ForEach(item => {
+            this.Set(item, index);
+        });
+      
         return this;
     }
 
@@ -36,6 +47,16 @@
         var group = this._Data.splice(index,1);
 
         return group[0];
+    }
+
+    public RemoveItem(item: T): T {
+        var index = this.Index(item);
+
+        if (index >= 0) {
+            this.Remove(index);
+        }
+
+        return item;
     }
 
     public Clear(): List<T> {
