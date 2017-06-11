@@ -35,74 +35,9 @@ var Binding = (function () {
             });
         }
     };
-    Binding.Key = "Binding";
     return Binding;
 }());
-String.prototype.NextPoint = function (count, startPoint) {
-    var x = startPoint.X;
-    var y = startPoint.Y;
-    for (var i = startPoint.Index; i < startPoint.Index + count; i++) {
-        if (this[i] == '\n') {
-            x = 0;
-            y += 1;
-        }
-        else if (this[i] == '\r') {
-        }
-        else {
-            x += 1;
-        }
-    }
-    var endPoint = new LinePoint(startPoint.Index + count, x, y);
-    return endPoint;
-};
-String.prototype.PrePoint = function (count, startPoint) {
-    var x = startPoint.X;
-    var y = startPoint.Y;
-    for (var i = startPoint.Index; i > startPoint.Index - count; i--) {
-        if (this[i] == '\n') {
-            x = 0;
-            y -= 1;
-        }
-        else if (this[i] == '\r') {
-        }
-        else {
-            x -= 1;
-        }
-    }
-    var endPoint = new LinePoint(startPoint.Index + count, x, y);
-    return endPoint;
-};
-String.prototype.MatchNext = function (regex, index) {
-    index = index || 0;
-    if (index >= this.length) {
-        return null;
-    }
-    var val = this.substr(index);
-    var match = new RegExp(regex, "gm").exec(val);
-    var result = match ? match[0] : "";
-    return result;
-};
-String.prototype.MatchPre = function (regex, index) {
-    index = index || 0;
-    if (index < 0) {
-        return null;
-    }
-    var val = this.substr(0, index + 1).Reverse();
-    var match = new RegExp(regex, "gm").exec(val);
-    var result = match ? match[0] : "";
-    result = result.Reverse();
-    return result;
-};
-String.prototype.Repeat = function (count) {
-    var val = "";
-    for (var i = 0; i < count; i++) {
-        val += this;
-    }
-    return val;
-};
-String.prototype.Reverse = function () {
-    return this.split('').reverse().join('');
-};
+Binding.Key = "Binding";
 CodeMirror.defineMode("xml", function (editorConfig, config) {
     var editorKey = editorConfig.EditorKey;
     var val = null;
@@ -110,7 +45,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
     $.get("data/xml.egt.base64", function (egtBase64) {
         var egt = base64ToBin(egtBase64);
         manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Word", "Text", "Content"]).ToList();
+        manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();
     });
     return {
         startState: function () {
@@ -127,19 +62,50 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 val = xml;
                 console.clear();
             }
-            if (stream.start == 0) {
+            if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
-            var col = stream.start;
-            var gramerInfo = manger.GetGramerInfo(line, col);
-            console.log(gramerInfo);
-            for (var i = 0; i < gramerInfo.Value.length; i++) {
+            var col = stream.pos;
+            var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
+            var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+            if (gramerInfo == null) {
                 stream.next();
+                return null;
+            }
+            else {
+                for (var i = 0; i < gramerInfo.Value.length; i++) {
+                    stream.next();
+                }
             }
             //while (!stream.eol()) {
             //}
-            return "tag";
+            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
+                return "error";
+            }
+            //console.log(gramerInfo);
+            //console.log(gramerAnalyInfo.ParantMaySymbolGroup);
+            var name = gramerInfo.Symbol.Name;
+            var parentMaySymbolGroup = $.Enumerable.From(gramerAnalyInfo.ParantMaySymbolGroup.ToArray())
+                .Select(function (item) { return item.Name; })
+                .ToList();
+            var style = null;
+            if (name == "<" || name == ">" || name == "</" || name == "/>") {
+                style = "tag bracket";
+            }
+            else if (name == "Val") {
+                style = "string";
+            }
+            else if (name == "Name") {
+                if ($.Enumerable.From(parentMaySymbolGroup.ToArray()).Any(function (item) { return item.indexOf("Tag") >= 0; })) {
+                    style = "tag";
+                }
+                else if (parentMaySymbolGroup.Contains("Attribute")) {
+                    style = "attribute";
+                }
+            }
+            console.log(style);
+            return style;
         }
     };
 });
@@ -171,6 +137,7 @@ var CodeEdit;
                 this.ProduceGroup = new List();
                 this.DFAStateGroup = new List();
                 this.LALRStateGroup = new List();
+                //#endregion
             }
             EgtManager.CreateFromStr = function (str) {
                 var manager = new EgtManager();
@@ -434,7 +401,8 @@ var CodeEdit;
                 else {
                     if (action.ActionType == LangAnaly.Model.ActionType.Shift) {
                         var gramerSymbol = new LangAnaly.Model.GramerInfo(LangAnaly.Model.GramerInfoState.Shift, tokenInfo);
-                        this._GrammerGroup.Set(new Tuple(action.TargetState, gramerSymbol));
+                        this._GrammerGroup
+                            .Set(new Tuple(action.TargetState, gramerSymbol));
                         return gramerSymbol;
                     }
                     else if (action.ActionType == LangAnaly.Model.ActionType.Reduce) {
@@ -448,10 +416,14 @@ var CodeEdit;
                             ? group.Get(0).Item2.StartToken
                             : new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, null, null, tokenInfo.Index, tokenInfo.Line, tokenInfo.Col));
                         gramerSymbol.SetChildGroup($.Enumerable.From(group.ToArray()).Select(function (item) { return item.Item2; }).ToList());
-                        gramerSymbol.Value = $.Enumerable.From(group.ToArray()).Select(function (item) { return item.Item2.Value; }).ToArray().join("");
+                        gramerSymbol.Value = $.Enumerable.From(group.ToArray())
+                            .Select(function (item) { return item.Item2.Value; })
+                            .ToArray()
+                            .join("");
                         gramerSymbol.Symbol = produce.NonTerminal;
                         gramerSymbol.Produce = produce;
-                        this._GrammerGroup.Set(new Tuple(this._GrammerGroup.Get().Item1.GetAction(produce.NonTerminal).TargetState, gramerSymbol));
+                        this._GrammerGroup
+                            .Set(new Tuple(this._GrammerGroup.Get().Item1.GetAction(produce.NonTerminal).TargetState, gramerSymbol));
                         return gramerSymbol;
                     }
                     else if (action.ActionType == LangAnaly.Model.ActionType.Accept) {
@@ -468,44 +440,11 @@ var CodeEdit;
                 }
             };
             GramerReader.prototype.GetGramerGroup = function () {
-                return $.Enumerable.From(this._GrammerGroup.ToArray())
-                    .Select(function (item) { return item.Item2; })
-                    .Where(function (item) { return item != null; })
-                    .ToList();
+                return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
             };
             return GramerReader;
         }());
         LangAnaly.GramerReader = GramerReader;
-    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
-})(CodeEdit || (CodeEdit = {}));
-var CodeEdit;
-(function (CodeEdit) {
-    var LangAnaly;
-    (function (LangAnaly) {
-        var Lang;
-        (function (Lang) {
-            ///<reference path="../LangManagerBase.ts"/>
-            var PrintLangManager = (function (_super) {
-                __extends(PrintLangManager, _super);
-                function PrintLangManager(egtStr) {
-                    _super.call(this, egtStr);
-                }
-                PrintLangManager.prototype.TokenRead = function (tokenInfo) {
-                    if (this.PrintToken) {
-                        console.log("%c" + tokenInfo.Value + "," + tokenInfo.Symbol.Name, "color:blue;");
-                    }
-                };
-                PrintLangManager.prototype.GramerRead = function (gramerInfo) {
-                    console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
-                        "," + gramerInfo.Value + "$", "color:green;");
-                };
-                PrintLangManager.prototype.GramerAccept = function (gramerInfo) {
-                    console.log("%c" + gramerInfo.Symbol.Name + "," + gramerInfo.Value, "color:red;");
-                };
-                return PrintLangManager;
-            }(LangAnaly.LangManagerBase));
-            Lang.PrintLangManager = PrintLangManager;
-        })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
 var CodeEdit;
@@ -538,7 +477,7 @@ var CodeEdit;
                                     var preWhiteSpace = val.MatchPre("\\s+", gramer.Index - 1);
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
-                                        var newPoint = val.PrePoint(preWhiteSpace.Length, new LinePoint(gramer.Index, gramer.Col, gramer.Line));
+                                        var newPoint = val.PrePoint(preWhiteSpace.length, new LinePoint(gramer.Index, gramer.Col, gramer.Line));
                                         gramer.Index = newPoint.Index;
                                         gramer.Line = newPoint.Y;
                                         gramer.Col = newPoint.X;
@@ -554,6 +493,7 @@ var CodeEdit;
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Accept) {
                                 this.GramerAccept(gramer);
                                 var resultGrammer = gramer.GetChildGroup().Get(0);
+                                //console.log(this._GramerReader.GetGramerGroup());
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
@@ -565,6 +505,7 @@ var CodeEdit;
                         }
                     }
                     if (token.State == LangAnaly.Model.TokenInfoState.End) {
+                        //console.log(this._GramerReader.GetGramerGroup());
                         break;
                     }
                 }
@@ -572,27 +513,56 @@ var CodeEdit;
                 //.ForEach(item => {
                 //        console.log(item.Index + "," + item.Line + "-" + item.Col + ":" + item.Value);
                 //    });
-                //console.log();
                 return null;
             };
-            LangManagerBase.prototype.GetGramerInfo = function (line, col) {
+            LangManagerBase.prototype.GetGramerAnalyInfo = function (line, col) {
                 var grammer = $.Enumerable.From(this._EroGrammerGroup.ToArray())
                     .FirstOrDefault(null, function (item) { return item.Line == line && item.Col == col; });
-                if (grammer == null) {
-                    var grammerGroup = $.Enumerable.From(this._GramerReader.GetGramerGroup().ToArray()).ToList();
+                if (grammer != null) {
+                    return new LangAnaly.Model.GramerAnalyInfo(grammer, new List());
+                }
+                else {
+                    var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
+                    var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                        .Where(function (item) { return item.Item2 != null; })
+                        .Select(function (item) { return item.Item2; })
+                        .ToList();
                     while (grammerGroup.Count() > 0) {
                         var item = grammerGroup.Remove(0);
                         var itemChildGroup = item.GetChildGroup();
-                        if (itemChildGroup.Count() > 0) {
+                        if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
                             grammerGroup.SetRange(itemChildGroup);
                         }
-                        else if (item.Line == line && item.Col == col && item.Value) {
+                        else if (item.Contains(line, col) && item.Value) {
                             grammer = item;
-                            return grammer;
+                            var parentMaySymbolGroup = new List();
+                            if (grammer.Parent != null) {
+                                parentMaySymbolGroup.Set(grammer.Parent.Symbol);
+                            }
+                            else {
+                                var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                                    .Select(function (item) { return item.Item2; })
+                                    .IndexOf(grammer);
+                                while (index > 0) {
+                                    var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
+                                    parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
+                                        .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
+                                        .Select(function (sItem) { return sItem.Symbol; })
+                                        .ToList();
+                                    if (parentMaySymbolGroup.Count() > 0) {
+                                        break;
+                                    }
+                                    else {
+                                        index--;
+                                    }
+                                    ;
+                                }
+                            }
+                            return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                         }
                     }
                 }
-                return grammer;
+                return null;
             };
             LangManagerBase.prototype.TokenRead = function (tokenInfo) {
             };
@@ -609,15 +579,45 @@ var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
+        var Lang;
+        (function (Lang) {
+            ///<reference path="../LangManagerBase.ts"/>
+            var PrintLangManager = (function (_super) {
+                __extends(PrintLangManager, _super);
+                function PrintLangManager(egtStr) {
+                    return _super.call(this, egtStr) || this;
+                }
+                PrintLangManager.prototype.TokenRead = function (tokenInfo) {
+                    //if (this.PrintToken) {
+                    //    console.log("%c" + tokenInfo.Value + "," + tokenInfo.Symbol.Name, "color:blue;");
+                    //}
+                };
+                PrintLangManager.prototype.GramerRead = function (gramerInfo) {
+                    //console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
+                    //    "," + gramerInfo.Value + "$", "color:green;");
+                };
+                PrintLangManager.prototype.GramerAccept = function (gramerInfo) {
+                    //console.log("%c" + gramerInfo.Symbol.Name + "," + gramerInfo.Value, "color:red;");
+                };
+                return PrintLangManager;
+            }(LangAnaly.LangManagerBase));
+            Lang.PrintLangManager = PrintLangManager;
+        })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
+    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
+})(CodeEdit || (CodeEdit = {}));
+var CodeEdit;
+(function (CodeEdit) {
+    var LangAnaly;
+    (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var ActionType;
             (function (ActionType) {
                 ActionType[ActionType["Shift"] = 1] = "Shift";
                 ActionType[ActionType["Reduce"] = 2] = "Reduce";
                 ActionType[ActionType["Goto"] = 3] = "Goto";
                 ActionType[ActionType["Accept"] = 4] = "Accept";
-            })(Model.ActionType || (Model.ActionType = {}));
-            var ActionType = Model.ActionType;
+            })(ActionType = Model.ActionType || (Model.ActionType = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -627,11 +627,11 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var AdvanceMode;
             (function (AdvanceMode) {
                 AdvanceMode[AdvanceMode["Token"] = 0] = "Token";
                 AdvanceMode[AdvanceMode["Character"] = 1] = "Character";
-            })(Model.AdvanceMode || (Model.AdvanceMode = {}));
-            var AdvanceMode = Model.AdvanceMode;
+            })(AdvanceMode = Model.AdvanceMode || (Model.AdvanceMode = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -652,6 +652,7 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="EgtEntityBase.ts"/>>
 var CodeEdit;
+///<reference path="EgtEntityBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
@@ -660,8 +661,9 @@ var CodeEdit;
             var CharSet = (function (_super) {
                 __extends(CharSet, _super);
                 function CharSet() {
-                    _super.apply(this, arguments);
-                    this.Group = new List();
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    _this.Group = new List();
+                    return _this;
                 }
                 return CharSet;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
@@ -712,8 +714,9 @@ var CodeEdit;
             var DFAState = (function (_super) {
                 __extends(DFAState, _super);
                 function DFAState() {
-                    _super.apply(this, arguments);
-                    this.EdgGroup = new List();
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    _this.EdgGroup = new List();
+                    return _this;
                 }
                 DFAState.prototype.GetEdge = function (cha) {
                     var edge = $.Enumerable.From(this.EdgGroup.ToArray())
@@ -732,11 +735,28 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var EndingMode;
             (function (EndingMode) {
                 EndingMode[EndingMode["Open"] = 0] = "Open";
                 EndingMode[EndingMode["Close"] = 1] = "Close";
-            })(Model.EndingMode || (Model.EndingMode = {}));
-            var EndingMode = Model.EndingMode;
+            })(EndingMode = Model.EndingMode || (Model.EndingMode = {}));
+        })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
+    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
+})(CodeEdit || (CodeEdit = {}));
+var CodeEdit;
+(function (CodeEdit) {
+    var LangAnaly;
+    (function (LangAnaly) {
+        var Model;
+        (function (Model) {
+            var GramerAnalyInfo = (function () {
+                function GramerAnalyInfo(gramerInfo, parantMaySymbolGroup) {
+                    this.GramerInfo = gramerInfo;
+                    this.ParantMaySymbolGroup = parantMaySymbolGroup;
+                }
+                return GramerAnalyInfo;
+            }());
+            Model.GramerAnalyInfo = GramerAnalyInfo;
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -754,6 +774,18 @@ var CodeEdit;
                     this.Col = col;
                     this.Index = index;
                 }
+                SymbolInfoBase.prototype.Contains = function (line, col) {
+                    var startPoint = this.StartLintPoint();
+                    var endPoint = this.EndLinePoint();
+                    var curPoint = new LinePoint(-1, col, line);
+                    return curPoint.Compare(startPoint) >= 0 && curPoint.Compare(endPoint) <= 0;
+                };
+                SymbolInfoBase.prototype.StartLintPoint = function () {
+                    return new LinePoint(this.Index, this.Col, this.Line);
+                };
+                SymbolInfoBase.prototype.EndLinePoint = function () {
+                    return this.Value.NextPoint(this.Value.length - 1, this.StartLintPoint());
+                };
                 return SymbolInfoBase;
             }());
             Model.SymbolInfoBase = SymbolInfoBase;
@@ -762,6 +794,7 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="SymbolInfoBase.ts"/>>
 var CodeEdit;
+///<reference path="SymbolInfoBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
@@ -770,11 +803,12 @@ var CodeEdit;
             var GramerInfo = (function (_super) {
                 __extends(GramerInfo, _super);
                 function GramerInfo(gramerState, startToken) {
-                    _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);
-                    this._ChildGroup = new List();
-                    this.GramerState = gramerState;
-                    this.StartToken = startToken;
-                    this.Data = startToken.Data;
+                    var _this = _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index) || this;
+                    _this._ChildGroup = new List();
+                    _this.GramerState = gramerState;
+                    _this.StartToken = startToken;
+                    _this.Data = startToken.Data;
+                    return _this;
                 }
                 GramerInfo.prototype.GetChildGroup = function () {
                     return this._ChildGroup;
@@ -807,13 +841,13 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var GramerInfoState;
             (function (GramerInfoState) {
                 GramerInfoState[GramerInfoState["Shift"] = 0] = "Shift";
                 GramerInfoState[GramerInfoState["Reduce"] = 1] = "Reduce";
                 GramerInfoState[GramerInfoState["Accept"] = 2] = "Accept";
                 GramerInfoState[GramerInfoState["Error"] = 3] = "Error";
-            })(Model.GramerInfoState || (Model.GramerInfoState = {}));
-            var GramerInfoState = Model.GramerInfoState;
+            })(GramerInfoState = Model.GramerInfoState || (Model.GramerInfoState = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -826,7 +860,7 @@ var CodeEdit;
             var Group = (function (_super) {
                 __extends(Group, _super);
                 function Group() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 return Group;
             }(Model.EgtEntityBase));
@@ -858,8 +892,9 @@ var CodeEdit;
             var LALRState = (function (_super) {
                 __extends(LALRState, _super);
                 function LALRState() {
-                    _super.apply(this, arguments);
-                    this.ActionGroup = new List();
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    _this.ActionGroup = new List();
+                    return _this;
                 }
                 LALRState.prototype.GetAction = function (symbol) {
                     var action = $.Enumerable.From(this.ActionGroup.ToArray()).FirstOrDefault(null, function (item) { return item.Symbol == symbol; });
@@ -880,7 +915,7 @@ var CodeEdit;
             var Produce = (function (_super) {
                 __extends(Produce, _super);
                 function Produce() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 return Produce;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
@@ -897,7 +932,7 @@ var CodeEdit;
             var Symbol = (function (_super) {
                 __extends(Symbol, _super);
                 function Symbol() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 return Symbol;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
@@ -911,6 +946,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var SymbolType;
             (function (SymbolType) {
                 SymbolType[SymbolType["Nonterminal"] = 0] = "Nonterminal";
                 SymbolType[SymbolType["Terminal"] = 1] = "Terminal";
@@ -919,8 +955,7 @@ var CodeEdit;
                 SymbolType[SymbolType["GroupStart"] = 4] = "GroupStart";
                 SymbolType[SymbolType["GroundEnd"] = 5] = "GroundEnd";
                 SymbolType[SymbolType["Error"] = 7] = "Error";
-            })(Model.SymbolType || (Model.SymbolType = {}));
-            var SymbolType = Model.SymbolType;
+            })(SymbolType = Model.SymbolType || (Model.SymbolType = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -933,8 +968,9 @@ var CodeEdit;
             var TokenInfo = (function (_super) {
                 __extends(TokenInfo, _super);
                 function TokenInfo(state, symbol, value, index, line, col) {
-                    _super.call(this, symbol, value, line, col, index);
-                    this.State = state;
+                    var _this = _super.call(this, symbol, value, line, col, index) || this;
+                    _this.State = state;
+                    return _this;
                 }
                 return TokenInfo;
             }(CodeEdit.LangAnaly.Model.SymbolInfoBase));
@@ -948,12 +984,12 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var TokenInfoState;
             (function (TokenInfoState) {
                 TokenInfoState[TokenInfoState["Accept"] = 0] = "Accept";
                 TokenInfoState[TokenInfoState["Error"] = 1] = "Error";
                 TokenInfoState[TokenInfoState["End"] = 2] = "End";
-            })(Model.TokenInfoState || (Model.TokenInfoState = {}));
-            var TokenInfoState = Model.TokenInfoState;
+            })(TokenInfoState = Model.TokenInfoState || (Model.TokenInfoState = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1019,6 +1055,71 @@ var CodeEdit;
         LangAnaly.TokenReader = TokenReader;
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
+String.prototype.NextPoint = function (count, startPoint) {
+    var x = startPoint.X;
+    var y = startPoint.Y;
+    for (var i = startPoint.Index; i < startPoint.Index + count; i++) {
+        if (this[i] == '\n') {
+            x = 0;
+            y += 1;
+        }
+        else if (this[i] == '\r') {
+        }
+        else {
+            x += 1;
+        }
+    }
+    var endPoint = new LinePoint(startPoint.Index + count, x, y);
+    return endPoint;
+};
+String.prototype.PrePoint = function (count, startPoint) {
+    var x = startPoint.X;
+    var y = startPoint.Y;
+    for (var i = startPoint.Index; i > startPoint.Index - count; i--) {
+        if (this[i] == '\n') {
+            x = 0;
+            y -= 1;
+        }
+        else if (this[i] == '\r') {
+        }
+        else {
+            x -= 1;
+        }
+    }
+    var endPoint = new LinePoint(startPoint.Index + count, x, y);
+    return endPoint;
+};
+String.prototype.MatchNext = function (regex, index) {
+    index = index || 0;
+    if (index >= this.length) {
+        return null;
+    }
+    var val = this.substr(index);
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
+    return result;
+};
+String.prototype.MatchPre = function (regex, index) {
+    index = index || 0;
+    if (index < 0) {
+        return null;
+    }
+    var val = this.substr(0, index + 1).Reverse();
+    var match = new RegExp(regex, "gm").exec(val);
+    var result = match ? match[0] : "";
+    result = result.Reverse();
+    return result;
+};
+String.prototype.Repeat = function (count) {
+    var val = "";
+    for (var i = 0; i < count; i++) {
+        val += this;
+    }
+    return val;
+};
+String.prototype.Reverse = function () {
+    return this.split('').reverse().join('');
+};
 var List = (function () {
     function List() {
         this._Data = [];
@@ -1097,9 +1198,9 @@ var Context = (function () {
         }
         return this._DicGroup.Get(0);
     };
-    Context._DicGroup = new List();
     return Context;
 }());
+Context._DicGroup = new List();
 var Dictionary = (function () {
     function Dictionary() {
         this._Data = [];
@@ -1145,6 +1246,17 @@ var LinePoint = (function () {
         this.X = x;
         this.Y = y;
     }
+    LinePoint.prototype.Compare = function (linePoint) {
+        if (this.Y != linePoint.Y) {
+            return this.Y > linePoint.Y ? 1 : -1;
+        }
+        else if (this.X != linePoint.X) {
+            return this.X > linePoint.X ? 1 : -1;
+        }
+        else {
+            return 0;
+        }
+    };
     return LinePoint;
 }());
 var Stream = (function () {

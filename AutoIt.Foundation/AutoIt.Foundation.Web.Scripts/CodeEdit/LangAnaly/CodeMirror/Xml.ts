@@ -8,7 +8,7 @@
         egtBase64 => {
             var egt = base64ToBin(egtBase64);
             manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-            manger.ContentNameGroup = $.Enumerable.From(["Word", "Text", "Content"]).ToList();
+            manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();
         });
 
     return {
@@ -22,28 +22,63 @@
             var editor = Cast<CodeMirror.EditorFromTextArea>(window[editorKey]);
             var xml = editor.getValue();
             if (xml != val) {
+
                 manger.Analy(xml);
                 val = xml;
                 console.clear();
             }
-            if (stream.start == 0) {
+            if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
-            var col = stream.start;
-            var gramerInfo= manger.GetGramerInfo(line, col);
-            console.log(gramerInfo);
-           
+            var col = stream.pos;
 
-            for (var i = 0; i < gramerInfo.Value.length; i++) {
+            var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
+            var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+          
+            if (gramerInfo == null) {
                 stream.next();
+                return null;
+            } else {
+                for (var i = 0; i < gramerInfo.Value.length; i++) {
+                    stream.next();
+                }
             }
             //while (!stream.eol()) {
-               
-            //}
 
-            return "tag";
-        }
+            //}
+          
+            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
+                return "error";
+            }
+
+            //console.log(gramerInfo);
+            //console.log(gramerAnalyInfo.ParantMaySymbolGroup);
+
+            var name = gramerInfo.Symbol.Name;
+            var parentMaySymbolGroup = $.Enumerable.From(gramerAnalyInfo.ParantMaySymbolGroup.ToArray())
+                .Select(item => item.Name)
+                .ToList();
+
+            var style = null;
+
+          
+
+            if (name == "<" || name == ">" || name == "</"|| name == "/>" ) {
+                style= "tag bracket";
+            } else if(name=="Val") {
+                style = "string";
+            } else if (name == "Name") {
+                if ($.Enumerable.From(parentMaySymbolGroup.ToArray()).Any(item => item.indexOf("Tag") >= 0)) {
+                    style = "tag";
+                } else if (parentMaySymbolGroup.Contains("Attribute")) {
+                    style = "attribute";
+                }
+            }
+
+            console.log(style);
+            return style;
+        }   
     };
 });
 

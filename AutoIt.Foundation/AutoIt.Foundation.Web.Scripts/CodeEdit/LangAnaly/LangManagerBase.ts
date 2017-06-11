@@ -34,12 +34,12 @@
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
 
-                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
+                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {                            
                                 var preWhiteSpace = val.MatchPre("\\s+", gramer.Index - 1);
-
+                             
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;
-                                    var newPoint = val.PrePoint(preWhiteSpace.Length,
+                                    var newPoint = val.PrePoint(preWhiteSpace.length,
                                         new LinePoint(gramer.Index, gramer.Col, gramer.Line));
                                     gramer.Index = newPoint.Index;
                                     gramer.Line = newPoint.Y;
@@ -57,6 +57,7 @@
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
                             this.GramerAccept(gramer);
                             var resultGrammer = gramer.GetChildGroup().Get(0);
+                            //console.log(this._GramerReader.GetGramerGroup());
 
                             return resultGrammer;
                         } else if (gramer.GramerState == Model.GramerInfoState.Error) {
@@ -70,6 +71,7 @@
                 }
 
                 if (token.State == Model.TokenInfoState.End) {
+                    //console.log(this._GramerReader.GetGramerGroup());
                     break;
                 }
             }
@@ -78,33 +80,67 @@
             //.ForEach(item => {
             //        console.log(item.Index + "," + item.Line + "-" + item.Col + ":" + item.Value);
             //    });
-            //console.log();
+           
 
             return null;
         }
 
-        GetGramerInfo(line: number, col: number): Model.GramerInfo {
+        GetGramerAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
            var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
 
-            if (grammer == null) {
-                var grammerGroup = $.Enumerable.From(this._GramerReader.GetGramerGroup().ToArray()).ToList();
+            if (grammer != null) {
+                return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
+            } else {
+                var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
+                var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                    .Where(item => item.Item2 != null)
+                    .Select(item => item.Item2)
+                    .ToList();
 
                 while (grammerGroup.Count() > 0) {
                     var item = grammerGroup.Remove(0);
-                    var itemChildGroup = item.GetChildGroup();
 
-                    if (itemChildGroup.Count()>0) {
+                    var itemChildGroup = item.GetChildGroup();
+                 
+                    if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
                         grammerGroup.SetRange(itemChildGroup);
                     }
-                    else if (item.Line == line && item.Col == col && item.Value) {
+                    else if (item.Contains(line, col) && item.Value) {//item.Line == line && item.Col == col 
                         grammer = item;
-                        return grammer;
+
+                        var parentMaySymbolGroup = new List<Model.Symbol>();
+
+                        if (grammer.Parent != null) {
+                            parentMaySymbolGroup.Set(grammer.Parent.Symbol);
+                        } else {
+                            var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                                .Select(item => item.Item2)
+                                .IndexOf(grammer);
+
+                            while (index>0) {
+                                var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
+
+                                parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
+                                    .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
+                                    .Select(sItem => sItem.Symbol)
+                                    .ToList();
+
+                                if (parentMaySymbolGroup.Count() > 0) {
+                                    break;
+                                } else {
+                                    index--;
+                                };
+                            }
+                          
+                        }
+
+                        return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                     }
                 }
             }
 
-            return grammer;
+            return null;
         }
 
         TokenRead(tokenInfo: Model.TokenInfo) {
@@ -117,4 +153,4 @@
 
         }
     }
-}
+} 

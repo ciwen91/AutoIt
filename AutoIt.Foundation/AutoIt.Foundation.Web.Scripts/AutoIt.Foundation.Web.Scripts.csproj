@@ -185,6 +185,7 @@
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\DFAState.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\EgtEntityBase.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\EndingMode.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\GramerAnalyInfo.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\GramerInfo.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\GramerInfoState.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\Group.ts" />

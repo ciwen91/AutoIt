@@ -1,7 +1,8 @@
 ﻿namespace CodeEdit.LangAnaly {
     export class GramerReader {
         private _EgtManager: EgtManager;
-        private _GrammerGroup: List<Tuple<Model.LALRState, Model.GramerInfo>> = new List<Tuple<Model.LALRState, Model.GramerInfo>>();
+        private _GrammerGroup: List<Tuple<Model.LALRState, Model.GramerInfo>> = new
+            List<Tuple<Model.LALRState, Model.GramerInfo>>();
 
         constructor(edgManager: EgtManager) {
             this._EgtManager = edgManager;
@@ -16,15 +17,14 @@
 
             if (action == null) {
                 return new Model.GramerInfo(Model.GramerInfoState.Error, tokenInfo);
-            }
-            else {
+            } else {
                 if (action.ActionType == Model.ActionType.Shift) {
                     var gramerSymbol = new Model.GramerInfo(Model.GramerInfoState.Shift, tokenInfo);
-                    this._GrammerGroup.Set(new Tuple<Model.LALRState, Model.GramerInfo>(action.TargetState, gramerSymbol));
+                    this._GrammerGroup
+                        .Set(new Tuple<Model.LALRState, Model.GramerInfo>(action.TargetState, gramerSymbol));
 
                     return gramerSymbol;
-                }
-                else if (action.ActionType == Model.ActionType.Reduce) {
+                } else if (action.ActionType == Model.ActionType.Reduce) {
                     var produce = action.TargetRule;
                     var prodSymbolCount = produce.SymbolGroup.Count();
 
@@ -34,18 +34,28 @@
                         .ToList();
                     var gramerSymbol = new Model.GramerInfo(Model.GramerInfoState.Reduce,
                         group.Count() > 0
-                            ? group.Get(0).Item2.StartToken
-                            : new Model.TokenInfo(Model.TokenInfoState.Accept, null, null, tokenInfo.Index, tokenInfo.Line,
-                                tokenInfo.Col))
+                        ? group.Get(0).Item2.StartToken
+                        : new Model.TokenInfo(Model.TokenInfoState.Accept,
+                            null,
+                            null,
+                            tokenInfo.Index,
+                            tokenInfo.Line,
+                            tokenInfo.Col));
                     gramerSymbol.SetChildGroup($.Enumerable.From(group.ToArray()).Select(item => item.Item2).ToList());
-                    gramerSymbol.Value = $.Enumerable.From(group.ToArray()).Select(item => item.Item2.Value).ToArray().join("");
+                    gramerSymbol.Value = $.Enumerable.From(group.ToArray())
+                        .Select(item => item.Item2.Value)
+                        .ToArray()
+                        .join("");
                     gramerSymbol.Symbol = produce.NonTerminal;
                     gramerSymbol.Produce = produce;
 
-                    this._GrammerGroup.Set(new Tuple<Model.LALRState, Model.GramerInfo>(this._GrammerGroup.Get().Item1.GetAction(produce.NonTerminal).TargetState, gramerSymbol));
+                    this._GrammerGroup
+                        .Set(new Tuple<Model.LALRState,
+                            Model.
+                            GramerInfo>(this._GrammerGroup.Get().Item1.GetAction(produce.NonTerminal).TargetState,
+                            gramerSymbol));
                     return gramerSymbol;
-                }
-                else if (action.ActionType == Model.ActionType.Accept) {
+                } else if (action.ActionType == Model.ActionType.Accept) {
                     var gramerInfo = this._GrammerGroup.Get().Item2;
 
                     var gramerSymbol = new Model.GramerInfo(Model.GramerInfoState.Accept, tokenInfo);
@@ -54,18 +64,14 @@
                     gramerSymbol.Data = gramerInfo.Data;
 
                     return gramerSymbol;
-                }
-                else {
+                } else {
                     throw "NotSupportedException";
                 }
             }
         }
 
-        GetGramerGroup(): List<Model.GramerInfo> {
-            return $.Enumerable.From(this._GrammerGroup.ToArray())
-                .Select(item => item.Item2)
-                .Where(item => item != null)
-                .ToList();
+        GetGramerGroup(): List<Tuple<Model.LALRState, Model.GramerInfo>> {
+            return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
         }
     }
 }
