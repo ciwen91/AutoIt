@@ -45,7 +45,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
     $.get("data/xml.egt.base64", function (egtBase64) {
         var egt = base64ToBin(egtBase64);
         manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();
+        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
     });
     return {
         startState: function () {
@@ -70,12 +70,18 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
             if (gramerInfo == null) {
+                console.log(90);
                 stream.next();
                 return null;
             }
             else {
-                for (var i = 0; i < gramerInfo.Value.length; i++) {
+                var endPoint = gramerInfo.EndLinePoint();
+                var tempCol = col;
+                while (!stream.eol() && (line < endPoint.Y || tempCol <= endPoint.X)) {
+                    //  debugger;
                     stream.next();
+                    tempCol++;
+                    console.log(100);
                 }
             }
             //while (!stream.eol()) {
@@ -104,6 +110,12 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                     style = "attribute";
                 }
             }
+            else if (name == "Text") {
+                style = "emstrong";
+            }
+            //if (style == null) {
+            //    debugger;
+            //}
             console.log(style);
             return style;
         }
@@ -474,7 +486,7 @@ var CodeEdit;
                             if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Reduce) {
                                 var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
                                 if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
-                                    var preWhiteSpace = val.MatchPre("\\s+", gramer.Index - 1);
+                                    var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
                                         var newPoint = val.PrePoint(preWhiteSpace.length, new LinePoint(gramer.Index, gramer.Col, gramer.Line));
@@ -784,7 +796,9 @@ var CodeEdit;
                     return new LinePoint(this.Index, this.Col, this.Line);
                 };
                 SymbolInfoBase.prototype.EndLinePoint = function () {
-                    return this.Value.NextPoint(this.Value.length - 1, this.StartLintPoint());
+                    var point = this.Value.NextPoint(this.Value.length - 1, new LinePoint(0, 0, 0));
+                    var endPoint = this.StartLintPoint().Add(point);
+                    return endPoint;
                 };
                 return SymbolInfoBase;
             }());
@@ -1256,6 +1270,12 @@ var LinePoint = (function () {
         else {
             return 0;
         }
+    };
+    LinePoint.prototype.Add = function (linePoint) {
+        var index = this.Index + linePoint.Index;
+        var line = this.Y + linePoint.Y;
+        var col = linePoint.Y == 0 ? this.X + linePoint.X : linePoint.X;
+        return new LinePoint(index, col, line);
     };
     return LinePoint;
 }());

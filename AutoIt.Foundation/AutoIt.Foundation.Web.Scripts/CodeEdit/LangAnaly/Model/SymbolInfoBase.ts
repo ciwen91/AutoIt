@@ -28,7 +28,9 @@ module CodeEdit.LangAnaly.Model {
         }
 
         EndLinePoint(): LinePoint {
-            return this.Value.NextPoint(this.Value.length-1, this.StartLintPoint());
+            var point = this.Value.NextPoint(this.Value.length - 1, new LinePoint(0, 0, 0));
+            var endPoint = this.StartLintPoint().Add(point);
+            return endPoint;
         }
     }
 }

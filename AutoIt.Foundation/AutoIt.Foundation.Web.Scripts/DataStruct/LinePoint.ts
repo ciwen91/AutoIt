@@ -20,4 +20,12 @@
             return 0;
         }
     }
+
+    Add(linePoint: LinePoint): LinePoint{
+        var index = this.Index + linePoint.Index;
+        var line = this.Y + linePoint.Y;
+        var col = linePoint.Y == 0 ? this.X + linePoint.X : linePoint.X;
+
+        return new LinePoint(index, col, line);
+    }
 }

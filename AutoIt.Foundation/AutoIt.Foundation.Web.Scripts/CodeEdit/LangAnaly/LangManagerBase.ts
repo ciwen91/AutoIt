@@ -34,8 +34,8 @@
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
 
-                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {                            
-                                var preWhiteSpace = val.MatchPre("\\s+", gramer.Index - 1);
+                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {                 
+                                var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
                              
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;

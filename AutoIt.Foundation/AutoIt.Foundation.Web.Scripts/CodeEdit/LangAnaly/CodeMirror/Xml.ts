@@ -8,7 +8,7 @@
         egtBase64 => {
             var egt = base64ToBin(egtBase64);
             manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-            manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();
+            manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
         });
 
     return {
@@ -37,11 +37,18 @@
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
           
             if (gramerInfo == null) {
+                console.log(90);
                 stream.next();
                 return null;
+
             } else {
-                for (var i = 0; i < gramerInfo.Value.length; i++) {
+                var endPoint = gramerInfo.EndLinePoint();
+                var tempCol = col
+                while (!stream.eol() && (line < endPoint.Y || tempCol <= endPoint.X)) {
+                 //  debugger;
                     stream.next();
+                    tempCol++;
+                    console.log(100);
                 }
             }
             //while (!stream.eol()) {
@@ -75,7 +82,13 @@
                     style = "attribute";
                 }
             }
+            else if (name == "Text") {
+                style = "emstrong";
+            }
 
+            //if (style == null) {
+            //    debugger;
+            //}
             console.log(style);
             return style;
         }   
