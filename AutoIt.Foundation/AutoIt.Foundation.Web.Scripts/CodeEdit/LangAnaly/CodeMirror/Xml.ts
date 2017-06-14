@@ -21,46 +21,39 @@
         token: (stream, state) => {
             var editor = Cast<CodeMirror.EditorFromTextArea>(window[editorKey]);
             var xml = editor.getValue();
+            xml = xml.replace(/^\n/mg, "");
             if (xml != val) {
-
+                //console.clear();
                 manger.Analy(xml);
                 val = xml;
                 console.clear();
+                console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
             var col = stream.pos;
-
+           console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
           
             if (gramerInfo == null) {
-                console.log(90);
                 stream.next();
                 return null;
 
             } else {
                 var endPoint = gramerInfo.EndLinePoint();
-                var tempCol = col
+                var tempCol = col;
                 while (!stream.eol() && (line < endPoint.Y || tempCol <= endPoint.X)) {
-                 //  debugger;
                     stream.next();
                     tempCol++;
-                    console.log(100);
                 }
             }
-            //while (!stream.eol()) {
-
-            //}
           
             if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
                 return "error";
             }
-
-            //console.log(gramerInfo);
-            //console.log(gramerAnalyInfo.ParantMaySymbolGroup);
 
             var name = gramerInfo.Symbol.Name;
             var parentMaySymbolGroup = $.Enumerable.From(gramerAnalyInfo.ParantMaySymbolGroup.ToArray())
@@ -86,10 +79,7 @@
                 style = "emstrong";
             }
 
-            //if (style == null) {
-            //    debugger;
-            //}
-            console.log(style);
+           // console.log(style);
             return style;
         }   
     };

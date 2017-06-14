@@ -26,11 +26,11 @@
             while (true) {
                 var token = this._TokenReader.ReadToken();
                 this.TokenRead(token);
-
+                console.log(token);
                 if (token.Symbol == null || token.Symbol.Type != Model.SymbolType.Noise) {
                     while (true) {
                         var gramer = this._GramerReader.ReadGramer(token);
-                       
+                        console.log(gramer);
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
 
@@ -92,6 +92,7 @@
             if (grammer != null) {
                 return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
             } else {
+               // debugger;
                 var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
                 var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
                     .Where(item => item.Item2 != null)
