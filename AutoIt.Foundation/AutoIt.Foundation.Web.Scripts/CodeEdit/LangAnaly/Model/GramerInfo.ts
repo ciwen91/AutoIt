@@ -2,8 +2,8 @@
 module CodeEdit.LangAnaly.Model {
     export  class  GramerInfo extends  CodeEdit.LangAnaly.Model.SymbolInfoBase {
         GramerState: CodeEdit.LangAnaly.Model.GramerInfoState;
-        StartToken: CodeEdit.LangAnaly.Model.TokenInfo;
-        Produce: CodeEdit.LangAnaly.Model.Produce;
+        StartToken: CodeEdit.LangAnaly.Model.TokenInfo ;
+        Produce: CodeEdit.LangAnaly.Model.Produce=null;
 
         Parent: GramerInfo;
         private _ChildGroup: List<GramerInfo> = new List<GramerInfo>();

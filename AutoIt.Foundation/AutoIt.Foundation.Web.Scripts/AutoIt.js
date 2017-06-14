@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -68,14 +63,13 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 manger.Analy(xml);
                 val = xml;
                 console.clear();
-                console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
             var col = stream.pos;
-            console.log(line + "," + col + ":" + stream.pos + "(" + stream.string + ")");
+            // console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
             if (gramerInfo == null) {
@@ -115,7 +109,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             else if (name == "Text") {
                 style = "emstrong";
             }
-            // console.log(style);
+            console.log(style);
             return style;
         }
     };
@@ -454,12 +448,23 @@ var CodeEdit;
                 return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
             };
             GramerReader.prototype.BackGramer = function () {
-                if (this._GrammerGroup.Count() > 1) {
-                    var topGramer = this._GrammerGroup.Get().Item2;
-                    if (topGramer.Produce == null) {
-                        this._GrammerGroup.Remove();
-                        return topGramer;
+                var index = this.GetGramerGroup().Count() - 1;
+                while (index >= 1) {
+                    var gramer = this._GrammerGroup.Get(index).Item2;
+                    var state = this._GrammerGroup.Get(index).Item1;
+                    var preState = this._GrammerGroup.Get(index - 1).Item1;
+                    if (gramer.Produce != null) {
+                        break;
                     }
+                    if ($.Enumerable.From(state.ActionGroup.ToArray()).Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                        break;
+                    }
+                    if ($.Enumerable.From(preState.ActionGroup.ToArray()).Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                        var resultGramer = this.GetGramerGroup().Get().Item2;
+                        this._GrammerGroup.Remove();
+                        return resultGramer;
+                    }
+                    index--;
                 }
                 return null;
             };
@@ -523,6 +528,7 @@ var CodeEdit;
                                 var backGramer = this._GramerReader.BackGramer();
                                 //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
                                 if (backGramer) {
+                                    backGramer.GramerState = LangAnaly.Model.GramerInfoState.Error;
                                     this._EroGrammerGroup.Set(backGramer);
                                     continue;
                                 }
@@ -838,6 +844,7 @@ var CodeEdit;
                 __extends(GramerInfo, _super);
                 function GramerInfo(gramerState, startToken) {
                     var _this = _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index) || this;
+                    _this.Produce = null;
                     _this._ChildGroup = new List();
                     _this.GramerState = gramerState;
                     _this.StartToken = startToken;

@@ -65,11 +65,13 @@
 
                              //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
                             if (backGramer) {
+                                backGramer.GramerState = Model.GramerInfoState.Error;
                                 this._EroGrammerGroup.Set(backGramer);
                                 continue;
                             } else {
                                 this._EroGrammerGroup.Set(gramer);
                             }
+                            //this._EroGrammerGroup.Set(gramer);
                         }
 
                         if (gramer.GramerState != Model.GramerInfoState.Reduce) {

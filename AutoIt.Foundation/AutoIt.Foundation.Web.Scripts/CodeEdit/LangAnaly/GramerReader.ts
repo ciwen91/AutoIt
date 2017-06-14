@@ -75,13 +75,28 @@
         }
 
         BackGramer(): Model.GramerInfo {
-            if (this._GrammerGroup.Count() > 1) {
-                var topGramer = this._GrammerGroup.Get().Item2;
+            var index = this.GetGramerGroup().Count() - 1;
 
-                if (topGramer.Produce == null) {
-                    this._GrammerGroup.Remove();
-                    return topGramer;
+            while (index>=1) {
+                var gramer = this._GrammerGroup.Get(index).Item2;
+                var state = this._GrammerGroup.Get(index).Item1;
+                var preState = this._GrammerGroup.Get(index-1).Item1;
+
+                if (gramer.Produce != null) {
+                    break;
                 }
+
+                if ($.Enumerable.From(state.ActionGroup.ToArray()).Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                    break;
+                }
+
+                if ($.Enumerable.From(preState.ActionGroup.ToArray()).Any(item=>item.ActionType== Model.ActionType.Reduce)) {
+                    var resultGramer = this.GetGramerGroup().Get().Item2;
+                    this._GrammerGroup.Remove();
+                    return resultGramer;
+                }
+
+                index--;
             }
 
             return null;

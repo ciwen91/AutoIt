@@ -27,14 +27,14 @@
                 manger.Analy(xml);
                 val = xml;
                 console.clear();
-                console.log(xml);
+                //console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
             var col = stream.pos;
-           console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
+          // console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
           
@@ -79,7 +79,7 @@
                 style = "emstrong";
             }
 
-           // console.log(style);
+            console.log(style);
             return style;
         }   
     };
