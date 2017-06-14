@@ -525,16 +525,16 @@ var CodeEdit;
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
-                                var backGramer = this._GramerReader.BackGramer();
                                 //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
-                                if (backGramer) {
-                                    backGramer.GramerState = LangAnaly.Model.GramerInfoState.Error;
-                                    this._EroGrammerGroup.Set(backGramer);
-                                    continue;
+                                if (gramer.Value != null) {
+                                    var backGramer = this._GramerReader.BackGramer();
+                                    if (backGramer) {
+                                        backGramer.GramerState = LangAnaly.Model.GramerInfoState.Error;
+                                        this._EroGrammerGroup.Set(backGramer);
+                                        continue;
+                                    }
                                 }
-                                else {
-                                    this._EroGrammerGroup.Set(gramer);
-                                }
+                                this._EroGrammerGroup.Set(gramer);
                             }
                             if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                                 break;
@@ -555,10 +555,10 @@ var CodeEdit;
             LangManagerBase.prototype.GetGramerAnalyInfo = function (line, col) {
                 var grammer = $.Enumerable.From(this._EroGrammerGroup.ToArray())
                     .FirstOrDefault(null, function (item) { return item.Line == line && item.Col == col; });
-                if (grammer != null) {
-                    return new LangAnaly.Model.GramerAnalyInfo(grammer, new List());
-                }
-                else {
+                //if (grammer != null) {
+                //    return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
+                //} else
+                {
                     // debugger;
                     var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
                     var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
@@ -599,6 +599,9 @@ var CodeEdit;
                             return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                         }
                     }
+                }
+                if (grammer != null) {
+                    return new LangAnaly.Model.GramerAnalyInfo(grammer, new List());
                 }
                 return null;
             };

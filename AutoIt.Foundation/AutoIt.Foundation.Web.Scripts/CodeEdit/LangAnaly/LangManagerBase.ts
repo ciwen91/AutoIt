@@ -61,17 +61,17 @@
 
                             return resultGrammer;
                         } else if (gramer.GramerState == Model.GramerInfoState.Error) {
-                            var backGramer = this._GramerReader.BackGramer();
-
-                             //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
-                            if (backGramer) {
-                                backGramer.GramerState = Model.GramerInfoState.Error;
-                                this._EroGrammerGroup.Set(backGramer);
-                                continue;
-                            } else {
-                                this._EroGrammerGroup.Set(gramer);
+                            //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
+                            if (gramer.Value != null) {
+                                var backGramer = this._GramerReader.BackGramer();
+                                if (backGramer) {
+                                    backGramer.GramerState = Model.GramerInfoState.Error;
+                                    this._EroGrammerGroup.Set(backGramer);
+                                    continue;
+                                }
                             }
-                            //this._EroGrammerGroup.Set(gramer);
+
+                            this._EroGrammerGroup.Set(gramer);
                         }
 
                         if (gramer.GramerState != Model.GramerInfoState.Reduce) {
@@ -99,9 +99,10 @@
            var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
 
-            if (grammer != null) {
-                return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
-            } else {
+            //if (grammer != null) {
+            //    return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
+            //} else
+            {
                // debugger;
                 var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
                 var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
@@ -149,6 +150,10 @@
                         return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                     }
                 }
+           }
+
+              if (grammer != null) {
+                return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
             }
 
             return null;
