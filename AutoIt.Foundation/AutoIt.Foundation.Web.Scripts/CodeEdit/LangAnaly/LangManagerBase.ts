@@ -61,7 +61,15 @@
 
                             return resultGrammer;
                         } else if (gramer.GramerState == Model.GramerInfoState.Error) {
-                            this._EroGrammerGroup.Set(gramer);
+                            var backGramer = this._GramerReader.BackGramer();
+
+                             //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
+                            if (backGramer) {
+                                this._EroGrammerGroup.Set(backGramer);
+                                continue;
+                            } else {
+                                this._EroGrammerGroup.Set(gramer);
+                            }
                         }
 
                         if (gramer.GramerState != Model.GramerInfoState.Reduce) {

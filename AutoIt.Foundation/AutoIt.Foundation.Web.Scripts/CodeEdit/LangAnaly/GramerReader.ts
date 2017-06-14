@@ -73,5 +73,18 @@
         GetGramerGroup(): List<Tuple<Model.LALRState, Model.GramerInfo>> {
             return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
         }
+
+        BackGramer(): Model.GramerInfo {
+            if (this._GrammerGroup.Count() > 1) {
+                var topGramer = this._GrammerGroup.Get().Item2;
+
+                if (topGramer.Produce == null) {
+                    this._GrammerGroup.Remove();
+                    return topGramer;
+                }
+            }
+
+            return null;
+        }
     }
 }

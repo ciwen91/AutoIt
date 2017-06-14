@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -448,6 +453,16 @@ var CodeEdit;
             GramerReader.prototype.GetGramerGroup = function () {
                 return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
             };
+            GramerReader.prototype.BackGramer = function () {
+                if (this._GrammerGroup.Count() > 1) {
+                    var topGramer = this._GrammerGroup.Get().Item2;
+                    if (topGramer.Produce == null) {
+                        this._GrammerGroup.Remove();
+                        return topGramer;
+                    }
+                }
+                return null;
+            };
             return GramerReader;
         }());
         LangAnaly.GramerReader = GramerReader;
@@ -505,7 +520,15 @@ var CodeEdit;
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
-                                this._EroGrammerGroup.Set(gramer);
+                                var backGramer = this._GramerReader.BackGramer();
+                                //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
+                                if (backGramer) {
+                                    this._EroGrammerGroup.Set(backGramer);
+                                    continue;
+                                }
+                                else {
+                                    this._EroGrammerGroup.Set(gramer);
+                                }
                             }
                             if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                                 break;
