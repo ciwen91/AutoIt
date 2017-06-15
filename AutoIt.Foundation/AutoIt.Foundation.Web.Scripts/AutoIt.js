@@ -468,6 +468,54 @@ var CodeEdit;
                 }
                 return null;
             };
+            GramerReader.prototype.GetParentMaySymbolGroup = function (gramer) {
+                var parentMaySymbolGroup = new List();
+                if (gramer.Parent != null) {
+                    parentMaySymbolGroup.Set(gramer.Parent.Symbol);
+                }
+                else {
+                    var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                        .Select(function (item) { return item.Item2; })
+                        .IndexOf(gramer);
+                    while (index > 0) {
+                        var preState = this._GrammerGroup.Get(index - 1).Item1;
+                        parentMaySymbolGroup = $.Enumerable.From(preState.ActionGroup.ToArray())
+                            .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
+                            .Select(function (sItem) { return sItem.Symbol; })
+                            .ToList();
+                        if (parentMaySymbolGroup.Count() > 0) {
+                            break;
+                        }
+                        else {
+                            index--;
+                        }
+                        ;
+                    }
+                }
+                return parentMaySymbolGroup;
+            };
+            GramerReader.prototype.IsInOptionPro = function (grammer) {
+                var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                    .Select(function (item) { return item.Item2; })
+                    .IndexOf(grammer);
+                while (index >= 1) {
+                    var gramer = this._GrammerGroup.Get(index).Item2;
+                    var state = this._GrammerGroup.Get(index).Item1;
+                    var preState = this._GrammerGroup.Get(index - 1).Item1;
+                    if (gramer.Produce != null) {
+                        break;
+                    }
+                    if ($.Enumerable.From(state.ActionGroup.ToArray()).Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                        break;
+                    }
+                    if ($.Enumerable.From(preState.ActionGroup.ToArray())
+                        .Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                        return true;
+                    }
+                    index--;
+                }
+                return false;
+            };
             return GramerReader;
         }());
         LangAnaly.GramerReader = GramerReader;

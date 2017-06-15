@@ -101,5 +101,64 @@
 
             return null;
         }
+
+        GetParentMaySymbolGroup(gramer: Model.GramerInfo): List<Model.Symbol> {
+            var parentMaySymbolGroup = new List<Model.Symbol>();
+
+            if (gramer.Parent != null) {
+                parentMaySymbolGroup.Set(gramer.Parent.Symbol);
+            } else {
+                var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                    .Select(item => item.Item2)
+                    .IndexOf(gramer);
+
+                while (index > 0) {
+                    var preState = this._GrammerGroup.Get(index - 1).Item1;
+
+                    parentMaySymbolGroup = $.Enumerable.From(preState.ActionGroup.ToArray())
+                        .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
+                        .Select(sItem => sItem.Symbol)
+                        .ToList();
+
+                    if (parentMaySymbolGroup.Count() > 0) {
+                        break;
+                    } else {
+                        index--;
+                    };
+                }
+            }
+
+            return parentMaySymbolGroup;
+        }
+
+        IsInOptionPro(grammer: Model.GramerInfo): boolean {
+            var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                .Select(item => item.Item2)
+                .IndexOf(grammer);
+
+            while (index>=1) {
+                var gramer = this._GrammerGroup.Get(index).Item2;
+                var state = this._GrammerGroup.Get(index).Item1;
+                var preState = this._GrammerGroup.Get(index - 1).Item1;
+
+                if (gramer.Produce != null) {
+                    break;
+                }
+
+
+                if ($.Enumerable.From(state.ActionGroup.ToArray()).Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                    break;
+                }
+               
+                if ($.Enumerable.From(preState.ActionGroup.ToArray())
+                    .Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                    return true;
+                }
+
+                index--;
+            }
+
+            return false;
+        }
     }
 }
