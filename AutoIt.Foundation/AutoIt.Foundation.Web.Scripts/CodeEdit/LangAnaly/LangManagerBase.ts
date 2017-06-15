@@ -63,10 +63,15 @@
                         } else if (gramer.GramerState == Model.GramerInfoState.Error) {
                             //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
                             if (gramer.Value != null) {
-                                var backGramer = this._GramerReader.BackGramer();
-                                if (backGramer) {
-                                    backGramer.GramerState = Model.GramerInfoState.Error;
-                                    this._EroGrammerGroup.Set(backGramer);
+                                //var backGramer = this._GramerReader.BackGramer();
+                                //if (backGramer) {
+                                //    backGramer.GramerState = Model.GramerInfoState.Error;
+                                //    this._EroGrammerGroup.Set(backGramer);
+                                //    continue;
+                                //}
+
+                                var isAutoComplete = this._GramerReader.AutoComplete();
+                                if (isAutoComplete) {
                                     continue;
                                 }
                             }

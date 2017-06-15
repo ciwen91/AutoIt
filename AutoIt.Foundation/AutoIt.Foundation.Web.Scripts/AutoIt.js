@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -63,6 +68,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 manger.Analy(xml);
                 val = xml;
                 console.clear();
+                //console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
@@ -516,6 +522,31 @@ var CodeEdit;
                 }
                 return false;
             };
+            GramerReader.prototype.GetIndex = function (grammer) {
+                var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                    .Select(function (item) { return item.Item2; })
+                    .IndexOf(grammer);
+                return index;
+            };
+            GramerReader.prototype.AutoComplete = function () {
+                var grammer = this._GrammerGroup.Get().Item2;
+                if (!this.IsInOptionPro(grammer)) {
+                    return false;
+                }
+                var index = this.GetIndex(grammer);
+                while (true) {
+                    var state = this._GrammerGroup.Get(index).Item1;
+                    var actionGroup = $.Enumerable.From(state.ActionGroup.ToArray());
+                    if (actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                        break;
+                    }
+                    var shift = actionGroup.First(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Shift; });
+                    var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
+                    this.ReadGramer(tokenInfo);
+                    index++;
+                }
+                return true;
+            };
             return GramerReader;
         }());
         LangAnaly.GramerReader = GramerReader;
@@ -575,10 +606,14 @@ var CodeEdit;
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
                                 //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
                                 if (gramer.Value != null) {
-                                    var backGramer = this._GramerReader.BackGramer();
-                                    if (backGramer) {
-                                        backGramer.GramerState = LangAnaly.Model.GramerInfoState.Error;
-                                        this._EroGrammerGroup.Set(backGramer);
+                                    //var backGramer = this._GramerReader.BackGramer();
+                                    //if (backGramer) {
+                                    //    backGramer.GramerState = Model.GramerInfoState.Error;
+                                    //    this._EroGrammerGroup.Set(backGramer);
+                                    //    continue;
+                                    //}
+                                    var isAutoComplete = this._GramerReader.AutoComplete();
+                                    if (isAutoComplete) {
                                         continue;
                                     }
                                 }

@@ -131,7 +131,7 @@
             return parentMaySymbolGroup;
         }
 
-        IsInOptionPro(grammer: Model.GramerInfo): boolean {
+        private  IsInOptionPro(grammer: Model.GramerInfo): boolean {
             var index = $.Enumerable.From(this._GrammerGroup.ToArray())
                 .Select(item => item.Item2)
                 .IndexOf(grammer);
@@ -159,6 +159,40 @@
             }
 
             return false;
+        }
+
+        private GetIndex(grammer: Model.GramerInfo): number {
+            var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                .Select(item => item.Item2)
+                .IndexOf(grammer);
+
+            return index;
+        }
+
+        AutoComplete(): boolean {
+            var grammer = this._GrammerGroup.Get().Item2;
+            if (!this.IsInOptionPro(grammer)) {
+                return false;
+            }
+
+            var index = this.GetIndex(grammer);  
+
+            while (true) {
+                var state = this._GrammerGroup.Get(index).Item1;
+                var actionGroup = $.Enumerable.From(state.ActionGroup.ToArray());
+
+                if (actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                    break;
+                }
+
+                var shift = actionGroup.First(item => item.ActionType == Model.ActionType.Shift);
+                var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
+
+                this.ReadGramer(tokenInfo);
+                index++;
+            }
+
+            return true;
         }
     }
 }
