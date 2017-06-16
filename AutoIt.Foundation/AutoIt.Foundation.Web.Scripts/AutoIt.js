@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -62,6 +67,8 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 console.clear();
                 manger.Analy(xml);
                 val = xml;
+                //console.clear();
+                //console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
@@ -427,7 +434,7 @@ var CodeEdit;
                             .ToList();
                         var gramerSymbol = new LangAnaly.Model.GramerInfo(LangAnaly.Model.GramerInfoState.Reduce, group.Count() > 0
                             ? group.Get(0).Item2.StartToken
-                            : new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, null, null, tokenInfo.Index, tokenInfo.Line, tokenInfo.Col));
+                            : new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, null, null, -1, -1, -1));
                         gramerSymbol.SetChildGroup($.Enumerable.From(group.ToArray()).Select(function (item) { return item.Item2; }).ToList());
                         gramerSymbol.Value = $.Enumerable.From(group.ToArray())
                             .Select(function (item) { return item.Item2.Value; })
@@ -583,12 +590,13 @@ var CodeEdit;
                             var gramer = this._GramerReader.ReadGramer(token);
                             console.log(gramer);
                             if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Reduce) {
-                                var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
-                                if (this.ContentNameGroup.Contains(gramer.Symbol.Name) && gramer.Symbol.Name != "Text") {
-                                    var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
+                                var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
+                                if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
+                                    var index = gramer.Index >= 0 ? gramer.Index : token.Index;
+                                    var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
-                                        var newPoint = val.PrePoint(preWhiteSpace.length, new LinePoint(gramer.Index, gramer.Col, gramer.Line));
+                                        var newPoint = val.PrePoint(gramerVal.length, new LinePoint(token.Index - 1, token.Col, token.Line));
                                         gramer.Index = newPoint.Index;
                                         gramer.Line = newPoint.Y;
                                         gramer.Col = newPoint.X;

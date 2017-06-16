@@ -38,9 +38,9 @@
                         : new Model.TokenInfo(Model.TokenInfoState.Accept,
                             null,
                             null,
-                            tokenInfo.Index,
-                            tokenInfo.Line,
-                            tokenInfo.Col));
+                            -1,
+                            -1,
+                            -1));
                     gramerSymbol.SetChildGroup($.Enumerable.From(group.ToArray()).Select(item => item.Item2).ToList());
                     gramerSymbol.Value = $.Enumerable.From(group.ToArray())
                         .Select(item => item.Item2.Value)

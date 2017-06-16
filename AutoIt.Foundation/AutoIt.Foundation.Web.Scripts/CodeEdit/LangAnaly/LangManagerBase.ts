@@ -32,15 +32,16 @@
                         var gramer = this._GramerReader.ReadGramer(token);
                         console.log(gramer);
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
-                            var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
+                            var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
 
-                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)&&gramer.Symbol.Name!="Text") {//???                 
-                                var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
+                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {//???      
+                                var index = gramer.Index >= 0 ? gramer.Index : token.Index;
+                                var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
                              
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;
-                                    var newPoint = val.PrePoint(preWhiteSpace.length,
-                                        new LinePoint(gramer.Index, gramer.Col, gramer.Line));
+                                    var newPoint = val.PrePoint(gramerVal.length,
+                                        new LinePoint(token.Index-1, token.Col, token.Line));
                                     gramer.Index = newPoint.Index;
                                     gramer.Line = newPoint.Y;
                                     gramer.Col = newPoint.X;
