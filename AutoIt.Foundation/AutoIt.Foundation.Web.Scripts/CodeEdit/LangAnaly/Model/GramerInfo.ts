@@ -25,8 +25,10 @@ module CodeEdit.LangAnaly.Model {
                 return  $.Enumerable.From(this._ChildGroup.ToArray()).Max(item => item.GetLevel() + 1);
             }
         }
-
-       
+        NextPoint(val:string): LinePoint {
+            var nextPoint = val.NextPoint(1, this.EndLinePoint());
+            return nextPoint;
+        }
 
         constructor(gramerState: GramerInfoState, startToken: TokenInfo) {
             super(startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);

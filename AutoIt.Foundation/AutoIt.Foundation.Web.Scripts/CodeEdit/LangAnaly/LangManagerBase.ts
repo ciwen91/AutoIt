@@ -34,7 +34,7 @@
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
 
-                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {                 
+                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)&&gramer.Symbol.Name!="Text") {//???                 
                                 var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
                              
                                 if (preWhiteSpace != null) {
@@ -123,7 +123,7 @@
                     if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
                         grammerGroup.SetRange(itemChildGroup);
                     }
-                    else if (item.Contains(line, col) && item.Value) {//item.Line == line && item.Col == col 
+                    else if (item.Value&&item.Contains(line, col)) {//item.Line == line && item.Col == col 
                         grammer = item;
 
                         var parentMaySymbolGroup = new List<Model.Symbol>();

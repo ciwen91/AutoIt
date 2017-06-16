@@ -188,9 +188,12 @@
                 var shift = actionGroup.First(item => item.ActionType == Model.ActionType.Shift);
                 var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
 
-                this.ReadGramer(tokenInfo);
+                var grammerInfo = this.ReadGramer(tokenInfo);
+                //grammerInfo.GramerState = Model.GramerInfoState.Error;
                 index++;
             }
+
+            grammer.GramerState = Model.GramerInfoState.AutoComplete;
 
             return true;
         }

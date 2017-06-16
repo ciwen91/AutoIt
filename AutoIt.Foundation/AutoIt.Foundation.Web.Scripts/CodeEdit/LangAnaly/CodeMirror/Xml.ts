@@ -8,7 +8,7 @@
         egtBase64 => {
             var egt = base64ToBin(egtBase64);
             manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-            manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
+            manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();//???
         });
 
     return {
@@ -23,10 +23,10 @@
             var xml = editor.getValue();
             xml = xml.replace(/^\n/mg, "");
             if (xml != val) {
-                //console.clear();
+                console.clear();
                 manger.Analy(xml);
                 val = xml;
-                console.clear();
+                //console.clear();
                 //console.log(xml);
             }
             if (stream.pos == 0) {
@@ -37,7 +37,15 @@
           // console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
-          
+            var nextGramerInfo:CodeEdit.LangAnaly.Model.GramerInfo = null;
+             if (gramerInfo != null) {
+                 var nextPoint = gramerInfo.NextPoint(xml);
+                 var nextAnaylyInfo = manger.GetGramerAnalyInfo(nextPoint.Y, nextPoint.X);
+                 if (nextAnaylyInfo != null) {
+                     nextGramerInfo = nextAnaylyInfo.GramerInfo;
+                 }
+             }
+
             if (gramerInfo == null) {
                 stream.next();
                 return null;
@@ -51,7 +59,8 @@
                 }
             }
           
-            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
+            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error ||
+                (gramerInfo.GramerState==CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete&&(nextGramerInfo==null||nextGramerInfo.GramerState!=CodeEdit.LangAnaly.Model.GramerInfoState.Error))) {
                 return "error";
             }
 

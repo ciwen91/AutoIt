@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -50,7 +45,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
     $.get("data/xml.egt.base64", function (egtBase64) {
         var egt = base64ToBin(egtBase64);
         manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
+        manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList(); //???
     });
     return {
         startState: function () {
@@ -64,11 +59,9 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             var xml = editor.getValue();
             xml = xml.replace(/^\n/mg, "");
             if (xml != val) {
-                //console.clear();
+                console.clear();
                 manger.Analy(xml);
                 val = xml;
-                console.clear();
-                //console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
@@ -78,6 +71,14 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             // console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
             var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+            var nextGramerInfo = null;
+            if (gramerInfo != null) {
+                var nextPoint = gramerInfo.NextPoint(xml);
+                var nextAnaylyInfo = manger.GetGramerAnalyInfo(nextPoint.Y, nextPoint.X);
+                if (nextAnaylyInfo != null) {
+                    nextGramerInfo = nextAnaylyInfo.GramerInfo;
+                }
+            }
             if (gramerInfo == null) {
                 stream.next();
                 return null;
@@ -90,7 +91,8 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                     tempCol++;
                 }
             }
-            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
+            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error ||
+                (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete && (nextGramerInfo == null || nextGramerInfo.GramerState != CodeEdit.LangAnaly.Model.GramerInfoState.Error))) {
                 return "error";
             }
             var name = gramerInfo.Symbol.Name;
@@ -542,9 +544,11 @@ var CodeEdit;
                     }
                     var shift = actionGroup.First(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Shift; });
                     var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
-                    this.ReadGramer(tokenInfo);
+                    var grammerInfo = this.ReadGramer(tokenInfo);
+                    //grammerInfo.GramerState = Model.GramerInfoState.Error;
                     index++;
                 }
+                grammer.GramerState = LangAnaly.Model.GramerInfoState.AutoComplete;
                 return true;
             };
             return GramerReader;
@@ -580,7 +584,7 @@ var CodeEdit;
                             console.log(gramer);
                             if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Reduce) {
                                 var gramerVal = val.substr(gramer.Index, token.Index - gramer.Index);
-                                if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
+                                if (this.ContentNameGroup.Contains(gramer.Symbol.Name) && gramer.Symbol.Name != "Text") {
                                     var preWhiteSpace = val.MatchPre("^\\s+", gramer.Index - 1);
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
@@ -654,7 +658,7 @@ var CodeEdit;
                         if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
                             grammerGroup.SetRange(itemChildGroup);
                         }
-                        else if (item.Contains(line, col) && item.Value) {
+                        else if (item.Value && item.Contains(line, col)) {
                             grammer = item;
                             var parentMaySymbolGroup = new List();
                             if (grammer.Parent != null) {
@@ -956,6 +960,10 @@ var CodeEdit;
                         return $.Enumerable.From(this._ChildGroup.ToArray()).Max(function (item) { return item.GetLevel() + 1; });
                     }
                 };
+                GramerInfo.prototype.NextPoint = function (val) {
+                    var nextPoint = val.NextPoint(1, this.EndLinePoint());
+                    return nextPoint;
+                };
                 return GramerInfo;
             }(CodeEdit.LangAnaly.Model.SymbolInfoBase));
             Model.GramerInfo = GramerInfo;
@@ -974,6 +982,7 @@ var CodeEdit;
                 GramerInfoState[GramerInfoState["Reduce"] = 1] = "Reduce";
                 GramerInfoState[GramerInfoState["Accept"] = 2] = "Accept";
                 GramerInfoState[GramerInfoState["Error"] = 3] = "Error";
+                GramerInfoState[GramerInfoState["AutoComplete"] = 4] = "AutoComplete";
             })(GramerInfoState = Model.GramerInfoState || (Model.GramerInfoState = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));

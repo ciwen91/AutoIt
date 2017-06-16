@@ -3,6 +3,7 @@ module CodeEdit.LangAnaly.Model {
         Shift = 0,
         Reduce,
         Accept,
-        Error
+        Error,
+        AutoComplete
     }
 }
