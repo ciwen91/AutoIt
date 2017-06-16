@@ -34,9 +34,17 @@ String.prototype.PrePoint=function(count, startPoint) {
     var x = startPoint.X;
     var y = startPoint.Y;
 
-    for (var i = startPoint.Index; i > startPoint.Index - count; i--) {
+    for (var i = startPoint.Index-1; i > startPoint.Index-1 - count; i--) {
         if (this[i] == '\n') {
             x = 0;
+            var tempIndex = i-1;
+            while (tempIndex >= 0 && this[tempIndex]!=='\n') {
+                if (this[tempIndex] != '\r') {
+                    x += 1;
+                }
+                tempIndex--;
+            }
+
             y -= 1;
         }
         else if (this[i] == '\r') {
@@ -47,7 +55,7 @@ String.prototype.PrePoint=function(count, startPoint) {
         }
     }
 
-    var endPoint = new LinePoint(startPoint.Index + count, x, y);
+    var endPoint = new LinePoint(startPoint.Index - count, x, y);
 
     return endPoint;
 }

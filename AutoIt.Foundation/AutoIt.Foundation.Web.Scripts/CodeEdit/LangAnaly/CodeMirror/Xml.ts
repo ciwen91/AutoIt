@@ -8,7 +8,7 @@
         egtBase64 => {
             var egt = base64ToBin(egtBase64);
             manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-            manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList();//???
+            manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();//???
         });
 
     return {
@@ -26,7 +26,7 @@
                 console.clear();
                 manger.Analy(xml);
                 val = xml;
-                //console.clear();
+               // console.clear();
                 //console.log(xml);
             }
             if (stream.pos == 0) {

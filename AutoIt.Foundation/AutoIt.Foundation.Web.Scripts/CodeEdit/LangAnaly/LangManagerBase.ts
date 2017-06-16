@@ -41,10 +41,13 @@
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;
                                     var newPoint = val.PrePoint(gramerVal.length,
-                                        new LinePoint(token.Index-1, token.Col, token.Line));
+                                        new LinePoint(token.Index, token.Col, token.Line));
                                     gramer.Index = newPoint.Index;
                                     gramer.Line = newPoint.Y;
                                     gramer.Col = newPoint.X;
+                                    gramer.StartToken.Index = gramer.Index;
+                                    gramer.StartToken.Col = gramer.Col;
+                                    gramer.StartToken.Line = gramer.Line;
                                 }
                                 gramer.Value = gramerVal;
                             }

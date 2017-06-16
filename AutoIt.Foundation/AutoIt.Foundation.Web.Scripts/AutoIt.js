@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var BindInfo = (function () {
     function BindInfo(target, source) {
         this.Target = target;
@@ -50,7 +45,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
     $.get("data/xml.egt.base64", function (egtBase64) {
         var egt = base64ToBin(egtBase64);
         manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Content"]).ToList(); //???
+        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList(); //???
     });
     return {
         startState: function () {
@@ -67,8 +62,6 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 console.clear();
                 manger.Analy(xml);
                 val = xml;
-                //console.clear();
-                //console.log(xml);
             }
             if (stream.pos == 0) {
                 state.Line += 1;
@@ -596,10 +589,13 @@ var CodeEdit;
                                     var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
-                                        var newPoint = val.PrePoint(gramerVal.length, new LinePoint(token.Index - 1, token.Col, token.Line));
+                                        var newPoint = val.PrePoint(gramerVal.length, new LinePoint(token.Index, token.Col, token.Line));
                                         gramer.Index = newPoint.Index;
                                         gramer.Line = newPoint.Y;
                                         gramer.Col = newPoint.X;
+                                        gramer.StartToken.Index = gramer.Index;
+                                        gramer.StartToken.Col = gramer.Col;
+                                        gramer.StartToken.Line = gramer.Line;
                                     }
                                     gramer.Value = gramerVal;
                                 }
@@ -1219,9 +1215,16 @@ String.prototype.NextPoint = function (count, startPoint) {
 String.prototype.PrePoint = function (count, startPoint) {
     var x = startPoint.X;
     var y = startPoint.Y;
-    for (var i = startPoint.Index; i > startPoint.Index - count; i--) {
+    for (var i = startPoint.Index - 1; i > startPoint.Index - 1 - count; i--) {
         if (this[i] == '\n') {
             x = 0;
+            var tempIndex = i - 1;
+            while (tempIndex >= 0 && this[tempIndex] !== '\n') {
+                if (this[tempIndex] != '\r') {
+                    x += 1;
+                }
+                tempIndex--;
+            }
             y -= 1;
         }
         else if (this[i] == '\r') {
@@ -1230,7 +1233,7 @@ String.prototype.PrePoint = function (count, startPoint) {
             x -= 1;
         }
     }
-    var endPoint = new LinePoint(startPoint.Index + count, x, y);
+    var endPoint = new LinePoint(startPoint.Index - count, x, y);
     return endPoint;
 };
 String.prototype.MatchNext = function (regex, index) {
