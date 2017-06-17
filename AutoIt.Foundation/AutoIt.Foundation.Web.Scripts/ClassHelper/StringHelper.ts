@@ -82,7 +82,7 @@ String.prototype.MatchPre = function (regex, index) {
     }
 
     var val = this.substr(0, index + 1).Reverse();
-    var match = new RegExp(regex, "gm").exec(val);
+    var match = new RegExp(regex, "g").exec(val);
     var result = match ? match[0] : "";
     result = result.Reverse();
 
