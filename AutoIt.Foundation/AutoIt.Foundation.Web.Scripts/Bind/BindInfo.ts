@@ -1,5 +1,8 @@
-﻿class BindInfo {
+﻿//绑定信息
+class BindInfo {
+    //绑定目标
     Target: FuncOne<any, any>;
+    //绑定源
     Source: Func<any>;
 
     constructor(target: FuncOne<any, any>, source: Func<any>) {
@@ -7,37 +10,13 @@
         this.Source = source;
     }
 
+    //将源数据更新到目标
     Update(): BindInfo {
-        var visitor = new MemberVisitor();
+        var val = this.Source();
+        this.Target(val);
 
-        var sourceVal = visitor.GetValue(this.Source);
-        visitor.SetValue(this.Target, sourceVal);
-
-       return this;
-   }
-}
-
-class Binding {
-    static Key:string="Binding";
-
-    static Bind(target: FuncOne<any, any>, source: Func<any>) {
-        var group = Context.Current();
-
-        if (group.Get(this.Key) == None) {
-            group.Set(this.Key, new List<BindInfo>());
-        }
-        var bindGroup = Cast<List<BindInfo>>(group.Get(this.Key));
-        bindGroup.Set(new BindInfo(target, source));
-    } 
-
-    static Update() {
-        var group = <List<BindInfo>>Context.Current().Get(this.Key);
-
-        if (group != None) {
-            $.each(group.ToArray(),
-                (index, item) => {
-                    item.Update();
-                });
-        }
+        return this;
     }
 }
+
+//绑定管理类

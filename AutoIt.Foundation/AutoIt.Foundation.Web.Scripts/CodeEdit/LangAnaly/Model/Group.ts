@@ -1,4 +1,5 @@
 module CodeEdit.LangAnaly.Model {
+    //·Ö×é
     export class Group extends EgtEntityBase{
         Name: string;
         Container: CodeEdit.LangAnaly.Model.Symbol;

@@ -1,6 +1,6 @@
 ﻿module CodeEdit.LangAnaly {
     export abstract class LangManagerBase {
-        private _EgtManager: EgtManager;
+        private _EgtStorer: EgtStorer;
         private _TokenReader: TokenReader;
         private _GramerReader:GramerReader;
 
@@ -9,7 +9,7 @@
         private _EroGrammerGroup:List<Model.GramerInfo>=new List<Model.GramerInfo>();
 
         constructor(egtStr: string) {
-            this._EgtManager = EgtManager.CreateFromStr(egtStr);
+            this._EgtStorer = EgtStorer.CreateFromStr(egtStr);
         }
 
         GetValue(val: string): Object {
@@ -20,17 +20,17 @@
         Analy(val: string): Model.GramerInfo {
             this._EroGrammerGroup.Clear();
 
-            this._TokenReader = new TokenReader(this._EgtManager, val);
-            this._GramerReader = new GramerReader(this._EgtManager);
+            this._TokenReader = new TokenReader(this._EgtStorer, val);
+            this._GramerReader = new GramerReader(this._EgtStorer);
            
             while (true) {
                 var token = this._TokenReader.ReadToken();
                 this.TokenRead(token);
-                console.log(token);
+                //console.log(token);
                 if (token.Symbol == null || token.Symbol.Type != Model.SymbolType.Noise) {
                     while (true) {
                         var gramer = this._GramerReader.ReadGramer(token);
-                        console.log(gramer);
+                        //console.log(gramer);
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
                             var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
 
@@ -40,8 +40,8 @@
                              
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;
-                                    var newPoint = val.PrePoint(gramerVal.length,
-                                        new LinePoint(token.Index, token.Col, token.Line));
+                                    var newPoint = val.PrePoint(new LinePoint(token.Index, token.Col, token.Line),
+                                        gramerVal.length);
                                     gramer.Index = newPoint.Index;
                                     gramer.Line = newPoint.Y;
                                     gramer.Col = newPoint.X;

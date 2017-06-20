@@ -1,4 +1,5 @@
-﻿interface Func<TResult> {
+﻿//有返回值的委托
+interface Func<TResult> {
     (): TResult;
 }
 

@@ -1,8 +1,11 @@
-﻿var None:any = new Object();
+﻿//定义的空值
+var None: any = new Object();
 
+//转换为指定类型
 function Cast<T>(obj: any) {
     return <T>obj;
 }
+//转换为数组
 function CastToAry<T>(t: T | T[]): T[] {
     if (t instanceof Array) {
         return t;
@@ -10,14 +13,16 @@ function CastToAry<T>(t: T | T[]): T[] {
         return [<T>t];
     }
 }
-
+//获取对象类型
 function GetType(obj: any): any {
     return obj.constructor;
 }
-
+//判断一个对象是否为空
 function IsEmpty(obj: any): boolean {
     return obj === null || obj === "" || obj === None;
 }
+
+//将对象转为字符串格式
 function ToValueStr(obj: any, quote: string = '"'): string {
     if (typeof (obj) == "number" || typeof (obj) == "boolean") {
         return obj.toString();
@@ -25,17 +30,19 @@ function ToValueStr(obj: any, quote: string = '"'): string {
         return quote + obj.toString() + quote;
     }
 }
-
+//获取GUID
 function NewGuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
+//获取固定位数GUID
 function NewGuidStr(len: number = 32) {
     return NewGuid().replace(/-/g, '').substr(0, len);
 }
 
+//浅表复制
 function LightClone<T>(t: T): T {
     if (t instanceof Array) {
         return (<any>t).concat();
@@ -43,6 +50,7 @@ function LightClone<T>(t: T): T {
         throw new Error(`未实现${t}的LightClone!`);
     }
 }
+//深表复制
 function DeepClone<T>(t: T): T {
     if (typeof (t) == "object") {
         var F = function () { };
@@ -58,7 +66,7 @@ function DeepClone<T>(t: T): T {
         return <T>JSON.parse(JSON.stringify(t));
     }
 }
-
+//将对象转换为字典
 function ToDict(obj: Object): Dictionary<string, Object> {
     var dic = new Dictionary<string, Object>();
 
@@ -69,7 +77,9 @@ function ToDict(obj: Object): Dictionary<string, Object> {
     return dic;
 }
 
+//循环
 class Loop {
+    //For循环(循环次数)
     static For(count:number):linq.Enumerable<number> {
         var group:number[] = [];
 
@@ -80,7 +90,7 @@ class Loop {
         return $.Enumerable.From(group);
     }
 }
-
+//初始化对象(对象,初始化函数)
 function InitObj<T>(obj: T, initFunc: ActionOne<T>): T {
     initFunc(obj);
     return obj;
@@ -88,7 +98,7 @@ function InitObj<T>(obj: T, initFunc: ActionOne<T>): T {
 
 
 var enumerable: any = $.Enumerable; 
-
+//将可枚举对象转换为列表
 enumerable.prototype.ToList = function () {
     var group = new List<any>();
     this.ForEach(item => group.Set(item));

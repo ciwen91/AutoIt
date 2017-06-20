@@ -23,7 +23,7 @@
             var xml = editor.getValue();
             xml = xml.replace(/^\n/mg, "");
             if (xml != val) {
-                console.clear();
+                //console.clear();
                 manger.Analy(xml);
                 val = xml;
                // console.clear();
@@ -88,7 +88,7 @@
                 style = "emstrong";
             }
 
-            console.log(style);
+            //console.log(style);
             return style;
         }   
     };

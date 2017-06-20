@@ -1,4 +1,5 @@
-﻿interface Action {
+﻿//没有返回值的委托
+interface Action {
     ():void;
 }
 

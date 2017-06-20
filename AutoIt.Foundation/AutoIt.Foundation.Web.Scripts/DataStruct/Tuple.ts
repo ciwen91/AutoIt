@@ -1,4 +1,5 @@
-﻿class  Tuple<T1,T2> {
+﻿//元组
+class Tuple<T1, T2> {
     Item1: T1;
     Item2: T2;
 

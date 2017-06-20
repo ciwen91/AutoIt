@@ -1,7 +1,10 @@
 module CodeEdit.LangAnaly.Model {
-    export  enum TokenInfoState {
+    export enum TokenInfoState {
+        //Ω” ‹
         Accept,
+        //¥ÌŒÛ
         Error,
+        //Ω· ¯
         End
     }
 }
