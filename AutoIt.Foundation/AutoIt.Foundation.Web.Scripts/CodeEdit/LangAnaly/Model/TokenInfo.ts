@@ -22,5 +22,9 @@ module CodeEdit.LangAnaly.Model {
             super(symbol, value, line, col, index);
             this.State = state;
         }
+
+        IsNoise():boolean {
+            return this.Symbol != null && this.Symbol.Type == Model.SymbolType.Noise;
+        }
     }
 }

@@ -1,43 +1,60 @@
 ﻿module CodeEdit.LangAnaly {
-    export abstract class LangManagerBase {
+    //语法分析基类
+    export abstract class LangAnalyBase {
+        //Egt存储器
         private _EgtStorer: EgtStorer;
+        //字符阅读器
         private _TokenReader: TokenReader;
+        //语法阅读器
         private _GramerReader:GramerReader;
 
+        //内容符号名称列表
         ContentNameGroup: List<string> = new List<string>();
-        
+        //错误语法列表       
         private _EroGrammerGroup:List<Model.GramerInfo>=new List<Model.GramerInfo>();
 
         constructor(egtStr: string) {
             this._EgtStorer = EgtStorer.CreateFromStr(egtStr);
         }
 
+        //获取值(文本)
         GetValue(val: string): Object {
             var acceptGramer = this.Analy(val);
             return acceptGramer ? acceptGramer.Data : None;
         }
-
+        //分析(文本):
         Analy(val: string): Model.GramerInfo {
+            //清除上次分析的结果
             this._EroGrammerGroup.Clear();
 
+            //构造Reader
             this._TokenReader = new TokenReader(this._EgtStorer, val);
             this._GramerReader = new GramerReader(this._EgtStorer);
-           
+
             while (true) {
+                //读取一个符号
                 var token = this._TokenReader.ReadToken();
                 this.TokenRead(token);
-                //console.log(token);
-                if (token.Symbol == null || token.Symbol.Type != Model.SymbolType.Noise) {
+
+                //不处理可忽略的符号
+                if (!token.IsNoise()) {
+                    //消耗符号
                     while (true) {
+                        //读取语法
                         var gramer = this._GramerReader.ReadGramer(token);
-                        //console.log(gramer);
+
+                        //如果是规约,重新计算文本
                         if (gramer.GramerState == Model.GramerInfoState.Reduce) {
+                            //文本从语法的索引开始到后面符号的索引结束(空字符)
                             var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
 
-                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {//???      
+                            //如果是内容符号,则还要包括前面的空白
+                            if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
+                                //从语法或符号的开始索引之前查找 
                                 var index = gramer.Index >= 0 ? gramer.Index : token.Index;
                                 var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
-                             
+
+                                //如果前面有空白,则重新定位
                                 if (preWhiteSpace != null) {
                                     gramerVal = preWhiteSpace + gramerVal;
                                     var newPoint = val.PrePoint(new LinePoint(token.Index, token.Col, token.Line),
@@ -51,6 +68,7 @@
                                 }
                                 gramer.Value = gramerVal;
                             }
+                            //非内容符号,去除前后空白
                             else {
                                 gramerVal = gramerVal.trim();
                                 gramer.Value = gramerVal;
@@ -58,53 +76,44 @@
 
                             this.GramerRead(gramer);
                         }
+                        //如果是接受,返回结果
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
                             this.GramerAccept(gramer);
+                            //根语法为Accept语法的第一个子语法
                             var resultGrammer = gramer.GetChildGroup().Get(0);
-                            //console.log(this._GramerReader.GetGramerGroup());
 
                             return resultGrammer;
-                        } else if (gramer.GramerState == Model.GramerInfoState.Error) {
-                            //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
-                            if (gramer.Value != null) {
-                                //var backGramer = this._GramerReader.BackGramer();
-                                //if (backGramer) {
-                                //    backGramer.GramerState = Model.GramerInfoState.Error;
-                                //    this._EroGrammerGroup.Set(backGramer);
-                                //    continue;
-                                //}
-
+                        }
+                       //如果是错误,尝试补全语法
+                        else if (gramer.GramerState == Model.GramerInfoState.Error) {
+                            //if (gramer.Value != null) {
                                 var isAutoComplete = this._GramerReader.AutoComplete();
+                                //补全了继续消耗符号
                                 if (isAutoComplete) {
                                     continue;
                                 }
-                            }
+                            //}
 
+                            //没补全则将当前语法设为错误
                             this._EroGrammerGroup.Set(gramer);
                         }
 
+                        //Reduce继续消耗符号
                         if (gramer.GramerState != Model.GramerInfoState.Reduce) {
                             break;
                         }
                     }
                 }
 
+                //遇到结束符号则停止分析
                 if (token.State == Model.TokenInfoState.End) {
-                    //console.log(this._GramerReader.GetGramerGroup());
                     break;
                 }
             }
-
-            //$.Enumerable.From(this._EroGrammerGroup.ToArray())
-            //.ForEach(item => {
-            //        console.log(item.Index + "," + item.Line + "-" + item.Col + ":" + item.Value);
-            //    });
-           
-
+            
             return null;
-        }
-
-        GetGramerAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
+        }      
+        GetAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
            var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
 
@@ -168,12 +177,15 @@
             return null;
         }
 
+        //读到符号(符号)
         TokenRead(tokenInfo: Model.TokenInfo) {
 
         }
+        //读到语法(语法)
         GramerRead(gramerInfo: Model.GramerInfo) {
 
         }
+        //语法被接受
         GramerAccept(gramerInfo: Model.GramerInfo) {
 
         }

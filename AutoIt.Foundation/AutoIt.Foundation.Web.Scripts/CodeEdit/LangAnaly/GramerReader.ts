@@ -125,8 +125,8 @@ namespace CodeEdit.LangAnaly {
         AutoComplete(): boolean {
             //当前语法
             var grammer = this._GrammerGroup.Get().Item2;
-            //非可选的语法不补全
-            if (!this.IsInOptionPro(grammer)) {
+            //完整的或必须的不补全
+            if (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)) {
                 return false;
             }
 
@@ -156,22 +156,27 @@ namespace CodeEdit.LangAnaly {
             return true;
         }
 
+        private IsComplete(grammer: Model.GramerInfo): boolean {
+            //如果语法有产生式则为已完成
+            if (grammer.Produce != null) {
+                return true;
+            }
+
+            var index = this.GetIndex(grammer);
+            var state = this._GrammerGroup.Get(index).Item1;
+
+            //如果当前状态有Reduce动作,则为已完成(说明当前状态可以Reduce,错误是由后面的字符导致的)
+            if (state.ActionGroup.ToEnumerble()
+                .Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                return true;
+            }
+
+            return false;
+        }
+
         //是否位于可选的语法
         private IsInOptionPro(grammer: Model.GramerInfo): boolean {
             var index = this.GetIndex(grammer);
-            var state = this._GrammerGroup.Get(index).Item1;
-            var gramer = this._GrammerGroup.Get(index).Item2;
-
-
-            //if (gramer.Produce != null) {
-            //    return false;
-            //}
-
-            //如果当前状态有Reduce动作,则不是必须的(说明当前状态可以Reduce,错误是由后面的字符导致的)
-            if (state.ActionGroup.ToEnumerble()
-                .Any(item => item.ActionType == Model.ActionType.Reduce)) {
-                return false;
-            }
 
             //从上一个状态开始,如果能找的Reduce动作则不是必须的(说明可以不经过当前状态而Reduce)
             while (index >= 1) {               
@@ -188,6 +193,7 @@ namespace CodeEdit.LangAnaly {
             return false;
         }
 
+        //获取语法在栈中的位置(语法)
         private GetIndex(grammer: Model.GramerInfo): number {
             var index = $.Enumerable.From(this._GrammerGroup.ToArray())
                 .Select(item => item.Item2)

@@ -174,9 +174,9 @@
     <TypeScriptCompile Include="Bind\BindInfo.ts" />
     <TypeScriptCompile Include="Bind\Binding.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\Xml.ts" />
-    <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtManager.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtStorer.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />
-    <TypeScriptCompile Include="CodeEdit\LangAnaly\LangManagerBase.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\LangAnalyBase.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Lang\PrintLangManager.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\ActionType.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\AdvanceMode.ts" />

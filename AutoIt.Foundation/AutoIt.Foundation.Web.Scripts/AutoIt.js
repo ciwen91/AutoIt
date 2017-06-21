@@ -41,6 +41,7 @@ var Binding = (function () {
 }());
 //绑定信息
 Binding.Key = "Binding";
+//xml Mode
 CodeMirror.defineMode("xml", function (editorConfig, config) {
     var editorKey = editorConfig.EditorKey;
     var val = null;
@@ -50,77 +51,95 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
         manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
         manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList(); //???
     });
+    function UpdateAnalyzer() {
+        var editor = Cast(window[editorKey]);
+        var xml = editor.getValue();
+        xml = xml.replace(/^\n/mg, "");
+        if (xml != val) {
+            manger.Analy(xml);
+            val = xml;
+        }
+    }
+    function ConsumeAnalyInfo(stream, gramerInfo, line, col) {
+        //如果语法为空,则处理下一个字符
+        if (gramerInfo == null) {
+            stream.next();
+        }
+        else {
+            var endPoint = gramerInfo.EndLinePoint();
+            var tempCol = col;
+            while (!stream.eol() && (line < endPoint.Y || tempCol <= endPoint.X)) {
+                stream.next();
+                tempCol++;
+            }
+        }
+    }
+    function GetStyle(gramerAnalyInfo) {
+        var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+        if (gramerInfo == null) {
+            return null;
+        }
+        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
+            return "error";
+        }
+        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
+            var nextPoint = gramerInfo.NextPoint(val);
+            var nextAnalyInfo = manger.GetAnalyInfo(nextPoint.Y, nextPoint.X);
+            var isNextError = nextAnalyInfo != null &&
+                nextAnalyInfo.GramerInfo != null &&
+                nextAnalyInfo.GramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error;
+            if (!isNextError) {
+                return "error";
+            }
+        }
+        var style = null;
+        var name = gramerInfo.Symbol.Name;
+        var parentMaySymbolGroup = gramerAnalyInfo.ParantMaySymbolGroup.ToEnumerble()
+            .Select(function (item) { return item.Name; });
+        //标签括号
+        if (name == "<" || name == ">" || name == "</" || name == "/>") {
+            style = "tag bracket";
+        }
+        else if (name == "Name") {
+            //标签:父节点为标签
+            if (parentMaySymbolGroup.Any(function (item) { return item.indexOf("Tag") >= 0; })) {
+                style = "tag";
+            }
+            else if (parentMaySymbolGroup.Contains("Attribute")) {
+                style = "attribute";
+            }
+        }
+        else if (name == "Val") {
+            style = "string";
+        }
+        else if (name == "Text") {
+            style = "emstrong";
+        }
+        return style;
+    }
     return {
         startState: function () {
-            return { Line: -1 };
+            //起始位-1行
+            return {
+                Line: -1
+            };
         },
-        /**
-          跨行如何处理？
-         */
         token: function (stream, state) {
-            var editor = Cast(window[editorKey]);
-            var xml = editor.getValue();
-            xml = xml.replace(/^\n/mg, "");
-            if (xml != val) {
-                //console.clear();
-                manger.Analy(xml);
-                val = xml;
-            }
+            //获取当前位置.如果是第一列,则行加1
             if (stream.pos == 0) {
                 state.Line += 1;
             }
             var line = state.Line;
             var col = stream.pos;
-            // console.log(line+","+col+":"+stream.pos+"("+stream.string+")");
-            var gramerAnalyInfo = manger.GetGramerAnalyInfo(line, col);
+            //更新分析器(文本可能有变化)
+            UpdateAnalyzer();
+            //获取当前位置的语法
+            var gramerAnalyInfo = manger.GetAnalyInfo(line, col);
             var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
-            var nextGramerInfo = null;
-            if (gramerInfo != null) {
-                var nextPoint = gramerInfo.NextPoint(xml);
-                var nextAnaylyInfo = manger.GetGramerAnalyInfo(nextPoint.Y, nextPoint.X);
-                if (nextAnaylyInfo != null) {
-                    nextGramerInfo = nextAnaylyInfo.GramerInfo;
-                }
-            }
-            if (gramerInfo == null) {
-                stream.next();
-                return null;
-            }
-            else {
-                var endPoint = gramerInfo.EndLinePoint();
-                var tempCol = col;
-                while (!stream.eol() && (line < endPoint.Y || tempCol <= endPoint.X)) {
-                    stream.next();
-                    tempCol++;
-                }
-            }
-            if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error ||
-                (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete && (nextGramerInfo == null || nextGramerInfo.GramerState != CodeEdit.LangAnaly.Model.GramerInfoState.Error))) {
-                return "error";
-            }
-            var name = gramerInfo.Symbol.Name;
-            var parentMaySymbolGroup = $.Enumerable.From(gramerAnalyInfo.ParantMaySymbolGroup.ToArray())
-                .Select(function (item) { return item.Name; })
-                .ToList();
-            var style = null;
-            if (name == "<" || name == ">" || name == "</" || name == "/>") {
-                style = "tag bracket";
-            }
-            else if (name == "Val") {
-                style = "string";
-            }
-            else if (name == "Name") {
-                if ($.Enumerable.From(parentMaySymbolGroup.ToArray()).Any(function (item) { return item.indexOf("Tag") >= 0; })) {
-                    style = "tag";
-                }
-                else if (parentMaySymbolGroup.Contains("Attribute")) {
-                    style = "attribute";
-                }
-            }
-            else if (name == "Text") {
-                style = "emstrong";
-            }
-            //console.log(style);
+            //消耗语法
+            ConsumeAnalyInfo(stream, gramerInfo, line, col);
+            //获取Style
+            var style = GetStyle(gramerAnalyInfo);
             return style;
         }
     };
@@ -551,8 +570,8 @@ var CodeEdit;
             GramerReader.prototype.AutoComplete = function () {
                 //当前语法
                 var grammer = this._GrammerGroup.Get().Item2;
-                //非可选的语法不补全
-                if (!this.IsInOptionPro(grammer)) {
+                //完整的或必须的不补全
+                if (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)) {
                     return false;
                 }
                 var index = this.GetIndex(grammer);
@@ -574,19 +593,23 @@ var CodeEdit;
                 grammer.GramerState = LangAnaly.Model.GramerInfoState.AutoComplete;
                 return true;
             };
+            GramerReader.prototype.IsComplete = function (grammer) {
+                //如果语法有产生式则为已完成
+                if (grammer.Produce != null) {
+                    return true;
+                }
+                var index = this.GetIndex(grammer);
+                var state = this._GrammerGroup.Get(index).Item1;
+                //如果当前状态有Reduce动作,则为已完成(说明当前状态可以Reduce,错误是由后面的字符导致的)
+                if (state.ActionGroup.ToEnumerble()
+                    .Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                    return true;
+                }
+                return false;
+            };
             //是否位于可选的语法
             GramerReader.prototype.IsInOptionPro = function (grammer) {
                 var index = this.GetIndex(grammer);
-                var state = this._GrammerGroup.Get(index).Item1;
-                var gramer = this._GrammerGroup.Get(index).Item2;
-                //if (gramer.Produce != null) {
-                //    return false;
-                //}
-                //如果当前状态有Reduce动作,则不是必须的(说明当前状态可以Reduce,错误是由后面的字符导致的)
-                if (state.ActionGroup.ToEnumerble()
-                    .Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
-                    return false;
-                }
                 //从上一个状态开始,如果能找的Reduce动作则不是必须的(说明可以不经过当前状态而Reduce)
                 while (index >= 1) {
                     var preState = this._GrammerGroup.Get(index - 1).Item1;
@@ -598,6 +621,7 @@ var CodeEdit;
                 }
                 return false;
             };
+            //获取语法在栈中的位置(语法)
             GramerReader.prototype.GetIndex = function (grammer) {
                 var index = $.Enumerable.From(this._GrammerGroup.ToArray())
                     .Select(function (item) { return item.Item2; })
@@ -613,33 +637,47 @@ var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
-        var LangManagerBase = (function () {
-            function LangManagerBase(egtStr) {
+        //语法分析基类
+        var LangAnalyBase = (function () {
+            function LangAnalyBase(egtStr) {
+                //内容符号名称列表
                 this.ContentNameGroup = new List();
+                //错误语法列表       
                 this._EroGrammerGroup = new List();
                 this._EgtStorer = LangAnaly.EgtStorer.CreateFromStr(egtStr);
             }
-            LangManagerBase.prototype.GetValue = function (val) {
+            //获取值(文本)
+            LangAnalyBase.prototype.GetValue = function (val) {
                 var acceptGramer = this.Analy(val);
                 return acceptGramer ? acceptGramer.Data : None;
             };
-            LangManagerBase.prototype.Analy = function (val) {
+            //分析(文本):
+            LangAnalyBase.prototype.Analy = function (val) {
+                //清除上次分析的结果
                 this._EroGrammerGroup.Clear();
+                //构造Reader
                 this._TokenReader = new LangAnaly.TokenReader(this._EgtStorer, val);
                 this._GramerReader = new LangAnaly.GramerReader(this._EgtStorer);
                 while (true) {
+                    //读取一个符号
                     var token = this._TokenReader.ReadToken();
                     this.TokenRead(token);
-                    //console.log(token);
-                    if (token.Symbol == null || token.Symbol.Type != LangAnaly.Model.SymbolType.Noise) {
+                    //不处理可忽略的符号
+                    if (!token.IsNoise()) {
+                        //消耗符号
                         while (true) {
+                            //读取语法
                             var gramer = this._GramerReader.ReadGramer(token);
-                            //console.log(gramer);
+                            //如果是规约,重新计算文本
                             if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Reduce) {
+                                //文本从语法的索引开始到后面符号的索引结束(空字符)
                                 var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
+                                //如果是内容符号,则还要包括前面的空白
                                 if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
+                                    //从语法或符号的开始索引之前查找 
                                     var index = gramer.Index >= 0 ? gramer.Index : token.Index;
                                     var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
+                                    //如果前面有空白,则重新定位
                                     if (preWhiteSpace != null) {
                                         gramerVal = preWhiteSpace + gramerVal;
                                         var newPoint = val.PrePoint(new LinePoint(token.Index, token.Col, token.Line), gramerVal.length);
@@ -660,43 +698,35 @@ var CodeEdit;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Accept) {
                                 this.GramerAccept(gramer);
+                                //根语法为Accept语法的第一个子语法
                                 var resultGrammer = gramer.GetChildGroup().Get(0);
-                                //console.log(this._GramerReader.GetGramerGroup());
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
-                                //如果可以回撤(前一个为非Produce),则将之前的一个语法设为错误并继续分析
-                                if (gramer.Value != null) {
-                                    //var backGramer = this._GramerReader.BackGramer();
-                                    //if (backGramer) {
-                                    //    backGramer.GramerState = Model.GramerInfoState.Error;
-                                    //    this._EroGrammerGroup.Set(backGramer);
-                                    //    continue;
-                                    //}
-                                    var isAutoComplete = this._GramerReader.AutoComplete();
-                                    if (isAutoComplete) {
-                                        continue;
-                                    }
+                                //if (gramer.Value != null) {
+                                var isAutoComplete = this._GramerReader.AutoComplete();
+                                //补全了继续消耗符号
+                                if (isAutoComplete) {
+                                    continue;
                                 }
+                                //}
+                                //没补全则将当前语法设为错误
                                 this._EroGrammerGroup.Set(gramer);
                             }
+                            //Reduce继续消耗符号
                             if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                                 break;
                             }
                         }
                     }
+                    //遇到结束符号则停止分析
                     if (token.State == LangAnaly.Model.TokenInfoState.End) {
-                        //console.log(this._GramerReader.GetGramerGroup());
                         break;
                     }
                 }
-                //$.Enumerable.From(this._EroGrammerGroup.ToArray())
-                //.ForEach(item => {
-                //        console.log(item.Index + "," + item.Line + "-" + item.Col + ":" + item.Value);
-                //    });
                 return null;
             };
-            LangManagerBase.prototype.GetGramerAnalyInfo = function (line, col) {
+            LangAnalyBase.prototype.GetAnalyInfo = function (line, col) {
                 var grammer = $.Enumerable.From(this._EroGrammerGroup.ToArray())
                     .FirstOrDefault(null, function (item) { return item.Line == line && item.Col == col; });
                 //if (grammer != null) {
@@ -749,15 +779,18 @@ var CodeEdit;
                 }
                 return null;
             };
-            LangManagerBase.prototype.TokenRead = function (tokenInfo) {
+            //读到符号(符号)
+            LangAnalyBase.prototype.TokenRead = function (tokenInfo) {
             };
-            LangManagerBase.prototype.GramerRead = function (gramerInfo) {
+            //读到语法(语法)
+            LangAnalyBase.prototype.GramerRead = function (gramerInfo) {
             };
-            LangManagerBase.prototype.GramerAccept = function (gramerInfo) {
+            //语法被接受
+            LangAnalyBase.prototype.GramerAccept = function (gramerInfo) {
             };
-            return LangManagerBase;
+            return LangAnalyBase;
         }());
-        LangAnaly.LangManagerBase = LangManagerBase;
+        LangAnaly.LangAnalyBase = LangAnalyBase;
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
 var CodeEdit;
@@ -766,7 +799,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Lang;
         (function (Lang) {
-            ///<reference path="../LangManagerBase.ts"/>
+            ///<reference path="../LangAnalyBase.ts"/>
             var PrintLangManager = (function (_super) {
                 __extends(PrintLangManager, _super);
                 function PrintLangManager(egtStr) {
@@ -785,7 +818,7 @@ var CodeEdit;
                     //console.log("%c" + gramerInfo.Symbol.Name + "," + gramerInfo.Value, "color:red;");
                 };
                 return PrintLangManager;
-            }(LangAnaly.LangManagerBase));
+            }(CodeEdit.LangAnaly.LangAnalyBase));
             Lang.PrintLangManager = PrintLangManager;
         })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
@@ -1213,6 +1246,9 @@ var CodeEdit;
                 }
                 TokenInfo.NullToken = function () {
                     return new Model.TokenInfo(Model.TokenInfoState.Accept, null, null, -1, -1, -1);
+                };
+                TokenInfo.prototype.IsNoise = function () {
+                    return this.Symbol != null && this.Symbol.Type == Model.SymbolType.Noise;
                 };
                 return TokenInfo;
             }(CodeEdit.LangAnaly.Model.SymbolInfoBase));

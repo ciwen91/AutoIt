@@ -1,6 +1,6 @@
 ﻿namespace CodeEdit.LangAnaly.Lang {
-   ///<reference path="../LangManagerBase.ts"/>
-    export class PrintLangManager extends LangManagerBase{
+   ///<reference path="../LangAnalyBase.ts"/>
+    export class PrintLangManager extends CodeEdit.LangAnaly.LangAnalyBase{
         PrintToken: boolean;
 
         constructor(egtStr: string) {
