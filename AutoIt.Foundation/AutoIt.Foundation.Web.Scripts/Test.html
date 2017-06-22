@@ -13,12 +13,9 @@
 <script type="text/javascript">
     var option = {
         mode: 'text/xml',
-        lineNumbers: true,
-        EditorKey: Math.random()
+        lineNumbers: true 
     };
-    var editor = CodeMirror.fromTextArea($("#code")[0], option);
-    //方法中可以获取Editor
-    window[option.EditorKey] = editor;
+    var editor = CodeMirrorExtend.CreateEditor($("#code")[0], option);
 </script>
 </body>
 </html>

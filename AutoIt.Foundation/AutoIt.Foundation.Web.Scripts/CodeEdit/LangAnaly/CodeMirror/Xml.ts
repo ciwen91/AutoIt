@@ -2,29 +2,33 @@
 
 //xml Mode
 CodeMirror.defineMode("xml", (editorConfig, config) => {
-    var editorKey = (<any>editorConfig).EditorKey;
+    var editorID = (<any>editorConfig).EditorID;
+
     //创建扩展类型
-    var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
+    var extend = new CodeMirrorExtend(editorID, "data/xml.egt.base64", new List<string>(["Text"]));
+
+    //样式函数
     extend.StyleFunc= (analyInfo) => {
         var style = null;
-        var gramerInfo = analyInfo.GramerInfo;
 
+        //获取语法和可能的父符号名称
+        var gramerInfo = analyInfo.GramerInfo;
         var name = gramerInfo.Symbol.Name;
-        var parentMaySymbolGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
+        var parentMayNameGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
             .Select(item => item.Name);
 
-        //标签括号
+        //尖括号
         if (name == "<" || name == ">" || name == "</" || name == "/>") {
             style = "tag bracket";
         }
-        //标签名或属性名
+        //名称
         else if (name == "Name") {
-            //标签:父节点为标签
-            if (parentMaySymbolGroup.Any(item => item.indexOf("Tag") >= 0)) {
+            //标签名(父节点为标签)
+            if (parentMayNameGroup.Any(item => item.indexOf("Tag") >= 0)) {
                 style = "tag";
             }
-            //属性:父节点为属性
-            else if (parentMaySymbolGroup.Contains("Attribute")) {
+            //属性名(父节点为属性)
+            else if (parentMayNameGroup.Contains("Attribute")) {
                 style = "attribute";
             }
         }

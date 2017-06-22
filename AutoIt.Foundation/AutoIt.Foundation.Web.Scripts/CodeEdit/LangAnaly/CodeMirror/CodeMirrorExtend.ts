@@ -1,20 +1,45 @@
-﻿(<any>CodeMirror).defaults.EditorKey = null;
+﻿(<any>CodeMirror).defaults.EditorID = null;
 
+//CodeMirror扩展类
 class CodeMirrorExtend {
-    private _EditorKey: string;
+    //编辑器ID
+    private _EditorID: string;
+    //分析过的文本
     private _AnalyedText: string = null;
+    //分析器
     private _LangAnaly: CodeEdit.LangAnaly.LangAnalyBase;
+    //样式函数
     StyleFunc:FuncOne<CodeEdit.LangAnaly.Model.GramerAnalyInfo,string>=null;
 
-    constructor(editorKey: string,egtUrl:string) {
-        this._EditorKey = editorKey;
+    //编辑器的全局键,语法元数据地址,内容元素名称列表
+    constructor(editorID: string,
+        egtUrl: string,
+        contentNameGroup: List<string> = new List<string>()) {
+        //记录编辑器ID
+        this._EditorID = editorID;
 
+        //创建分析器
         var egt = getAjaxData(egtUrl);
-        var manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
-        this._LangAnaly = manger;
+        var analy = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
+        analy.ContentNameGroup = contentNameGroup;
+
+        this._LangAnaly = analy;
     }
 
+    //创建编辑器(Html元素,配置)
+    static CreateEditor(elm: HTMLTextAreaElement, option: CodeMirror.EditorConfiguration): CodeMirror.EditorConfiguration {
+        //设置编辑器ID
+        var editorID = Math.random();
+        (<any>option).EditorID = editorID;
+
+        //创建编辑器
+        var editor = CodeMirror.fromTextArea(elm, option);
+        window[editorID] = <any>editor;
+
+        return editor;
+    }
+
+    //高亮文本
     HighLight(stream: CodeMirror.StringStream, state: any):string {
         //获取当前位置.如果是第一列,则行加1
         if (stream.pos == 0) {
@@ -41,7 +66,7 @@ class CodeMirrorExtend {
 
     //更新分析器(如果文本变化重新分析)
     UpdateAnalyzer() {
-        var editor = Cast<CodeMirror.EditorFromTextArea>(window[this._EditorKey]);
+        var editor = Cast<CodeMirror.EditorFromTextArea>(window[this._EditorID]);
 
         var text = editor.getValue();
         //CodeMirror从首个非空白行开始处理

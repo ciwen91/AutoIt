@@ -112,65 +112,63 @@
             }
             
             return null;
-        }      
+        } 
+        //获取指定位置的分析信息(行,列)     
         GetAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
-           var grammer= $.Enumerable.From(this._EroGrammerGroup.ToArray())
+            var grammer = this._EroGrammerGroup.ToEnumerble()
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
 
-            //if (grammer != null) {
-            //    return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
-            //} else
-            {
-               // debugger;
-                var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
-                var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                    .Where(item => item.Item2 != null)
-                    .Select(item => item.Item2)
-                    .ToList();
+            var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
+            var grammerGroup = grammerWithStateGroup.ToEnumerble()
+                .Where(item => item.Item2 != null)
+                .Select(item => item.Item2)
+                .ToList();
 
-                while (grammerGroup.Count() > 0) {
-                    var item = grammerGroup.Remove(0);
+            while (grammerGroup.Count() > 0) {
+                var item = grammerGroup.Remove(0);
+                var itemChildGroup = item.GetChildGroup();
 
-                    var itemChildGroup = item.GetChildGroup();
-                 
-                    if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
-                        grammerGroup.SetRange(itemChildGroup);
-                    }
-                    else if (item.Value&&item.Contains(line, col)) {//item.Line == line && item.Col == col 
-                        grammer = item;
+                //寻找匹配的叶子节点(没有子节点或内容节点)
+                if ((itemChildGroup.Count() == 0 || this.ContentNameGroup.Index(item.Symbol.Name) > 0) &&
+                    item.Value &&
+                    item.Contains(line, col)) {
+                    grammer = item;
 
-                        var parentMaySymbolGroup = new List<Model.Symbol>();
+                    //找到所有可能的父符号
+                    var parentMaySymbolGroup = new List<Model.Symbol>();
 
-                        if (grammer.Parent != null) {
-                            parentMaySymbolGroup.Set(grammer.Parent.Symbol);
-                        } else {
-                            var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                                .Select(item => item.Item2)
-                                .IndexOf(grammer);
+                    if (grammer.Parent != null) {
+                        parentMaySymbolGroup.Set(grammer.Parent.Symbol);
+                    } else {
+                        var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                            .Select(item => item.Item2)
+                            .IndexOf(grammer);
 
-                            while (index>0) {
-                                var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
+                        while (index > 0) {
+                            var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
 
-                                parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
-                                    .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
-                                    .Select(sItem => sItem.Symbol)
-                                    .ToList();
+                            parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
+                                .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
+                                .Select(sItem => sItem.Symbol)
+                                .ToList();
 
-                                if (parentMaySymbolGroup.Count() > 0) {
-                                    break;
-                                } else {
-                                    index--;
-                                };
-                            }
-                          
+                            if (parentMaySymbolGroup.Count() > 0) {
+                                break;
+                            } else {
+                                index--;
+                            };
                         }
 
-                        return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                     }
-                }
-           }
 
-              if (grammer != null) {
+                    return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
+                } else if (itemChildGroup.Count() > 0) {
+                    grammerGroup.SetRange(itemChildGroup);
+                }
+            }
+
+
+            if (grammer != null) {
                 return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
             }
 

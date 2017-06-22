@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -46,17 +41,35 @@ var Binding = (function () {
 }());
 //绑定信息
 Binding.Key = "Binding";
-CodeMirror.defaults.EditorKey = null;
+CodeMirror.defaults.EditorID = null;
+//CodeMirror扩展类
 var CodeMirrorExtend = (function () {
-    function CodeMirrorExtend(editorKey, egtUrl) {
+    //编辑器的全局键,语法元数据地址,内容元素名称列表
+    function CodeMirrorExtend(editorID, egtUrl, contentNameGroup) {
+        if (contentNameGroup === void 0) { contentNameGroup = new List(); }
+        //分析过的文本
         this._AnalyedText = null;
+        //样式函数
         this.StyleFunc = null;
-        this._EditorKey = editorKey;
+        //记录编辑器ID
+        this._EditorID = editorID;
+        //创建分析器
         var egt = getAjaxData(egtUrl);
-        var manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
-        this._LangAnaly = manger;
+        var analy = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
+        analy.ContentNameGroup = contentNameGroup;
+        this._LangAnaly = analy;
     }
+    //创建编辑器(Html元素,配置)
+    CodeMirrorExtend.CreateEditor = function (elm, option) {
+        //设置编辑器ID
+        var editorID = Math.random();
+        option.EditorID = editorID;
+        //创建编辑器
+        var editor = CodeMirror.fromTextArea(elm, option);
+        window[editorID] = editor;
+        return editor;
+    };
+    //高亮文本
     CodeMirrorExtend.prototype.HighLight = function (stream, state) {
         //获取当前位置.如果是第一列,则行加1
         if (stream.pos == 0) {
@@ -77,7 +90,7 @@ var CodeMirrorExtend = (function () {
     };
     //更新分析器(如果文本变化重新分析)
     CodeMirrorExtend.prototype.UpdateAnalyzer = function () {
-        var editor = Cast(window[this._EditorKey]);
+        var editor = Cast(window[this._EditorID]);
         var text = editor.getValue();
         //CodeMirror从首个非空白行开始处理
         text = text.replace(/^\n/mg, "");
@@ -137,25 +150,27 @@ var CodeMirrorExtend = (function () {
 CodeMirror.defineMIME("text/xml", "xml");
 //xml Mode
 CodeMirror.defineMode("xml", function (editorConfig, config) {
-    var editorKey = editorConfig.EditorKey;
+    var editorID = editorConfig.EditorID;
     //创建扩展类型
-    var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
+    var extend = new CodeMirrorExtend(editorID, "data/xml.egt.base64", new List(["Text"]));
+    //样式函数
     extend.StyleFunc = function (analyInfo) {
         var style = null;
+        //获取语法和可能的父符号名称
         var gramerInfo = analyInfo.GramerInfo;
         var name = gramerInfo.Symbol.Name;
-        var parentMaySymbolGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
+        var parentMayNameGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
             .Select(function (item) { return item.Name; });
-        //标签括号
+        //尖括号
         if (name == "<" || name == ">" || name == "</" || name == "/>") {
             style = "tag bracket";
         }
         else if (name == "Name") {
-            //标签:父节点为标签
-            if (parentMaySymbolGroup.Any(function (item) { return item.indexOf("Tag") >= 0; })) {
+            //标签名(父节点为标签)
+            if (parentMayNameGroup.Any(function (item) { return item.indexOf("Tag") >= 0; })) {
                 style = "tag";
             }
-            else if (parentMaySymbolGroup.Contains("Attribute")) {
+            else if (parentMayNameGroup.Contains("Attribute")) {
                 style = "attribute";
             }
         }
@@ -747,52 +762,51 @@ var CodeEdit;
                 }
                 return null;
             };
+            //获取指定位置的分析信息(行,列)     
             LangAnalyBase.prototype.GetAnalyInfo = function (line, col) {
-                var grammer = $.Enumerable.From(this._EroGrammerGroup.ToArray())
+                var grammer = this._EroGrammerGroup.ToEnumerble()
                     .FirstOrDefault(null, function (item) { return item.Line == line && item.Col == col; });
-                //if (grammer != null) {
-                //    return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
-                //} else
-                {
-                    // debugger;
-                    var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
-                    var grammerGroup = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                        .Where(function (item) { return item.Item2 != null; })
-                        .Select(function (item) { return item.Item2; })
-                        .ToList();
-                    while (grammerGroup.Count() > 0) {
-                        var item = grammerGroup.Remove(0);
-                        var itemChildGroup = item.GetChildGroup();
-                        if (itemChildGroup.Count() > 0 && this.ContentNameGroup.Index(item.Symbol.Name) < 0) {
-                            grammerGroup.SetRange(itemChildGroup);
+                var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
+                var grammerGroup = grammerWithStateGroup.ToEnumerble()
+                    .Where(function (item) { return item.Item2 != null; })
+                    .Select(function (item) { return item.Item2; })
+                    .ToList();
+                while (grammerGroup.Count() > 0) {
+                    var item = grammerGroup.Remove(0);
+                    var itemChildGroup = item.GetChildGroup();
+                    //寻找匹配的叶子节点(没有子节点或内容节点)
+                    if ((itemChildGroup.Count() == 0 || this.ContentNameGroup.Index(item.Symbol.Name) > 0) &&
+                        item.Value &&
+                        item.Contains(line, col)) {
+                        grammer = item;
+                        //找到所有可能的父符号
+                        var parentMaySymbolGroup = new List();
+                        if (grammer.Parent != null) {
+                            parentMaySymbolGroup.Set(grammer.Parent.Symbol);
                         }
-                        else if (item.Value && item.Contains(line, col)) {
-                            grammer = item;
-                            var parentMaySymbolGroup = new List();
-                            if (grammer.Parent != null) {
-                                parentMaySymbolGroup.Set(grammer.Parent.Symbol);
-                            }
-                            else {
-                                var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                                    .Select(function (item) { return item.Item2; })
-                                    .IndexOf(grammer);
-                                while (index > 0) {
-                                    var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
-                                    parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
-                                        .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
-                                        .Select(function (sItem) { return sItem.Symbol; })
-                                        .ToList();
-                                    if (parentMaySymbolGroup.Count() > 0) {
-                                        break;
-                                    }
-                                    else {
-                                        index--;
-                                    }
-                                    ;
+                        else {
+                            var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
+                                .Select(function (item) { return item.Item2; })
+                                .IndexOf(grammer);
+                            while (index > 0) {
+                                var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
+                                parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
+                                    .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
+                                    .Select(function (sItem) { return sItem.Symbol; })
+                                    .ToList();
+                                if (parentMaySymbolGroup.Count() > 0) {
+                                    break;
                                 }
+                                else {
+                                    index--;
+                                }
+                                ;
                             }
-                            return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                         }
+                        return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
+                    }
+                    else if (itemChildGroup.Count() > 0) {
+                        grammerGroup.SetRange(itemChildGroup);
                     }
                 }
                 if (grammer != null) {
