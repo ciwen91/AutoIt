@@ -1,4 +1,6 @@
-﻿class CodeMirrorExtend {
+﻿(<any>CodeMirror).defaults.EditorKey = null;
+
+class CodeMirrorExtend {
     private _EditorKey: string;
     private _AnalyedText: string = null;
     private _LangAnaly:CodeEdit.LangAnaly.LangAnalyBase;

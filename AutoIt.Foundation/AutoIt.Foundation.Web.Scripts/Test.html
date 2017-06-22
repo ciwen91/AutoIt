@@ -11,19 +11,12 @@
 <textarea id="code"></textarea>
 
 <script type="text/javascript">
-  
-
-    CodeMirror.defineMIME("text/xml", "xml");
-    CodeMirror.defaults.EditorKey = null;
-
     var option = {
         mode: 'text/xml',
         lineNumbers: true,
         EditorKey: Math.random()
-        //theme: 'seti'
     };
-    var editor =CodeMirror.fromTextArea(document.getElementById("code"),option
-   );
+    var editor =CodeMirror.fromTextArea($("#code")[0],option);
     window[option.EditorKey] = editor;
 </script>
 </body>

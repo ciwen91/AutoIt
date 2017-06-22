@@ -41,6 +41,7 @@ var Binding = (function () {
 }());
 //绑定信息
 Binding.Key = "Binding";
+CodeMirror.defaults.EditorKey = null;
 var CodeMirrorExtend = (function () {
     function CodeMirrorExtend(editorKey, egtUrl) {
         this._AnalyedText = null;
@@ -136,6 +137,7 @@ var CodeMirrorExtend = (function () {
     };
     return CodeMirrorExtend;
 }());
+CodeMirror.defineMIME("text/xml", "xml");
 //xml Mode
 CodeMirror.defineMode("xml", function (editorConfig, config) {
     var editorKey = editorConfig.EditorKey;

@@ -1,4 +1,6 @@
-﻿//xml Mode
+﻿(<any>CodeMirror).defineMIME("text/xml", "xml");
+
+//xml Mode
 CodeMirror.defineMode("xml", (editorConfig, config) => {
     var editorKey = (<any>editorConfig).EditorKey;
     var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
