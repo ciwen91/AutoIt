@@ -147,8 +147,8 @@ namespace CodeEdit.LangAnaly {
         AutoComplete(): boolean {
             //当前语法
             var grammer = this._GrammerGroup.Get().Item2;
-            //完整的或必须的不补全
-            if (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)) {
+            //空的(最开始)、完整的、必须的不补全
+            if (grammer != null && this.IsComplete(grammer) || !this.IsInOptionPro(grammer)) {
                 return false;
             }
 
