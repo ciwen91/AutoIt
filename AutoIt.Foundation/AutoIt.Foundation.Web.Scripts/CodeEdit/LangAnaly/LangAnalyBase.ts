@@ -115,61 +115,18 @@
         } 
         //获取指定位置的分析信息(行,列)     
         GetAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
-            var grammer = this._EroGrammerGroup.ToEnumerble()
+            //如果位于错误列表,则返回错误信息
+            var  grammer = this._EroGrammerGroup.ToEnumerble()
                 .FirstOrDefault(null, item => item.Line == line && item.Col == col);
-
-            var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
-            var grammerGroup = grammerWithStateGroup.ToEnumerble()
-                .Where(item => item.Item2 != null)
-                .Select(item => item.Item2)
-                .ToList();
-
-            while (grammerGroup.Count() > 0) {
-                var item = grammerGroup.Remove(0);
-                var itemChildGroup = item.GetChildGroup();
-
-                //寻找匹配的叶子节点(没有子节点或内容节点)
-                if ((itemChildGroup.Count() == 0 || this.ContentNameGroup.Index(item.Symbol.Name) > 0) &&
-                    item.Value &&
-                    item.Contains(line, col)) {
-                    grammer = item;
-
-                    //找到所有可能的父符号
-                    var parentMaySymbolGroup = new List<Model.Symbol>();
-
-                    if (grammer.Parent != null) {
-                        parentMaySymbolGroup.Set(grammer.Parent.Symbol);
-                    } else {
-                        var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                            .Select(item => item.Item2)
-                            .IndexOf(grammer);
-
-                        while (index > 0) {
-                            var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
-
-                            parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
-                                .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
-                                .Select(sItem => sItem.Symbol)
-                                .ToList();
-
-                            if (parentMaySymbolGroup.Count() > 0) {
-                                break;
-                            } else {
-                                index--;
-                            };
-                        }
-
-                    }
-
-                    return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
-                } else if (itemChildGroup.Count() > 0) {
-                    grammerGroup.SetRange(itemChildGroup);
-                }
-            }
-
-
             if (grammer != null) {
                 return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
+            }
+
+            //如果位于语法树中,则返回语法信息和可能的父符号
+            grammer = this._GramerReader.GetGrammerInfo(line, col, this.ContentNameGroup);
+            if (grammer != null) {
+                var parentMaySymbolGroup = this._GramerReader.GetParentMaySymbolGroup(grammer);
+                return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
             }
 
             return null;

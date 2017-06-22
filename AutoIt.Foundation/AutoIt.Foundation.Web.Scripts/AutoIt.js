@@ -510,10 +510,6 @@ var CodeEdit;
                 var topInfo = new Tuple(egtStorer.LALRStateGroup.Get(0), null);
                 this._GrammerGroup.Set(topInfo);
             }
-            //获取语法列表
-            GramerReader.prototype.GetGramerGroup = function () {
-                return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
-            };
             //读取语法(符号)
             GramerReader.prototype.ReadGramer = function (tokenInfo) {
                 var _this = this;
@@ -575,6 +571,28 @@ var CodeEdit;
                     }
                 }
             };
+            //获取指定位置的语法信息(行,列,内容符号名称列表)
+            GramerReader.prototype.GetGrammerInfo = function (line, col, contentNameGroup) {
+                //初始列表为顶级语法列表
+                var group = this._GrammerGroup.ToEnumerble()
+                    .Where(function (item) { return item.Item2 != null; })
+                    .Select(function (item) { return item.Item2; })
+                    .ToList();
+                while (group.Count() > 0) {
+                    var item = group.Remove(0);
+                    var itemChildGroup = item.GetChildGroup();
+                    //寻找匹配的叶子节点(没有子节点或内容节点)
+                    if ((itemChildGroup.Count() == 0 || contentNameGroup.Index(item.Symbol.Name) >= 0) &&
+                        item.Value &&
+                        item.Contains(line, col)) {
+                        return item;
+                    }
+                    else if (itemChildGroup.Count() > 0) {
+                        group.SetRange(itemChildGroup);
+                    }
+                }
+                return null;
+            };
             //获取所有可能的父符号(当前语法)
             GramerReader.prototype.GetParentMaySymbolGroup = function (gramer) {
                 var parentMaySymbolGroup = new List();
@@ -629,6 +647,7 @@ var CodeEdit;
                 grammer.GramerState = LangAnaly.Model.GramerInfoState.AutoComplete;
                 return true;
             };
+            //语法是否完成
             GramerReader.prototype.IsComplete = function (grammer) {
                 //如果语法有产生式则为已完成
                 if (grammer.Produce != null) {
@@ -643,7 +662,7 @@ var CodeEdit;
                 }
                 return false;
             };
-            //是否位于可选的语法
+            //是否式可选的语法
             GramerReader.prototype.IsInOptionPro = function (grammer) {
                 var index = this.GetIndex(grammer);
                 //从上一个状态开始,如果能找的Reduce动作则不是必须的(说明可以不经过当前状态而Reduce)
@@ -764,53 +783,17 @@ var CodeEdit;
             };
             //获取指定位置的分析信息(行,列)     
             LangAnalyBase.prototype.GetAnalyInfo = function (line, col) {
+                //如果位于错误列表,则返回错误信息
                 var grammer = this._EroGrammerGroup.ToEnumerble()
                     .FirstOrDefault(null, function (item) { return item.Line == line && item.Col == col; });
-                var grammerWithStateGroup = this._GramerReader.GetGramerGroup();
-                var grammerGroup = grammerWithStateGroup.ToEnumerble()
-                    .Where(function (item) { return item.Item2 != null; })
-                    .Select(function (item) { return item.Item2; })
-                    .ToList();
-                while (grammerGroup.Count() > 0) {
-                    var item = grammerGroup.Remove(0);
-                    var itemChildGroup = item.GetChildGroup();
-                    //寻找匹配的叶子节点(没有子节点或内容节点)
-                    if ((itemChildGroup.Count() == 0 || this.ContentNameGroup.Index(item.Symbol.Name) > 0) &&
-                        item.Value &&
-                        item.Contains(line, col)) {
-                        grammer = item;
-                        //找到所有可能的父符号
-                        var parentMaySymbolGroup = new List();
-                        if (grammer.Parent != null) {
-                            parentMaySymbolGroup.Set(grammer.Parent.Symbol);
-                        }
-                        else {
-                            var index = $.Enumerable.From(grammerWithStateGroup.ToArray())
-                                .Select(function (item) { return item.Item2; })
-                                .IndexOf(grammer);
-                            while (index > 0) {
-                                var lalrState = grammerWithStateGroup.Get(index - 1).Item1;
-                                parentMaySymbolGroup = $.Enumerable.From(lalrState.ActionGroup.ToArray())
-                                    .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
-                                    .Select(function (sItem) { return sItem.Symbol; })
-                                    .ToList();
-                                if (parentMaySymbolGroup.Count() > 0) {
-                                    break;
-                                }
-                                else {
-                                    index--;
-                                }
-                                ;
-                            }
-                        }
-                        return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
-                    }
-                    else if (itemChildGroup.Count() > 0) {
-                        grammerGroup.SetRange(itemChildGroup);
-                    }
-                }
                 if (grammer != null) {
                     return new LangAnaly.Model.GramerAnalyInfo(grammer, new List());
+                }
+                //如果位于语法树中,则返回语法信息和可能的父符号
+                grammer = this._GramerReader.GetGrammerInfo(line, col, this.ContentNameGroup);
+                if (grammer != null) {
+                    var parentMaySymbolGroup = this._GramerReader.GetParentMaySymbolGroup(grammer);
+                    return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                 }
                 return null;
             };

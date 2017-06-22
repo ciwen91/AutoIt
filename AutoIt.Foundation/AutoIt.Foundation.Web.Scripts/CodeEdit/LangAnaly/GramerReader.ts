@@ -15,11 +15,6 @@ namespace CodeEdit.LangAnaly {
             this._GrammerGroup.Set(topInfo);
         }
 
-        //获取语法列表
-        GetGramerGroup(): List<Tuple<Model.LALRState, Model.GramerInfo>> {
-            return $.Enumerable.From(this._GrammerGroup.ToArray()).ToList();
-        }
-
         //读取语法(符号)
         ReadGramer(tokenInfo: Model.TokenInfo): Model.GramerInfo {
             //当前状态
@@ -91,6 +86,33 @@ namespace CodeEdit.LangAnaly {
             }
         }
 
+        //获取指定位置的语法信息(行,列,内容符号名称列表)
+        GetGrammerInfo(line: number, col: number, contentNameGroup: List<string>): Model.GramerInfo {
+            //初始列表为顶级语法列表
+            var group = this._GrammerGroup.ToEnumerble()
+                .Where(item => item.Item2 != null)
+                .Select(item => item.Item2)
+                .ToList();
+
+            while (group.Count() > 0) {
+                var item = group.Remove(0);
+                var itemChildGroup = item.GetChildGroup();
+
+                //寻找匹配的叶子节点(没有子节点或内容节点)
+                if ((itemChildGroup.Count() == 0 || contentNameGroup.Index(item.Symbol.Name) >= 0) &&
+                    item.Value &&
+                    item.Contains(line, col)) {
+                    return item;
+                }
+                //非叶子节点则将子节点加入队列
+                else if (itemChildGroup.Count() > 0) {
+                    group.SetRange(itemChildGroup);
+                }
+            }
+
+            return null;
+        }
+
         //获取所有可能的父符号(当前语法)
         GetParentMaySymbolGroup(gramer: Model.GramerInfo): List<Model.Symbol> {
             var parentMaySymbolGroup = new List<Model.Symbol>();
@@ -156,6 +178,7 @@ namespace CodeEdit.LangAnaly {
             return true;
         }
 
+        //语法是否完成
         private IsComplete(grammer: Model.GramerInfo): boolean {
             //如果语法有产生式则为已完成
             if (grammer.Produce != null) {
@@ -174,7 +197,7 @@ namespace CodeEdit.LangAnaly {
             return false;
         }
 
-        //是否位于可选的语法
+        //是否式可选的语法
         private IsInOptionPro(grammer: Model.GramerInfo): boolean {
             var index = this.GetIndex(grammer);
 
