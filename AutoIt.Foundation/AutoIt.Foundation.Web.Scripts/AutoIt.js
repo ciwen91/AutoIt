@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -45,6 +50,7 @@ CodeMirror.defaults.EditorKey = null;
 var CodeMirrorExtend = (function () {
     function CodeMirrorExtend(editorKey, egtUrl) {
         this._AnalyedText = null;
+        this.StyleFunc = null;
         this._EditorKey = editorKey;
         var egt = getAjaxData(egtUrl);
         var manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
@@ -69,17 +75,21 @@ var CodeMirrorExtend = (function () {
         var style = this.GetStyle(gramerAnalyInfo);
         return style;
     };
+    //更新分析器(如果文本变化重新分析)
     CodeMirrorExtend.prototype.UpdateAnalyzer = function () {
         var editor = Cast(window[this._EditorKey]);
         var text = editor.getValue();
+        //CodeMirror从首个非空白行开始处理
         text = text.replace(/^\n/mg, "");
+        //文本变化则重新分析
         if (this._AnalyedText != text) {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
         }
     };
+    //消耗语法
     CodeMirrorExtend.prototype.ConsumeAnalyInfo = function (stream, gramerInfo, line, col) {
-        //如果语法为空,则处理下一个字符
+        //如果语法为空,则消耗当前字符
         if (gramerInfo == null) {
             stream.next();
         }
@@ -92,14 +102,18 @@ var CodeMirrorExtend = (function () {
             }
         }
     };
+    //获取样式
     CodeMirrorExtend.prototype.GetStyle = function (gramerAnalyInfo) {
         var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+        //如果语法为空,则样式为空
         if (gramerInfo == null) {
             return null;
         }
+        //如果语法为错误,则样式为错误
         if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
             return "error";
         }
+        //如果语法为自动完成且下一个语法不为错误,则样式为错误
         if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
             var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
             var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
@@ -110,9 +124,27 @@ var CodeMirrorExtend = (function () {
                 return "error";
             }
         }
+        //如果定义了样式函数,则为样式函数的结果
+        if (this.StyleFunc != null) {
+            return this.StyleFunc(gramerAnalyInfo);
+        }
+        else {
+            return null;
+        }
+    };
+    return CodeMirrorExtend;
+}());
+CodeMirror.defineMIME("text/xml", "xml");
+//xml Mode
+CodeMirror.defineMode("xml", function (editorConfig, config) {
+    var editorKey = editorConfig.EditorKey;
+    //创建扩展类型
+    var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
+    extend.StyleFunc = function (analyInfo) {
         var style = null;
+        var gramerInfo = analyInfo.GramerInfo;
         var name = gramerInfo.Symbol.Name;
-        var parentMaySymbolGroup = gramerAnalyInfo.ParantMaySymbolGroup.ToEnumerble()
+        var parentMaySymbolGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
             .Select(function (item) { return item.Name; });
         //标签括号
         if (name == "<" || name == ">" || name == "</" || name == "/>") {
@@ -135,13 +167,6 @@ var CodeMirrorExtend = (function () {
         }
         return style;
     };
-    return CodeMirrorExtend;
-}());
-CodeMirror.defineMIME("text/xml", "xml");
-//xml Mode
-CodeMirror.defineMode("xml", function (editorConfig, config) {
-    var editorKey = editorConfig.EditorKey;
-    var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
     return {
         startState: function () {
             //起始位-1行
@@ -150,6 +175,7 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             };
         },
         token: function (stream, state) {
+            //调用扩展类的高亮方法
             return extend.HighLight(stream, state);
         }
     };

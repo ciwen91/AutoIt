@@ -3,7 +3,8 @@
 class CodeMirrorExtend {
     private _EditorKey: string;
     private _AnalyedText: string = null;
-    private _LangAnaly:CodeEdit.LangAnaly.LangAnalyBase;
+    private _LangAnaly: CodeEdit.LangAnaly.LangAnalyBase;
+    StyleFunc:FuncOne<CodeEdit.LangAnaly.Model.GramerAnalyInfo,string>=null;
 
     constructor(editorKey: string,egtUrl:string) {
         this._EditorKey = editorKey;
@@ -38,23 +39,27 @@ class CodeMirrorExtend {
         return style;
     }
 
+    //更新分析器(如果文本变化重新分析)
     UpdateAnalyzer() {
         var editor = Cast<CodeMirror.EditorFromTextArea>(window[this._EditorKey]);
 
         var text = editor.getValue();
+        //CodeMirror从首个非空白行开始处理
         text = text.replace(/^\n/mg, "");
 
+        //文本变化则重新分析
         if (this._AnalyedText != text) {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
         }
     }
 
+    //消耗语法
     ConsumeAnalyInfo(stream: CodeMirror.StringStream,
         gramerInfo: CodeEdit.LangAnaly.Model.GramerInfo,
         line: number,
         col: number) {
-        //如果语法为空,则处理下一个字符
+        //如果语法为空,则消耗当前字符
         if (gramerInfo == null) {
             stream.next();
         }
@@ -69,17 +74,21 @@ class CodeMirrorExtend {
         }
     }
 
+    //获取样式
     GetStyle(gramerAnalyInfo: CodeEdit.LangAnaly.Model.GramerAnalyInfo): string {
         var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
 
+        //如果语法为空,则样式为空
         if (gramerInfo == null) {
             return null;
         }
 
+        //如果语法为错误,则样式为错误
         if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error) {
             return "error";
         }
 
+        //如果语法为自动完成且下一个语法不为错误,则样式为错误
         if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
             var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
             var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
@@ -92,35 +101,11 @@ class CodeMirrorExtend {
             }
         }
 
-        var style = null;
-        var name = gramerInfo.Symbol.Name;
-        var parentMaySymbolGroup = gramerAnalyInfo.ParantMaySymbolGroup.ToEnumerble()
-            .Select(item => item.Name);
-
-        //标签括号
-        if (name == "<" || name == ">" || name == "</" || name == "/>") {
-            style = "tag bracket";
+        //如果定义了样式函数,则为样式函数的结果
+        if (this.StyleFunc != null) {
+            return this.StyleFunc(gramerAnalyInfo);
+        } else {
+            return null;
         }
-        //标签名或属性名
-        else if (name == "Name") {
-            //标签:父节点为标签
-            if (parentMaySymbolGroup.Any(item => item.indexOf("Tag") >= 0)) {
-                style = "tag";
-            }
-            //属性:父节点为属性
-            else if (parentMaySymbolGroup.Contains("Attribute")) {
-                style = "attribute";
-            }
-        }
-        //属性值
-        else if (name == "Val") {
-            style = "string";
-        }
-        //内容文本
-        else if (name == "Text") {
-            style = "emstrong";
-        }
-
-        return style;
     }
 }

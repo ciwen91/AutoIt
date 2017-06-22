@@ -16,7 +16,8 @@
         lineNumbers: true,
         EditorKey: Math.random()
     };
-    var editor =CodeMirror.fromTextArea($("#code")[0],option);
+    var editor = CodeMirror.fromTextArea($("#code")[0], option);
+    //方法中可以获取Editor
     window[option.EditorKey] = editor;
 </script>
 </body>
