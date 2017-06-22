@@ -41,26 +41,43 @@ var Binding = (function () {
 }());
 //绑定信息
 Binding.Key = "Binding";
-//xml Mode
-CodeMirror.defineMode("xml", function (editorConfig, config) {
-    var editorKey = editorConfig.EditorKey;
-    var val = null;
-    var manger = null;
-    $.get("data/xml.egt.base64", function (egtBase64) {
-        var egt = base64ToBin(egtBase64);
-        manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList(); //???
-    });
-    function UpdateAnalyzer() {
-        var editor = Cast(window[editorKey]);
-        var xml = editor.getValue();
-        xml = xml.replace(/^\n/mg, "");
-        if (xml != val) {
-            manger.Analy(xml);
-            val = xml;
-        }
+var CodeMirrorExtend = (function () {
+    function CodeMirrorExtend(editorKey, egtUrl) {
+        this._AnalyedText = null;
+        this._EditorKey = editorKey;
+        var egt = getAjaxData(egtUrl);
+        var manger = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
+        manger.ContentNameGroup = $.Enumerable.From(["Text"]).ToList();
+        this._LangAnaly = manger;
     }
-    function ConsumeAnalyInfo(stream, gramerInfo, line, col) {
+    CodeMirrorExtend.prototype.HighLight = function (stream, state) {
+        //获取当前位置.如果是第一列,则行加1
+        if (stream.pos == 0) {
+            state.Line += 1;
+        }
+        var line = state.Line;
+        var col = stream.pos;
+        //更新分析器(文本可能有变化)
+        this.UpdateAnalyzer();
+        //获取当前位置的语法
+        var gramerAnalyInfo = this._LangAnaly.GetAnalyInfo(line, col);
+        var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
+        //消耗语法
+        this.ConsumeAnalyInfo(stream, gramerInfo, line, col);
+        //获取Style
+        var style = this.GetStyle(gramerAnalyInfo);
+        return style;
+    };
+    CodeMirrorExtend.prototype.UpdateAnalyzer = function () {
+        var editor = Cast(window[this._EditorKey]);
+        var text = editor.getValue();
+        text = text.replace(/^\n/mg, "");
+        if (this._AnalyedText != text) {
+            this._LangAnaly.Analy(text);
+            this._AnalyedText = text;
+        }
+    };
+    CodeMirrorExtend.prototype.ConsumeAnalyInfo = function (stream, gramerInfo, line, col) {
         //如果语法为空,则处理下一个字符
         if (gramerInfo == null) {
             stream.next();
@@ -73,8 +90,8 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
                 tempCol++;
             }
         }
-    }
-    function GetStyle(gramerAnalyInfo) {
+    };
+    CodeMirrorExtend.prototype.GetStyle = function (gramerAnalyInfo) {
         var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
         if (gramerInfo == null) {
             return null;
@@ -83,8 +100,8 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             return "error";
         }
         if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
-            var nextPoint = gramerInfo.NextPoint(val);
-            var nextAnalyInfo = manger.GetAnalyInfo(nextPoint.Y, nextPoint.X);
+            var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
+            var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
             var isNextError = nextAnalyInfo != null &&
                 nextAnalyInfo.GramerInfo != null &&
                 nextAnalyInfo.GramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.Error;
@@ -116,7 +133,13 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             style = "emstrong";
         }
         return style;
-    }
+    };
+    return CodeMirrorExtend;
+}());
+//xml Mode
+CodeMirror.defineMode("xml", function (editorConfig, config) {
+    var editorKey = editorConfig.EditorKey;
+    var extend = new CodeMirrorExtend(editorKey, "data/xml.egt.base64");
     return {
         startState: function () {
             //起始位-1行
@@ -125,40 +148,10 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             };
         },
         token: function (stream, state) {
-            //获取当前位置.如果是第一列,则行加1
-            if (stream.pos == 0) {
-                state.Line += 1;
-            }
-            var line = state.Line;
-            var col = stream.pos;
-            //更新分析器(文本可能有变化)
-            UpdateAnalyzer();
-            //获取当前位置的语法
-            var gramerAnalyInfo = manger.GetAnalyInfo(line, col);
-            var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
-            //消耗语法
-            ConsumeAnalyInfo(stream, gramerInfo, line, col);
-            //获取Style
-            var style = GetStyle(gramerAnalyInfo);
-            return style;
+            return extend.HighLight(stream, state);
         }
     };
 });
-var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
-function base64ToBin(str) {
-    var bitString = "";
-    var tail = 0;
-    for (var i = 0; i < str.length; i++) {
-        if (str[i] != "=") {
-            var decode = code.indexOf(str[i]).toString(2);
-            bitString += (new Array(7 - decode.length)).join("0") + decode;
-        }
-        else {
-            tail++;
-        }
-    }
-    return bitString.substr(0, bitString.length - tail * 2);
-}
 var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
@@ -190,7 +183,7 @@ var CodeEdit;
                     //读取信息
                     storer.ReadInfo(stream);
                     //读取所有记录
-                    while (stream.Position < str.length) {
+                    while (stream.CanRead()) {
                         storer.ReadRecord(stream);
                     }
                     //更新绑定信息 
@@ -1631,20 +1624,22 @@ var LinePoint = (function () {
     return LinePoint;
 }());
 LinePoint.Empty = new LinePoint(0, 0, 0);
-//二进制流
+//Base64流
 var Stream = (function () {
     function Stream(str) {
         //当前位置
         this.Position = 0;
-        this.Str = str;
+        this.ByteGroup = Base64ToByte(str);
     }
     //读取一个字节
     Stream.prototype.ReadByte = function () {
-        //将8位二进制字符串转换为byte
-        var byteStr = this.Str.substr(this.Position, 8);
-        var byte = parseInt(byteStr, 2);
-        this.Position += 8;
+        var byte = this.ByteGroup.Get(this.Position);
+        this.Position += 1;
         return byte;
+    };
+    //是否可以往后读
+    Stream.prototype.CanRead = function () {
+        return this.Position < this.ByteGroup.Count();
     };
     return Stream;
 }());
@@ -1759,6 +1754,40 @@ enumerable.prototype.ToList = function () {
     this.ForEach(function (item) { return group.Set(item); });
     return group;
 };
+//同步获取Ajax数据
+function getAjaxData(url) {
+    var response = $.ajax({ url: url, async: false });
+    //如果状态为200则返回输出的文本
+    var result = response.status == 200 ? response.responseText : None;
+    return result;
+}
+//Base64转字节
+function Base64ToByte(str) {
+    var binStr = Base64ToBin(str);
+    var group = new List();
+    for (var i = 0; i < binStr.length; i += 8) {
+        var byteStr = binStr.substr(i, 8);
+        var byte = parseInt(byteStr, 2);
+        group.Set(byte);
+    }
+    return group;
+}
+//Base64转二进制
+function Base64ToBin(str) {
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
+    var bitString = "";
+    var tail = 0;
+    for (var i = 0; i < str.length; i++) {
+        if (str[i] != "=") {
+            var decode = code.indexOf(str[i]).toString(2);
+            bitString += (new Array(7 - decode.length)).join("0") + decode;
+        }
+        else {
+            tail++;
+        }
+    }
+    return bitString.substr(0, bitString.length - tail * 2);
+}
 //function InitControl<T>(obj: T, parent: Control = null, initFunc: Action<T> = null): T {
 //    if (initFunc) {
 //        initFunc(obj);

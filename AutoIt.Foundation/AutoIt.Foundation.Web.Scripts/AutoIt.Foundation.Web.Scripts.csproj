@@ -173,6 +173,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="Bind\BindInfo.ts" />
     <TypeScriptCompile Include="Bind\Binding.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\CodeMirrorExtend.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\Xml.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtStorer.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />

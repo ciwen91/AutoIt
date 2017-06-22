@@ -28,7 +28,7 @@
                 storer.ReadInfo(stream);
 
                 //读取所有记录
-                while (stream.Position<str.length) {
+                while (stream.CanRead()) {
                     storer.ReadRecord(stream);
                 }
 

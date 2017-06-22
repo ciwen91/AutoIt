@@ -105,6 +105,47 @@ enumerable.prototype.ToList = function () {
     return group;
 }
 
+//同步获取Ajax数据
+function getAjaxData(url):string {
+    var response = $.ajax({ url: url, async: false });
+
+    //如果状态为200则返回输出的文本
+    var result = response.status == 200 ? response.responseText : None;
+
+    return result;
+}
+
+//Base64转字节
+function Base64ToByte(str): List<number> {
+    var binStr = Base64ToBin(str);
+    var group = new List<number>();
+
+    for (var i = 0; i < binStr.length; i += 8) {
+        var byteStr = binStr.substr(i, 8);
+        var byte = parseInt(byteStr, 2);
+        group.Set(byte);
+    }
+
+    return group;
+}
+
+//Base64转二进制
+function Base64ToBin(str):string {
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
+
+    var bitString = "";
+    var tail = 0;
+    for (var i = 0; i < str.length; i++) {
+        if (str[i] != "=") {
+            var decode = code.indexOf(str[i]).toString(2);
+            bitString += (new Array(7 - decode.length)).join("0") + decode;
+        } else {
+            tail++;
+        }
+    }
+    return bitString.substr(0, bitString.length - tail * 2);
+}
+
 //function InitControl<T>(obj: T, parent: Control = null, initFunc: Action<T> = null): T {
 //    if (initFunc) {
 //        initFunc(obj);
