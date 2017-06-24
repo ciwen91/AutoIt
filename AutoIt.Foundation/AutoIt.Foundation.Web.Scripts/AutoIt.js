@@ -54,9 +54,7 @@ var CodeMirrorExtend = (function () {
         //记录编辑器ID
         this._EditorID = editorID;
         //创建分析器
-        var egt = getAjaxData(egtUrl);
-        var analy = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        analy.ContentNameGroup = contentNameGroup;
+        var analy = this.CreateLangAnaly(egtUrl, contentNameGroup);
         this._LangAnaly = analy;
     }
     //创建编辑器(Html元素,配置)
@@ -68,6 +66,20 @@ var CodeMirrorExtend = (function () {
         var editor = CodeMirror.fromTextArea(elm, option);
         window[editorID] = editor;
         return editor;
+    };
+    //根据Egt地址判断语法类型,并生成语法分析器(Egt地址,内容符号名称列表)
+    CodeMirrorExtend.prototype.CreateLangAnaly = function (egtUrl, contentNameGroup) {
+        //获取语法元数据
+        var egt = getAjaxData(egtUrl);
+        //xml语法
+        if (egtUrl.indexOf("xml") >= 0) {
+            var analy = new CodeEdit.LangAnaly.XmlLangAnaly(egt);
+            analy.ContentNameGroup = contentNameGroup;
+            return analy;
+        }
+        else {
+            throw "无法从" + egtUrl + "推断出分析器的类型！";
+        }
     };
     //高亮文本
     CodeMirrorExtend.prototype.HighLight = function (stream, state) {
@@ -676,6 +688,29 @@ var CodeEdit;
                 }
                 return false;
             };
+            //获取最近的语法(过滤函数)
+            GramerReader.prototype.GetClosetGrammer = function (whereFunc) {
+                var result = this._GrammerGroup.ToEnumerble()
+                    .Reverse()
+                    .Select(function (item) { return item.Item2; })
+                    .FirstOrDefault(null, whereFunc);
+                return result;
+            };
+            //撤销语法
+            GramerReader.prototype.BackGrammer = function () {
+                var result = this._GrammerGroup.Remove().Item2;
+                //去除前面空值语法(是由当前撤销语法带来的)
+                while (true) {
+                    var gramer = this._GrammerGroup.Get().Item2;
+                    if (gramer != null && !gramer.Value) {
+                        this._GrammerGroup.Remove();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                return result;
+            };
             //获取语法在栈中的位置(语法)
             GramerReader.prototype.GetIndex = function (grammer) {
                 var index = $.Enumerable.From(this._GrammerGroup.ToArray())
@@ -749,7 +784,17 @@ var CodeEdit;
                                     gramerVal = gramerVal.trim();
                                     gramer.Value = gramerVal;
                                 }
-                                this.GramerRead(gramer);
+                                //如果语义错误,则撤回语法并设置为错误
+                                if (!this.IsGramerMeanEro(gramer)) {
+                                    this._GramerReader.BackGrammer();
+                                    gramer.GramerState = LangAnaly.Model.GramerInfoState.Error;
+                                    this._EroGrammerGroup.Set(gramer);
+                                }
+                                else {
+                                    this.GramerRead(gramer);
+                                }
+                                //Reduce时继续处理当前Token
+                                continue;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Accept) {
                                 this.GramerAccept(gramer);
@@ -758,20 +803,15 @@ var CodeEdit;
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
-                                //if (gramer.Value != null) {
                                 var isAutoComplete = this._GramerReader.AutoComplete();
                                 //补全了继续消耗符号
                                 if (isAutoComplete) {
                                     continue;
                                 }
-                                //}
                                 //没补全则将当前语法设为错误
                                 this._EroGrammerGroup.Set(gramer);
                             }
-                            //Reduce继续消耗符号
-                            if (gramer.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
-                                break;
-                            }
+                            break;
                         }
                     }
                     //遇到结束符号则停止分析
@@ -796,6 +836,10 @@ var CodeEdit;
                     return new LangAnaly.Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
                 }
                 return null;
+            };
+            //语法
+            LangAnalyBase.prototype.IsGramerMeanEro = function (gramerInfo) {
+                return true;
             };
             //读到符号(符号)
             LangAnalyBase.prototype.TokenRead = function (tokenInfo) {
@@ -839,6 +883,42 @@ var CodeEdit;
             }(CodeEdit.LangAnaly.LangAnalyBase));
             Lang.PrintLangManager = PrintLangManager;
         })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
+    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
+})(CodeEdit || (CodeEdit = {}));
+var CodeEdit;
+(function (CodeEdit) {
+    var LangAnaly;
+    (function (LangAnaly) {
+        var XmlLangAnaly = (function (_super) {
+            __extends(XmlLangAnaly, _super);
+            function XmlLangAnaly() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            XmlLangAnaly.prototype.IsGramerMeanEro = function (gramerInfo) {
+                //标签名称
+                var symbolName = gramerInfo.Symbol.Name;
+                if (symbolName == "End Tag") {
+                    //起始标签
+                    var startGramer = this._GramerReader
+                        .GetClosetGrammer(function (item) { return item.Symbol != null && item.Symbol.Name == "Start Tag"; });
+                    var startTagName = this.GetTagName(startGramer.Value);
+                    //结束标签与起始标签名称不一致,则语法无意义
+                    var endTagName = this.GetTagName(gramerInfo.Value);
+                    if (endTagName != startTagName) {
+                        return false;
+                    }
+                }
+                return _super.prototype.IsGramerMeanEro.call(this, gramerInfo);
+            };
+            //获取标签名称(文本)
+            XmlLangAnaly.prototype.GetTagName = function (text) {
+                var group = /\w+/g.exec(text);
+                var tagName = group ? group[0] : "";
+                return tagName;
+            };
+            return XmlLangAnaly;
+        }(LangAnaly.LangAnalyBase));
+        LangAnaly.XmlLangAnaly = XmlLangAnaly;
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
 var CodeEdit;

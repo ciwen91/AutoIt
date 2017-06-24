@@ -19,10 +19,7 @@ class CodeMirrorExtend {
         this._EditorID = editorID;
 
         //创建分析器
-        var egt = getAjaxData(egtUrl);
-        var analy = new CodeEdit.LangAnaly.Lang.PrintLangManager(egt);
-        analy.ContentNameGroup = contentNameGroup;
-
+        var analy = this.CreateLangAnaly(egtUrl,contentNameGroup);
         this._LangAnaly = analy;
     }
 
@@ -37,6 +34,21 @@ class CodeMirrorExtend {
         window[editorID] = <any>editor;
 
         return editor;
+    }
+
+    //根据Egt地址判断语法类型,并生成语法分析器(Egt地址,内容符号名称列表)
+    private CreateLangAnaly(egtUrl: string, contentNameGroup: List<string>): CodeEdit.LangAnaly.LangAnalyBase {
+        //获取语法元数据
+        var egt = getAjaxData(egtUrl);
+
+        //xml语法
+        if (egtUrl.indexOf("xml") >= 0) {
+            var analy = new CodeEdit.LangAnaly.XmlLangAnaly(egt);
+            analy.ContentNameGroup = contentNameGroup;
+            return analy;
+        } else {
+            throw "无法从" + egtUrl + "推断出分析器的类型！";
+        }
     }
 
     //高亮文本

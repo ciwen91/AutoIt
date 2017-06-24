@@ -179,6 +179,7 @@
     <TypeScriptCompile Include="CodeEdit\LangAnaly\GramerReader.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\LangAnalyBase.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Lang\PrintLangManager.ts" />
+    <TypeScriptCompile Include="CodeEdit\LangAnaly\Lang\XmlLangAnaly.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\ActionType.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\AdvanceMode.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\Model\CharSet.ts" />

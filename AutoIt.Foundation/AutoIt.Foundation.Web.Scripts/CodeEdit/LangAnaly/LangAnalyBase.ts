@@ -1,12 +1,12 @@
-﻿module CodeEdit.LangAnaly {
+﻿namespace  CodeEdit.LangAnaly {
     //语法分析基类
     export abstract class LangAnalyBase {
         //Egt存储器
-        private _EgtStorer: EgtStorer;
+        private   _EgtStorer: EgtStorer;
         //字符阅读器
-        private _TokenReader: TokenReader;
+        private  _TokenReader: TokenReader;
         //语法阅读器
-        private _GramerReader:GramerReader;
+        protected _GramerReader:GramerReader;
 
         //内容符号名称列表
         ContentNameGroup: List<string> = new List<string>();
@@ -74,7 +74,17 @@
                                 gramer.Value = gramerVal;
                             }
 
-                            this.GramerRead(gramer);
+                            //如果语义错误,则撤回语法并设置为错误
+                            if (!this.IsGramerMeanEro(gramer)) {
+                                this._GramerReader.BackGrammer();
+                                gramer.GramerState = Model.GramerInfoState.Error;
+                                this._EroGrammerGroup.Set(gramer);            
+                            } else {
+                                this.GramerRead(gramer);
+                            }      
+
+                            //Reduce时继续处理当前Token
+                            continue;
                         }
                         //如果是接受,返回结果
                         else if (gramer.GramerState == Model.GramerInfoState.Accept) {
@@ -86,22 +96,17 @@
                         }
                        //如果是错误,尝试补全语法
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
-                            //if (gramer.Value != null) {
                                 var isAutoComplete = this._GramerReader.AutoComplete();
                                 //补全了继续消耗符号
                                 if (isAutoComplete) {
                                     continue;
                                 }
-                            //}
 
                             //没补全则将当前语法设为错误
                             this._EroGrammerGroup.Set(gramer);
                         }
 
-                        //Reduce继续消耗符号
-                        if (gramer.GramerState != Model.GramerInfoState.Reduce) {
-                            break;
-                        }
+                        break;
                     }
                 }
 
@@ -132,6 +137,10 @@
             return null;
         }
 
+        //语法
+        IsGramerMeanEro(gramerInfo:Model.GramerInfo):boolean {
+            return true;
+        }
         //读到符号(符号)
         TokenRead(tokenInfo: Model.TokenInfo) {
 

@@ -216,6 +216,33 @@ namespace CodeEdit.LangAnaly {
             return false;
         }
 
+        //获取最近的语法(过滤函数)
+        GetClosetGrammer(whereFunc:FuncOne<Model.GramerInfo,boolean>):Model.GramerInfo {
+            var result = this._GrammerGroup.ToEnumerble()
+                .Reverse()
+                .Select(item => item.Item2)
+                .FirstOrDefault(null, whereFunc);
+            return result;
+        }
+
+        //撤销语法
+        BackGrammer():Model.GramerInfo {
+            var result = this._GrammerGroup.Remove().Item2;
+
+            //去除前面空值语法(是由当前撤销语法带来的)
+            while (true) {
+                var gramer = this._GrammerGroup.Get().Item2;
+                if (gramer != null && !gramer.Value) {
+                    this._GrammerGroup.Remove();
+                } else {
+                    break;
+                }
+            }
+
+            return result;
+        }
+       
+
         //获取语法在栈中的位置(语法)
         private GetIndex(grammer: Model.GramerInfo): number {
             var index = $.Enumerable.From(this._GrammerGroup.ToArray())
