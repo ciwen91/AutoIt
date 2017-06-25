@@ -198,6 +198,7 @@ namespace CodeEdit.LangAnaly {
             return true;
         }
 
+        //设置错误语法(语法)
         SetEroGramer(grammer:Model.GramerInfo):GramerReader {
             this._GrammerGroup.Set(new Tuple(<Model.LALRState>None, grammer));
             return this;
@@ -258,7 +259,10 @@ namespace CodeEdit.LangAnaly {
         //撤销语法
         BackGrammer(): Model.GramerInfo {
             //将当前语法设置为错误
-            var result = this._GrammerGroup.Get().Item2;
+            var result = this._GrammerGroup.ToEnumerble()
+                .Where(item => item.Item2 != null)
+                .Select(item => item.Item2)
+                .Last(item => item.GramerState != Model.GramerInfoState.Error);
             result.GramerState = Model.GramerInfoState.Error;
 
             var index = this._GrammerGroup.Count() - 2;
@@ -276,7 +280,6 @@ namespace CodeEdit.LangAnaly {
             return result;
         }
        
-
         //获取当前状态
         private GetCurState():Model.LALRState {
             return this._GrammerGroup.ToEnumerble()

@@ -14,12 +14,15 @@ class CodeMirrorExtend {
     //编辑器的全局键,语法元数据地址,内容元素名称列表
     constructor(editorID: string,
         egtUrl: string,
-        contentNameGroup: List<string> = new List<string>()) {
+        contentNameGroup: List<string> = new List<string>(),
+        blockStartNameGroup: List<string>=new List<string>()) {
         //记录编辑器ID
         this._EditorID = editorID;
 
         //创建分析器
-        var analy = this.CreateLangAnaly(egtUrl,contentNameGroup);
+        var analy = this.CreateLangAnaly(egtUrl);
+        analy.ContentNameGroup = contentNameGroup;
+        analy.BlockStartNameGroup = blockStartNameGroup;
         this._LangAnaly = analy;
     }
 
@@ -37,14 +40,13 @@ class CodeMirrorExtend {
     }
 
     //根据Egt地址判断语法类型,并生成语法分析器(Egt地址,内容符号名称列表)
-    private CreateLangAnaly(egtUrl: string, contentNameGroup: List<string>): CodeEdit.LangAnaly.LangAnalyBase {
+    private CreateLangAnaly(egtUrl: string): CodeEdit.LangAnaly.LangAnalyBase {
         //获取语法元数据
         var egt = getAjaxData(egtUrl);
 
         //xml语法
         if (egtUrl.indexOf("xml") >= 0) {
             var analy = new CodeEdit.LangAnaly.XmlLangAnaly(egt);
-            analy.ContentNameGroup = contentNameGroup;
             return analy;
         } else {
             throw "无法从" + egtUrl + "推断出分析器的类型！";

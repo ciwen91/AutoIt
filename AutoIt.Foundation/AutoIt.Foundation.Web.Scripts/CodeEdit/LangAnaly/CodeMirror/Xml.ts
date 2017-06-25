@@ -5,7 +5,10 @@ CodeMirror.defineMode("xml", (editorConfig, config) => {
     var editorID = (<any>editorConfig).EditorID;
 
     //创建扩展类型
-    var extend = new CodeMirrorExtend(editorID, "data/xml.egt.base64", new List<string>(["Text"]));
+    var extend = new CodeMirrorExtend(editorID,
+        "data/xml.egt.base64",
+        new List<string>(["Text"]),
+        new List<string>(["<"]));
 
     //样式函数
     extend.StyleFunc= (analyInfo) => {

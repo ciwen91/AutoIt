@@ -45,7 +45,7 @@ CodeMirror.defaults.EditorID = null;
 //CodeMirror扩展类
 var CodeMirrorExtend = (function () {
     //编辑器的全局键,语法元数据地址,内容元素名称列表
-    function CodeMirrorExtend(editorID, egtUrl, contentNameGroup) {
+    function CodeMirrorExtend(editorID, egtUrl, contentNameGroup, blockStartNameGroup) {
         if (contentNameGroup === void 0) { contentNameGroup = new List(); }
         //分析过的文本
         this._AnalyedText = null;
@@ -54,7 +54,9 @@ var CodeMirrorExtend = (function () {
         //记录编辑器ID
         this._EditorID = editorID;
         //创建分析器
-        var analy = this.CreateLangAnaly(egtUrl, contentNameGroup);
+        var analy = this.CreateLangAnaly(egtUrl);
+        analy.ContentNameGroup = contentNameGroup;
+        analy.BlockStartNameGroup = blockStartNameGroup;
         this._LangAnaly = analy;
     }
     //创建编辑器(Html元素,配置)
@@ -68,13 +70,12 @@ var CodeMirrorExtend = (function () {
         return editor;
     };
     //根据Egt地址判断语法类型,并生成语法分析器(Egt地址,内容符号名称列表)
-    CodeMirrorExtend.prototype.CreateLangAnaly = function (egtUrl, contentNameGroup) {
+    CodeMirrorExtend.prototype.CreateLangAnaly = function (egtUrl) {
         //获取语法元数据
         var egt = getAjaxData(egtUrl);
         //xml语法
         if (egtUrl.indexOf("xml") >= 0) {
             var analy = new CodeEdit.LangAnaly.XmlLangAnaly(egt);
-            analy.ContentNameGroup = contentNameGroup;
             return analy;
         }
         else {
@@ -164,7 +165,7 @@ CodeMirror.defineMIME("text/xml", "xml");
 CodeMirror.defineMode("xml", function (editorConfig, config) {
     var editorID = editorConfig.EditorID;
     //创建扩展类型
-    var extend = new CodeMirrorExtend(editorID, "data/xml.egt.base64", new List(["Text"]));
+    var extend = new CodeMirrorExtend(editorID, "data/xml.egt.base64", new List(["Text"]), new List(["<"]));
     //样式函数
     extend.StyleFunc = function (analyInfo) {
         var style = null;
@@ -670,6 +671,7 @@ var CodeEdit;
                 grammer.GramerState = LangAnaly.Model.GramerInfoState.AutoComplete;
                 return true;
             };
+            //设置错误语法(语法)
             GramerReader.prototype.SetEroGramer = function (grammer) {
                 this._GrammerGroup.Set(new Tuple(None, grammer));
                 return this;
@@ -719,7 +721,10 @@ var CodeEdit;
             //撤销语法
             GramerReader.prototype.BackGrammer = function () {
                 //将当前语法设置为错误
-                var result = this._GrammerGroup.Get().Item2;
+                var result = this._GrammerGroup.ToEnumerble()
+                    .Where(function (item) { return item.Item2 != null; })
+                    .Select(function (item) { return item.Item2; })
+                    .Last(function (item) { return item.GramerState != LangAnaly.Model.GramerInfoState.Error; });
                 result.GramerState = LangAnaly.Model.GramerInfoState.Error;
                 var index = this._GrammerGroup.Count() - 2;
                 //去除前面空值语法(是由当前撤销语法带来的)
@@ -762,6 +767,8 @@ var CodeEdit;
             function LangAnalyBase(egtStr) {
                 //内容符号名称列表
                 this.ContentNameGroup = new List();
+                //块开始名称列表
+                this.BlockStartNameGroup = new List();
                 this._EgtStorer = LangAnaly.EgtStorer.CreateFromStr(egtStr);
             }
             //获取值(文本)
@@ -827,9 +834,16 @@ var CodeEdit;
                                 return resultGrammer;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
+                                //如果是块开始元素,则撤销前面的语法(直至正确为止)
+                                if (gramer.Symbol != null && this.BlockStartNameGroup.Contains(gramer.Symbol.Name)) {
+                                    this._GramerReader.BackGrammer();
+                                    //继续消耗字符
+                                    continue;
+                                }
+                                //尝试补全语法
                                 var isAutoComplete = this._GramerReader.AutoComplete();
-                                //补全了继续消耗符号
                                 if (isAutoComplete) {
+                                    //继续消耗字符
                                     continue;
                                 }
                                 else {

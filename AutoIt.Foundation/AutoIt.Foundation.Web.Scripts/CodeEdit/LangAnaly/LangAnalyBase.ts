@@ -10,6 +10,8 @@
 
         //内容符号名称列表
         ContentNameGroup: List<string> = new List<string>();
+        //块开始名称列表
+        BlockStartNameGroup:List<string>=new List<string>();
 
         constructor(egtStr: string) {
             this._EgtStorer = EgtStorer.CreateFromStr(egtStr);
@@ -87,11 +89,19 @@
 
                             return resultGrammer;
                         }
-                       //如果是错误,尝试补全语法
+                       //如果是错误,尝试撤销语法(块开始元素),尝试补全语法
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
+                            //如果是块开始元素,则撤销前面的语法(直至正确为止)
+                            if (gramer.Symbol != null && this.BlockStartNameGroup.Contains(gramer.Symbol.Name)) {
+                                this._GramerReader.BackGrammer();
+                                //继续消耗字符
+                                continue;
+                            }
+
+                            //尝试补全语法
                             var isAutoComplete = this._GramerReader.AutoComplete();
-                            //补全了继续消耗符号
                             if (isAutoComplete) {
+                                //继续消耗字符
                                 continue;
                             } else {
                                 this._GramerReader.SetEroGramer(gramer);
