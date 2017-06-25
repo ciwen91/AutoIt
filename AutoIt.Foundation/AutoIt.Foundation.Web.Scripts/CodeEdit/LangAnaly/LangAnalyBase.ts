@@ -10,8 +10,6 @@
 
         //内容符号名称列表
         ContentNameGroup: List<string> = new List<string>();
-        //错误语法列表       
-        private _EroGrammerGroup:List<Model.GramerInfo>=new List<Model.GramerInfo>();
 
         constructor(egtStr: string) {
             this._EgtStorer = EgtStorer.CreateFromStr(egtStr);
@@ -24,9 +22,6 @@
         }
         //分析(文本):
         Analy(val: string): Model.GramerInfo {
-            //清除上次分析的结果
-            this._EroGrammerGroup.Clear();
-
             //构造Reader
             this._TokenReader = new TokenReader(this._EgtStorer, val);
             this._GramerReader = new GramerReader(this._EgtStorer);
@@ -76,9 +71,7 @@
 
                             //如果语义错误,则撤回语法并设置为错误
                             if (!this.IsGramerMeanEro(gramer)) {
-                                this._GramerReader.BackGrammer();
-                                gramer.GramerState = Model.GramerInfoState.Error;
-                                this._EroGrammerGroup.Set(gramer);            
+                                this._GramerReader.BackGrammer();   
                             } else {
                                 this.GramerRead(gramer);
                             }      
@@ -96,14 +89,13 @@
                         }
                        //如果是错误,尝试补全语法
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
-                                var isAutoComplete = this._GramerReader.AutoComplete();
-                                //补全了继续消耗符号
-                                if (isAutoComplete) {
-                                    continue;
-                                }
-
-                            //没补全则将当前语法设为错误
-                            this._EroGrammerGroup.Set(gramer);
+                            var isAutoComplete = this._GramerReader.AutoComplete();
+                            //补全了继续消耗符号
+                            if (isAutoComplete) {
+                                continue;
+                            } else {
+                                this._GramerReader.SetEroGramer(gramer);
+                            }
                         }
 
                         break;
@@ -120,15 +112,8 @@
         } 
         //获取指定位置的分析信息(行,列)     
         GetAnalyInfo(line: number, col: number): Model.GramerAnalyInfo {
-            //如果位于错误列表,则返回错误信息
-            var  grammer = this._EroGrammerGroup.ToEnumerble()
-                .FirstOrDefault(null, item => item.Line == line && item.Col == col);
-            if (grammer != null) {
-                return new Model.GramerAnalyInfo(grammer, new List<Model.Symbol>());
-            }
-
             //如果位于语法树中,则返回语法信息和可能的父符号
-            grammer = this._GramerReader.GetGrammerInfo(line, col, this.ContentNameGroup);
+            var grammer = this._GramerReader.GetGrammerInfo(line, col, this.ContentNameGroup);
             if (grammer != null) {
                 var parentMaySymbolGroup = this._GramerReader.GetParentMaySymbolGroup(grammer);
                 return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);

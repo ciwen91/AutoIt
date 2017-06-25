@@ -18,13 +18,14 @@ namespace CodeEdit.LangAnaly {
         //读取语法(符号)
         ReadGramer(tokenInfo: Model.TokenInfo): Model.GramerInfo {
             //当前状态
-            var curState = this._GrammerGroup.Get().Item1;
+            var curState = this.GetCurState();
             //符号对应的动作
             var action = curState.GetAction(tokenInfo.Symbol);
 
             //没有对应的动作则返回语法错误
             if (action == null) {
-                return new Model.GramerInfo(Model.GramerInfoState.Error, tokenInfo);
+                var gramer = new Model.GramerInfo(Model.GramerInfoState.Error, tokenInfo);
+                return gramer;
             } else {
                 //移入
                 if (action.ActionType == Model.ActionType.Shift) {
@@ -41,30 +42,41 @@ namespace CodeEdit.LangAnaly {
                     var prodSymbolCount = produce.SymbolGroup.Count();
 
                     //将产生式的主体移出堆栈
-                    var group = Loop.For(prodSymbolCount)
-                        .Select(item => this._GrammerGroup.Remove())
-                        .Reverse()
-                        .ToList();
+                    var group = new List<Tuple<Model.LALRState, Model.GramerInfo>>();
+                    var i = 0;
+                    while (i < prodSymbolCount) {
+                        var info = this._GrammerGroup.Remove();
+                        group.Set(info);
+
+                        if (info.Item2.GramerState != Model.GramerInfoState.Error) {
+                            i++;
+                        }
+                    }
+                    group = group.ToEnumerble().Reverse().ToList();
+
                     //语法首符号为子语法的首符号或空符号
                     var gramerSymbol = new Model.GramerInfo(Model.GramerInfoState.Reduce,
                         group.Count() > 0
                         ? group.Get(0).Item2.StartToken
                             : Model.TokenInfo.NullToken());
                     gramerSymbol.SetChildGroup($.Enumerable.From(group.ToArray()).Select(item => item.Item2).ToList());
+
                     //语法文本为子语法文本的结合
                     gramerSymbol.Value = $.Enumerable.From(group.ToArray())
                         .Select(item => item.Item2.Value)
                         .ToArray()
                         .join("");
+
                     //语法符号为产生式头部
                     gramerSymbol.Symbol = produce.NonTerminal;
                     gramerSymbol.Produce = produce;
 
                     //下一个状态为当前状态匹配动作的目标状态
+                    var targetState = this.GetCurState().GetAction(produce.NonTerminal).TargetState;
                     this._GrammerGroup
                         .Set(new Tuple<Model.LALRState,
                             Model.
-                            GramerInfo>(this._GrammerGroup.Get().Item1.GetAction(produce.NonTerminal).TargetState,
+                            GramerInfo>(targetState,
                             gramerSymbol));
                     return gramerSymbol;
                 }
@@ -99,7 +111,7 @@ namespace CodeEdit.LangAnaly {
                 var itemChildGroup = item.GetChildGroup();
 
                 //寻找匹配的叶子节点(没有子节点或内容节点)
-                if ((itemChildGroup.Count() == 0 || contentNameGroup.Index(item.Symbol.Name) >= 0) &&
+                if ((itemChildGroup.Count() == 0 || item.GramerState== Model.GramerInfoState.Error|| contentNameGroup.Index(item.Symbol.Name) >= 0) &&
                     item.Value &&
                     item.Contains(line, col)) {
                     return item;
@@ -125,18 +137,23 @@ namespace CodeEdit.LangAnaly {
 
                 //从上一个状态开始,找最近的GoTo动作上的符号
                 while (index > 0) {
-                    var preState = this._GrammerGroup.Get(index - 1).Item1;
-                    
-                    parentMaySymbolGroup = preState.ActionGroup.ToEnumerble()
-                        .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
-                        .Select(sItem => sItem.Symbol)
-                        .ToList();
+                    var preInfo = this._GrammerGroup.Get(index - 1);
+                    var preGramer = preInfo.Item2;
 
-                    if (parentMaySymbolGroup.Count() > 0) {
-                        break;
-                    } else {
-                        index--;
-                    };
+                    if (preGramer == null || preGramer.GramerState != Model.GramerInfoState.Error) {
+                        var preState = preInfo.Item1;
+
+                        parentMaySymbolGroup = preState.ActionGroup.ToEnumerble()
+                            .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
+                            .Select(sItem => sItem.Symbol)
+                            .ToList();
+
+                        if (parentMaySymbolGroup.Count() > 0) {
+                            break;
+                        }
+                    }
+
+                    index--;
                 }
             }
 
@@ -147,8 +164,11 @@ namespace CodeEdit.LangAnaly {
         AutoComplete(): boolean {
             //当前语法
             var grammer = this._GrammerGroup.Get().Item2;
-            //空的(最开始)、完整的、必须的不补全
-            if (grammer != null && this.IsComplete(grammer) || !this.IsInOptionPro(grammer)) {
+            //空的(最开始)、错误的、完整的、必须的不补全
+            if (grammer == null ||
+                grammer.GramerState == Model.GramerInfoState.Error ||
+                this.IsComplete(grammer) ||
+                !this.IsInOptionPro(grammer)) {
                 return false;
             }
 
@@ -165,7 +185,7 @@ namespace CodeEdit.LangAnaly {
 
                 //寻找第一个移入类的动作
                 var shift = actionGroup.First(item => item.ActionType == Model.ActionType.Shift);
-                //构造移入符号并读入符号
+                //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                 var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                 this.ReadGramer(tokenInfo);
 
@@ -176,6 +196,11 @@ namespace CodeEdit.LangAnaly {
             grammer.GramerState = Model.GramerInfoState.AutoComplete;
 
             return true;
+        }
+
+        SetEroGramer(grammer:Model.GramerInfo):GramerReader {
+            this._GrammerGroup.Set(new Tuple(<Model.LALRState>None, grammer));
+            return this;
         }
 
         //语法是否完成
@@ -198,16 +223,20 @@ namespace CodeEdit.LangAnaly {
         }
 
         //是否式可选的语法
-        private IsInOptionPro(grammer: Model.GramerInfo): boolean {
-            var index = this.GetIndex(grammer);
+        private IsInOptionPro(gramer: Model.GramerInfo): boolean {
+            var index = this.GetIndex(gramer);
 
             //从上一个状态开始,如果能找的Reduce动作则不是必须的(说明可以不经过当前状态而Reduce)
-            while (index >= 1) {               
-                var preState = this._GrammerGroup.Get(index - 1).Item1;
+            while (index > 0) {
+                var info = this._GrammerGroup.Get(index - 1);
+                var preGramer = info.Item2;
 
-                if (preState.ActionGroup.ToEnumerble()
-                    .Any(item => item.ActionType == Model.ActionType.Reduce)) {
-                    return true;
+                if (preGramer != null && preGramer.GramerState != Model.GramerInfoState.Error) {
+                    var preState = info.Item1;
+                    if (preState.ActionGroup.ToEnumerble()
+                        .Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                        return true;
+                    }
                 }
 
                 index--;
@@ -219,6 +248,7 @@ namespace CodeEdit.LangAnaly {
         //获取最近的语法(过滤函数)
         GetClosetGrammer(whereFunc:FuncOne<Model.GramerInfo,boolean>):Model.GramerInfo {
             var result = this._GrammerGroup.ToEnumerble()
+                .Where(item=>item.Item2!=null&&item.Item2.GramerState!=Model.GramerInfoState.Error)
                 .Reverse()
                 .Select(item => item.Item2)
                 .FirstOrDefault(null, whereFunc);
@@ -226,22 +256,33 @@ namespace CodeEdit.LangAnaly {
         }
 
         //撤销语法
-        BackGrammer():Model.GramerInfo {
-            var result = this._GrammerGroup.Remove().Item2;
+        BackGrammer(): Model.GramerInfo {
+            //将当前语法设置为错误
+            var result = this._GrammerGroup.Get().Item2;
+            result.GramerState = Model.GramerInfoState.Error;
 
-            //去除前面空值语法(是由当前撤销语法带来的)
-            while (true) {
-                var gramer = this._GrammerGroup.Get().Item2;
+            var index = this._GrammerGroup.Count() - 2;
+             //去除前面空值语法(是由当前撤销语法带来的)
+            while (index > 0) {
+                var gramer = this._GrammerGroup.Get(index).Item2;
                 if (gramer != null && !gramer.Value) {
-                    this._GrammerGroup.Remove();
+                    gramer.GramerState = Model.GramerInfoState.Error;
                 } else {
                     break;
                 }
+                index--;
             }
 
             return result;
         }
        
+
+        //获取当前状态
+        private GetCurState():Model.LALRState {
+            return this._GrammerGroup.ToEnumerble()
+                .Last(item => item.Item2 == null || item.Item2.GramerState != Model.GramerInfoState.Error)
+                .Item1;
+        }
 
         //获取语法在栈中的位置(语法)
         private GetIndex(grammer: Model.GramerInfo): number {
@@ -251,5 +292,6 @@ namespace CodeEdit.LangAnaly {
 
             return index;
         }
+
     }
 }
