@@ -7,7 +7,7 @@ class CodeMirrorExtend {
     //分析过的文本
     private _AnalyedText: string = null;
     //分析器
-    private _LangAnaly: CodeEdit.LangAnaly.LangAnalyBase;
+    _LangAnaly: CodeEdit.LangAnaly.LangAnalyBase;
     //样式函数
     StyleFunc:FuncOne<CodeEdit.LangAnaly.Model.GramerAnalyInfo,string>=null;
 
@@ -90,6 +90,7 @@ class CodeMirrorExtend {
         if (this._AnalyedText != text) {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
+            (<any>editor).Extend = this;
         }
     }
 

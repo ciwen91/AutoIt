@@ -6,7 +6,7 @@
         //字符阅读器
         private  _TokenReader: TokenReader;
         //语法阅读器
-        protected _GramerReader:GramerReader;
+        _GramerReader:GramerReader;
 
         //内容符号名称列表
         ContentNameGroup: List<string> = new List<string>();

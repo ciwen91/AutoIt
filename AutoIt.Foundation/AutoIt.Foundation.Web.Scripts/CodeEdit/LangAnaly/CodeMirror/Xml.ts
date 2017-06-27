@@ -11,7 +11,7 @@ CodeMirror.defineMode("xml", (editorConfig, config) => {
         new List<string>(["<"]));
 
     //样式函数
-    extend.StyleFunc= (analyInfo) => {
+    extend.StyleFunc = (analyInfo) => {
         var style = null;
 
         //获取语法和可能的父符号名称
@@ -61,6 +61,51 @@ CodeMirror.defineMode("xml", (editorConfig, config) => {
     };
 });
 
+
+CodeMirror.defineOption("autoTag",
+    true,
+    function (cm, val, old) {
+        var map = {};
+        map["'>'"] = function (cm) {
+            var extend = <CodeMirrorExtend>cm.Extend;
+            var analy = extend._LangAnaly;
+            var gramerReader = analy._GramerReader;
+           
+            var ranges = cm.listSelections();
+            for (var i = 0; i < ranges.length; i++) {
+                var range = ranges[i];
+               
+                setTimeout(function () {
+                    var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
+                    if (info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Start Tag")) {
+                        var nameGramer = gramerReader
+                            .GetClosetGrammer(item => item.Symbol.Name == "Name" &&
+                                gramerReader.GetParentMaySymbolGroup(item)
+                                .ToEnumerble()
+                                .Any(sItem => sItem.Name.indexOf("Tag") >= 0),
+                                info.GramerInfo);
+                        var tag = nameGramer.Value;
+
+                        range.anchor.ch++;
+                        cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
+                        var newPos = CodeMirror.Pos(range.head.line + 1,  10);
+                        console.log(newPos);
+                        
+                        cm.indentLine(range.head.line + 1,null,true);
+                        cm.indentLine(range.head.line + 2, null, true);
+                        cm.setSelections([{ head: newPos, anchor: newPos }]);
+                        
+                    }
+                }, 0);
+            }
+
+         
+
+            return CodeMirror.Pass;
+        }
+
+        cm.addKeyMap(map);
+    });
 
 
 

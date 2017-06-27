@@ -47,6 +47,7 @@ var CodeMirrorExtend = (function () {
     //编辑器的全局键,语法元数据地址,内容元素名称列表
     function CodeMirrorExtend(editorID, egtUrl, contentNameGroup, blockStartNameGroup) {
         if (contentNameGroup === void 0) { contentNameGroup = new List(); }
+        if (blockStartNameGroup === void 0) { blockStartNameGroup = new List(); }
         //分析过的文本
         this._AnalyedText = null;
         //样式函数
@@ -111,6 +112,7 @@ var CodeMirrorExtend = (function () {
         if (this._AnalyedText != text) {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
+            editor.Extend = this;
         }
     };
     //消耗语法
@@ -207,6 +209,38 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
             return extend.HighLight(stream, state);
         }
     };
+});
+CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
+    var map = {};
+    map["'>'"] = function (cm) {
+        var extend = cm.Extend;
+        var analy = extend._LangAnaly;
+        var gramerReader = analy._GramerReader;
+        var ranges = cm.listSelections();
+        for (var i = 0; i < ranges.length; i++) {
+            var range = ranges[i];
+            setTimeout(function () {
+                var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
+                if (info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Start Tag"; })) {
+                    var nameGramer = gramerReader
+                        .GetClosetGrammer(function (item) { return item.Symbol.Name == "Name" &&
+                        gramerReader.GetParentMaySymbolGroup(item)
+                            .ToEnumerble()
+                            .Any(function (sItem) { return sItem.Name.indexOf("Tag") >= 0; }); }, info.GramerInfo);
+                    var tag = nameGramer.Value;
+                    range.anchor.ch++;
+                    cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
+                    var newPos = CodeMirror.Pos(range.head.line + 1, 10);
+                    console.log(newPos);
+                    cm.indentLine(range.head.line + 1, null, true);
+                    cm.indentLine(range.head.line + 2, null, true);
+                    cm.setSelections([{ head: newPos, anchor: newPos }]);
+                }
+            }, 0);
+        }
+        return CodeMirror.Pass;
+    };
+    cm.addKeyMap(map);
 });
 var CodeEdit;
 (function (CodeEdit) {
@@ -616,13 +650,26 @@ var CodeEdit;
             //获取所有可能的父符号(当前语法)
             GramerReader.prototype.GetParentMaySymbolGroup = function (gramer) {
                 var parentMaySymbolGroup = new List();
+                //如果是错误语法则没有父符号
+                if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
+                    return parentMaySymbolGroup;
+                }
                 //如果有父语法,则为父语法的符号
                 if (gramer.Parent != null) {
                     parentMaySymbolGroup.Set(gramer.Parent.Symbol);
                 }
-                else {
-                    var index = this.GetIndex(gramer);
-                    //从上一个状态开始,找最近的GoTo动作上的符号
+                var index = this.GetIndex(gramer);
+                //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
+                if (parentMaySymbolGroup.Count() == 0) {
+                    var curState = this._GrammerGroup.Get(index).Item1;
+                    var reduce = curState.ActionGroup.ToEnumerble()
+                        .FirstOrDefault(null, function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce && item.TargetRule.SymbolGroup.Count() > 0; });
+                    if (reduce != null) {
+                        parentMaySymbolGroup.Set(reduce.TargetRule.NonTerminal);
+                    }
+                }
+                //从上一个状态开始,找最近的GoTo动作上的符号
+                if (parentMaySymbolGroup.Count() == 0) {
                     while (index > 0) {
                         var preInfo = this._GrammerGroup.Get(index - 1);
                         var preGramer = preInfo.Item2;
@@ -710,9 +757,16 @@ var CodeEdit;
                 return false;
             };
             //获取最近的语法(过滤函数)
-            GramerReader.prototype.GetClosetGrammer = function (whereFunc) {
+            GramerReader.prototype.GetClosetGrammer = function (whereFunc, gramer) {
+                if (gramer === void 0) { gramer = null; }
+                var index = -1;
+                if (gramer != null) {
+                    index = this.GetIndex(gramer);
+                }
                 var result = this._GrammerGroup.ToEnumerble()
-                    .Where(function (item) { return item.Item2 != null && item.Item2.GramerState != LangAnaly.Model.GramerInfoState.Error; })
+                    .Where(function (item, i) { return (index < 0 || i <= index) &&
+                    item.Item2 != null &&
+                    item.Item2.GramerState != LangAnaly.Model.GramerInfoState.Error; })
                     .Reverse()
                     .Select(function (item) { return item.Item2; })
                     .FirstOrDefault(null, whereFunc);

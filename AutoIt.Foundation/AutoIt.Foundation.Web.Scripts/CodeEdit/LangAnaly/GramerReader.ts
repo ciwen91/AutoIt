@@ -129,13 +129,31 @@ namespace CodeEdit.LangAnaly {
         GetParentMaySymbolGroup(gramer: Model.GramerInfo): List<Model.Symbol> {
             var parentMaySymbolGroup = new List<Model.Symbol>();
 
+            //如果是错误语法则没有父符号
+            if (gramer.GramerState == Model.GramerInfoState.Error) {
+                return parentMaySymbolGroup;
+            }
+
             //如果有父语法,则为父语法的符号
             if (gramer.Parent != null) {
                 parentMaySymbolGroup.Set(gramer.Parent.Symbol);
-            } else {
-                var index = this.GetIndex(gramer);
+            }
 
-                //从上一个状态开始,找最近的GoTo动作上的符号
+            var index = this.GetIndex(gramer);
+
+            //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
+            if (parentMaySymbolGroup.Count() == 0) {
+                var curState = this._GrammerGroup.Get(index).Item1;
+                var reduce = curState.ActionGroup.ToEnumerble()
+                    .FirstOrDefault(null,
+                        item => item.ActionType == Model.ActionType.Reduce && item.TargetRule.SymbolGroup.Count() > 0);
+                if (reduce != null) {
+                    parentMaySymbolGroup.Set(reduce.TargetRule.NonTerminal);
+                }
+            }
+
+            //从上一个状态开始,找最近的GoTo动作上的符号
+            if (parentMaySymbolGroup.Count() == 0) {
                 while (index > 0) {
                     var preInfo = this._GrammerGroup.Get(index - 1);
                     var preGramer = preInfo.Item2;
@@ -247,9 +265,17 @@ namespace CodeEdit.LangAnaly {
         }
 
         //获取最近的语法(过滤函数)
-        GetClosetGrammer(whereFunc:FuncOne<Model.GramerInfo,boolean>):Model.GramerInfo {
+        GetClosetGrammer(whereFunc: FuncOne<Model.GramerInfo, boolean>, gramer: Model.GramerInfo = null): Model.
+            GramerInfo {
+            var index = -1;
+            if (gramer != null) {
+                index = this.GetIndex(gramer);
+            }
+
             var result = this._GrammerGroup.ToEnumerble()
-                .Where(item=>item.Item2!=null&&item.Item2.GramerState!=Model.GramerInfoState.Error)
+                .Where((item, i) => (index < 0 || i <= index) &&
+                    item.Item2 != null &&
+                    item.Item2.GramerState != Model.GramerInfoState.Error)
                 .Reverse()
                 .Select(item => item.Item2)
                 .FirstOrDefault(null, whereFunc);
