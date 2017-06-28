@@ -267,17 +267,21 @@ namespace CodeEdit.LangAnaly {
         //获取最近的语法(过滤函数)
         GetClosetGrammer(whereFunc: FuncOne<Model.GramerInfo, boolean>, gramer: Model.GramerInfo = null): Model.
             GramerInfo {
-            var index = -1;
+            var group = this._GrammerGroup.ToEnumerble().Select(item=>item.Item2);
+
             if (gramer != null) {
-                index = this.GetIndex(gramer);
+                if (gramer.Parent != null) {
+                    group = gramer.Parent.GetChildGroup().ToEnumerble();
+                }
+
+                var index = group.IndexOf(gramer);
+                group = group.Where((item, i) => i <= index);
             }
 
-            var result = this._GrammerGroup.ToEnumerble()
-                .Where((item, i) => (index < 0 || i <= index) &&
-                    item.Item2 != null &&
-                    item.Item2.GramerState != Model.GramerInfoState.Error)
-                .Reverse()
-                .Select(item => item.Item2)
+            var result = group
+                .Where(item=>item != null &&
+                    item.GramerState != Model.GramerInfoState.Error)
+                .Reverse()  
                 .FirstOrDefault(null, whereFunc);
             return result;
         }

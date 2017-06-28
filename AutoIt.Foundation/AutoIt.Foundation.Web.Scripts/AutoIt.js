@@ -215,11 +215,11 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
     map["'>'"] = function (cm) {
         var extend = cm.Extend;
         var analy = extend._LangAnaly;
-        var gramerReader = analy._GramerReader;
         var ranges = cm.listSelections();
         for (var i = 0; i < ranges.length; i++) {
             var range = ranges[i];
             setTimeout(function () {
+                var gramerReader = analy._GramerReader;
                 var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
                 if (info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Start Tag"; })) {
                     var nameGramer = gramerReader
@@ -230,14 +230,30 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
                     var tag = nameGramer.Value;
                     range.anchor.ch++;
                     cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
-                    var newPos = CodeMirror.Pos(range.head.line + 1, 10);
-                    console.log(newPos);
-                    cm.indentLine(range.head.line + 1, null, true);
-                    cm.indentLine(range.head.line + 2, null, true);
+                    // debugger;
+                    cm.indentLine(range.head.line + 1, "prev", true);
+                    cm.indentLine(range.head.line + 1, "add", true);
+                    cm.indentLine(range.head.line + 2, "prev", true);
+                    cm.indentLine(range.head.line + 2, "subtract", true);
+                    var newPos = CodeMirror.Pos(range.head.line + 1, cm.getLine(range.head.line + 1).length);
                     cm.setSelections([{ head: newPos, anchor: newPos }]);
                 }
             }, 0);
         }
+        return CodeMirror.Pass;
+    };
+    map["'\"'"] = function (cm) {
+        var extend = cm.Extend;
+        var analy = extend._LangAnaly;
+        var range = cm.listSelections()[0];
+        setTimeout(function () {
+            var gramerReader = analy._GramerReader;
+            var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
+            console.log(info);
+            cm.replaceRange('"', range.head, range.anchor);
+            var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
+            cm.setSelections([{ head: newPos, anchor: newPos }]);
+        }, 0);
         return CodeMirror.Pass;
     };
     cm.addKeyMap(map);
@@ -759,16 +775,18 @@ var CodeEdit;
             //获取最近的语法(过滤函数)
             GramerReader.prototype.GetClosetGrammer = function (whereFunc, gramer) {
                 if (gramer === void 0) { gramer = null; }
-                var index = -1;
+                var group = this._GrammerGroup.ToEnumerble().Select(function (item) { return item.Item2; });
                 if (gramer != null) {
-                    index = this.GetIndex(gramer);
+                    if (gramer.Parent != null) {
+                        group = gramer.Parent.GetChildGroup().ToEnumerble();
+                    }
+                    var index = group.IndexOf(gramer);
+                    group = group.Where(function (item, i) { return i <= index; });
                 }
-                var result = this._GrammerGroup.ToEnumerble()
-                    .Where(function (item, i) { return (index < 0 || i <= index) &&
-                    item.Item2 != null &&
-                    item.Item2.GramerState != LangAnaly.Model.GramerInfoState.Error; })
+                var result = group
+                    .Where(function (item) { return item != null &&
+                    item.GramerState != LangAnaly.Model.GramerInfoState.Error; })
                     .Reverse()
-                    .Select(function (item) { return item.Item2; })
                     .FirstOrDefault(null, whereFunc);
                 return result;
             };

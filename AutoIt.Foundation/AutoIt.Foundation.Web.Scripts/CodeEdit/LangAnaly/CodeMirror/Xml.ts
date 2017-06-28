@@ -69,13 +69,13 @@ CodeMirror.defineOption("autoTag",
         map["'>'"] = function (cm) {
             var extend = <CodeMirrorExtend>cm.Extend;
             var analy = extend._LangAnaly;
-            var gramerReader = analy._GramerReader;
            
             var ranges = cm.listSelections();
             for (var i = 0; i < ranges.length; i++) {
                 var range = ranges[i];
                
                 setTimeout(function () {
+                    var gramerReader = analy._GramerReader;
                     var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
                     if (info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Start Tag")) {
                         var nameGramer = gramerReader
@@ -88,11 +88,13 @@ CodeMirror.defineOption("autoTag",
 
                         range.anchor.ch++;
                         cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
-                        var newPos = CodeMirror.Pos(range.head.line + 1,  10);
-                        console.log(newPos);
                         
-                        cm.indentLine(range.head.line + 1,null,true);
-                        cm.indentLine(range.head.line + 2, null, true);
+                       // debugger;
+                        cm.indentLine(range.head.line + 1, "prev", true);
+                        cm.indentLine(range.head.line + 1, "add", true);
+                        cm.indentLine(range.head.line + 2, "prev", true);
+                        cm.indentLine(range.head.line + 2, "subtract", true);
+                        var newPos = CodeMirror.Pos(range.head.line + 1, cm.getLine(range.head.line + 1).length);
                         cm.setSelections([{ head: newPos, anchor: newPos }]);
                         
                     }
@@ -100,6 +102,24 @@ CodeMirror.defineOption("autoTag",
             }
 
          
+
+            return CodeMirror.Pass;
+        }
+
+        map["'\"'"] = function (cm) {
+            var extend = <CodeMirrorExtend>cm.Extend;
+            var analy = extend._LangAnaly;
+            var range = cm.listSelections()[0];
+
+            setTimeout(function() {
+                    var gramerReader = analy._GramerReader;
+                    var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
+                    console.log(info);
+                    cm.replaceRange('"', range.head, range.anchor);
+                    var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
+                    cm.setSelections([{ head: newPos, anchor: newPos }]);
+                },
+                0);
 
             return CodeMirror.Pass;
         }
