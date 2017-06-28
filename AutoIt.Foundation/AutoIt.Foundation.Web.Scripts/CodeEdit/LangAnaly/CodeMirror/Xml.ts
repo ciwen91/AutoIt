@@ -115,9 +115,12 @@ CodeMirror.defineOption("autoTag",
                     var gramerReader = analy._GramerReader;
                     var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
                     console.log(info);
-                    cm.replaceRange('"', range.head, range.anchor);
-                    var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
-                    cm.setSelections([{ head: newPos, anchor: newPos }]);
+
+                    if (info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Attribute")) {
+                        cm.replaceRange('"', range.head, range.anchor);
+                        var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
+                        cm.setSelections([{ head: newPos, anchor: newPos }]);
+                    }
                 },
                 0);
 

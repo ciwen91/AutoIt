@@ -14,6 +14,9 @@ module CodeEdit.LangAnaly.Model {
         //子语法集合
         private _ChildGroup: List<GramerInfo> = new List<GramerInfo>();
 
+        public MayParent: GramerInfo = null;
+        public MayToken:Model.TokenInfo;
+
         constructor(gramerState: GramerInfoState, startToken: TokenInfo) {
             super(startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);
 

@@ -131,6 +131,13 @@ namespace CodeEdit.LangAnaly {
 
             //如果是错误语法则没有父符号
             if (gramer.GramerState == Model.GramerInfoState.Error) {
+                var index = this.GetIndex(gramer);
+                if (index - 1 > 0) {
+                    var preGramer = this._GrammerGroup.Get(index - 1).Item2;
+                    if (preGramer.Index < 0) {
+                        return this.GetParentMaySymbolGroup(preGramer);
+                    }
+                }
                 return parentMaySymbolGroup;
             }
 
