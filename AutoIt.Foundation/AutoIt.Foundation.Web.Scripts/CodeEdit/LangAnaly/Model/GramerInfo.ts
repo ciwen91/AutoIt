@@ -15,7 +15,7 @@ module CodeEdit.LangAnaly.Model {
         private _ChildGroup: List<GramerInfo> = new List<GramerInfo>();
 
         public MayParent: GramerInfo = null;
-        public MayToken:Model.TokenInfo;
+        public MayParentSymbolGroup:List<Model.Symbol>=new List<Model.Symbol>();
 
         constructor(gramerState: GramerInfoState, startToken: TokenInfo) {
             super(startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);

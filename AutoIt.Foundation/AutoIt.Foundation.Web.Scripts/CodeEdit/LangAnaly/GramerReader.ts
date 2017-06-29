@@ -98,6 +98,52 @@ namespace CodeEdit.LangAnaly {
             }
         }
 
+        //结束分析
+        EndRead() {
+            this._GrammerGroup.ToEnumerble()
+                .Where(item=>item.Item2!=null&&item.Item2.Parent==null&&item.Item2.GramerState!=Model.GramerInfoState.Error)
+                .ForEach((gramerItem, index) => {
+                    var mayParentSymbolGroup: List<Model.Symbol> = new List<Model.Symbol>();
+
+                    //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
+                    if (mayParentSymbolGroup.Count() == 0) {
+                        var curState = gramerItem.Item1;
+                        var reduce = curState.ActionGroup.ToEnumerble()
+                            .FirstOrDefault(null,
+                                item => item.ActionType == Model.ActionType.Reduce &&
+                                item.TargetRule.SymbolGroup.Count() > 0);
+                        if (reduce != null) {
+                            mayParentSymbolGroup.Set(reduce.TargetRule.NonTerminal);
+                        }
+                    }
+
+                    //从上一个状态开始,找最近的GoTo动作上的符号
+                    if (mayParentSymbolGroup.Count() == 0) {
+                        while (index > 0) {
+                            var preInfo = this._GrammerGroup.Get(index - 1);
+                            var preGramer = preInfo.Item2;
+
+                            if (preGramer == null || preGramer.GramerState != Model.GramerInfoState.Error) {
+                                var preState = preInfo.Item1; 
+
+                                    mayParentSymbolGroup = preState.ActionGroup.ToEnumerble()
+                                        .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
+                                        .Select(sItem => sItem.Symbol)
+                                        .ToList();
+
+                                if (mayParentSymbolGroup.Count() > 0) {
+                                    break;
+                                }
+                            }
+
+                            index--;
+                        }
+                    }
+
+                    gramerItem.Item2.MayParentSymbolGroup = mayParentSymbolGroup;
+                });
+        }
+
         //获取指定位置的语法信息(行,列,内容符号名称列表)
         GetGrammerInfo(line: number, col: number, contentNameGroup: List<string>): Model.GramerInfo {
             //初始列表为顶级语法列表
@@ -129,57 +175,13 @@ namespace CodeEdit.LangAnaly {
         GetParentMaySymbolGroup(gramer: Model.GramerInfo): List<Model.Symbol> {
             var parentMaySymbolGroup = new List<Model.Symbol>();
 
-            //如果是错误语法则没有父符号
-            if (gramer.GramerState == Model.GramerInfoState.Error) {
-                var index = this.GetIndex(gramer);
-                if (index - 1 > 0) {
-                    var preGramer = this._GrammerGroup.Get(index - 1).Item2;
-                    if (preGramer.Index < 0) {
-                        return this.GetParentMaySymbolGroup(preGramer);
-                    }
-                }
-                return parentMaySymbolGroup;
-            }
-
             //如果有父语法,则为父语法的符号
             if (gramer.Parent != null) {
                 parentMaySymbolGroup.Set(gramer.Parent.Symbol);
-            }
-
-            var index = this.GetIndex(gramer);
-
-            //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
-            if (parentMaySymbolGroup.Count() == 0) {
-                var curState = this._GrammerGroup.Get(index).Item1;
-                var reduce = curState.ActionGroup.ToEnumerble()
-                    .FirstOrDefault(null,
-                        item => item.ActionType == Model.ActionType.Reduce && item.TargetRule.SymbolGroup.Count() > 0);
-                if (reduce != null) {
-                    parentMaySymbolGroup.Set(reduce.TargetRule.NonTerminal);
-                }
-            }
-
-            //从上一个状态开始,找最近的GoTo动作上的符号
-            if (parentMaySymbolGroup.Count() == 0) {
-                while (index > 0) {
-                    var preInfo = this._GrammerGroup.Get(index - 1);
-                    var preGramer = preInfo.Item2;
-
-                    if (preGramer == null || preGramer.GramerState != Model.GramerInfoState.Error) {
-                        var preState = preInfo.Item1;
-
-                        parentMaySymbolGroup = preState.ActionGroup.ToEnumerble()
-                            .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
-                            .Select(sItem => sItem.Symbol)
-                            .ToList();
-
-                        if (parentMaySymbolGroup.Count() > 0) {
-                            break;
-                        }
-                    }
-
-                    index--;
-                }
+            } else if (gramer.MayParent != null) {
+                parentMaySymbolGroup.Set(gramer.MayParent.Symbol);
+            } else {
+                parentMaySymbolGroup = gramer.MayParentSymbolGroup;
             }
 
             return parentMaySymbolGroup;
@@ -224,7 +226,14 @@ namespace CodeEdit.LangAnaly {
         }
 
         //设置错误语法(语法)
-        SetEroGramer(grammer:Model.GramerInfo):GramerReader {
+        SetEroGramer(grammer: Model.GramerInfo): GramerReader {
+            if (this._GrammerGroup.Count()>1) {
+                var preGramer = this._GrammerGroup.Get().Item2;
+                if (preGramer.Index < 0) {
+                    grammer.MayParent = preGramer;
+                }
+            }
+
             this._GrammerGroup.Set(new Tuple(<Model.LALRState>None, grammer));
             return this;
         }

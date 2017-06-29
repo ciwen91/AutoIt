@@ -86,6 +86,7 @@
                             this.GramerAccept(gramer);
                             //根语法为Accept语法的第一个子语法
                             var resultGrammer = gramer.GetChildGroup().Get(0);
+                            this._GramerReader.EndRead();
 
                             return resultGrammer;
                         }
@@ -117,7 +118,9 @@
                     break;
                 }
             }
-            
+
+            this._GramerReader.EndRead();
+
             return null;
         } 
         //获取指定位置的分析信息(行,列)     
