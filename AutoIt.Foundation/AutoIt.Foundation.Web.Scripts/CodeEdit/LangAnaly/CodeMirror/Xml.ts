@@ -27,11 +27,11 @@ CodeMirror.defineMode("xml", (editorConfig, config) => {
         //名称
         else if (name == "Name") {
             //标签名(父节点为标签)
-            if (parentMayNameGroup.Any(item => item.indexOf("Tag") >= 0)) {
+            if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Tag") >= 0) {
                 style = "tag";
             }
             //属性名(父节点为属性)
-            else if (parentMayNameGroup.Contains("Attribute")) {
+            else if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Attribute") >= 0) {
                 style = "attribute";
             }
         }
@@ -77,7 +77,7 @@ CodeMirror.defineOption("autoTag",
                 setTimeout(function () {
                     var gramerReader = analy._GramerReader;
                     var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
-                    if (info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Start Tag")) {
+                    if (info.ParantMaySymbolGroup.Count() > 0 && info.ParantMaySymbolGroup.Get(0).Name == "Start Tag") {
                         var nameGramer = gramerReader
                             .GetClosetGrammer(item => item.Symbol.Name == "Name" &&
                                 gramerReader.GetParentMaySymbolGroup(item)
@@ -88,15 +88,15 @@ CodeMirror.defineOption("autoTag",
 
                         range.anchor.ch++;
                         cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
-                        
-                       // debugger;
+
+                        // debugger;
                         cm.indentLine(range.head.line + 1, "prev", true);
                         cm.indentLine(range.head.line + 1, "add", true);
                         cm.indentLine(range.head.line + 2, "prev", true);
                         cm.indentLine(range.head.line + 2, "subtract", true);
                         var newPos = CodeMirror.Pos(range.head.line + 1, cm.getLine(range.head.line + 1).length);
                         cm.setSelections([{ head: newPos, anchor: newPos }]);
-                        
+
                     }
                 }, 0);
             }
@@ -116,7 +116,9 @@ CodeMirror.defineOption("autoTag",
                     var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
                     console.log(info);
 
-                    if (info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Attribute")) {
+                    if (info.ParantMaySymbolGroup.Count() > 0 &&
+                        info.ParantMaySymbolGroup.Get(0).Name == "Val" &&
+                        info.ParantMaySymbolGroup.ToEnumerble().Any(item => item.Name == "Attribute")) {
                         cm.replaceRange('"', range.head, range.anchor);
                         var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
                         cm.setSelections([{ head: newPos, anchor: newPos }]);

@@ -176,10 +176,18 @@ namespace CodeEdit.LangAnaly {
             var parentMaySymbolGroup = new List<Model.Symbol>();
 
             //如果有父语法,则为父语法的符号
-            if (gramer.Parent != null) {
-                parentMaySymbolGroup.Set(gramer.Parent.Symbol);
+            if (gramer.Parent != null && gramer.GramerState != Model.GramerInfoState.Error) {
+                var parentGramer = gramer.Parent;
+                while (parentGramer != null) {
+                    parentMaySymbolGroup.Set(parentGramer.Symbol);
+                    parentGramer = parentGramer.Parent;
+                }
             } else if (gramer.MayParent != null) {
-                parentMaySymbolGroup.Set(gramer.MayParent.Symbol);
+                var parentGramer = gramer.MayParent;
+                while (parentGramer != null) {
+                    parentMaySymbolGroup.Set(parentGramer.Symbol);
+                    parentGramer = parentGramer.Parent;
+                }
             } else {
                 parentMaySymbolGroup = gramer.MayParentSymbolGroup;
             }

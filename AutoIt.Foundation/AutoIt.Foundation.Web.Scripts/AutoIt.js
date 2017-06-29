@@ -182,10 +182,10 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
         }
         else if (name == "Name") {
             //标签名(父节点为标签)
-            if (parentMayNameGroup.Any(function (item) { return item.indexOf("Tag") >= 0; })) {
+            if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Tag") >= 0) {
                 style = "tag";
             }
-            else if (parentMayNameGroup.Contains("Attribute")) {
+            else if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Attribute") >= 0) {
                 style = "attribute";
             }
         }
@@ -221,7 +221,7 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
             setTimeout(function () {
                 var gramerReader = analy._GramerReader;
                 var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
-                if (info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Start Tag"; })) {
+                if (info.ParantMaySymbolGroup.Count() > 0 && info.ParantMaySymbolGroup.Get(0).Name == "Start Tag") {
                     var nameGramer = gramerReader
                         .GetClosetGrammer(function (item) { return item.Symbol.Name == "Name" &&
                         gramerReader.GetParentMaySymbolGroup(item)
@@ -250,7 +250,9 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
             var gramerReader = analy._GramerReader;
             var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
             console.log(info);
-            if (info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Attribute"; })) {
+            if (info.ParantMaySymbolGroup.Count() > 0 &&
+                info.ParantMaySymbolGroup.Get(0).Name == "Val" &&
+                info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Attribute"; })) {
                 cm.replaceRange('"', range.head, range.anchor);
                 var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
                 cm.setSelections([{ head: newPos, anchor: newPos }]);
@@ -707,11 +709,19 @@ var CodeEdit;
             GramerReader.prototype.GetParentMaySymbolGroup = function (gramer) {
                 var parentMaySymbolGroup = new List();
                 //如果有父语法,则为父语法的符号
-                if (gramer.Parent != null) {
-                    parentMaySymbolGroup.Set(gramer.Parent.Symbol);
+                if (gramer.Parent != null && gramer.GramerState != LangAnaly.Model.GramerInfoState.Error) {
+                    var parentGramer = gramer.Parent;
+                    while (parentGramer != null) {
+                        parentMaySymbolGroup.Set(parentGramer.Symbol);
+                        parentGramer = parentGramer.Parent;
+                    }
                 }
                 else if (gramer.MayParent != null) {
-                    parentMaySymbolGroup.Set(gramer.MayParent.Symbol);
+                    var parentGramer = gramer.MayParent;
+                    while (parentGramer != null) {
+                        parentMaySymbolGroup.Set(parentGramer.Symbol);
+                        parentGramer = parentGramer.Parent;
+                    }
                 }
                 else {
                     parentMaySymbolGroup = gramer.MayParentSymbolGroup;
