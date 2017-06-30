@@ -129,6 +129,7 @@ namespace CodeEdit.LangAnaly {
                                     mayParentSymbolGroup = preState.ActionGroup.ToEnumerble()
                                         .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
                                         .Select(sItem => sItem.Symbol)
+                                        .Reverse()
                                         .ToList();
 
                                 if (mayParentSymbolGroup.Count() > 0) {

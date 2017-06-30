@@ -240,3 +240,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/AutoIt.Foundation/AutoIt.Foundation.Web.Scripts/Scripts/codemirror-2.37
