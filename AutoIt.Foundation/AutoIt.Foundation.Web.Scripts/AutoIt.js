@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -652,41 +647,11 @@ var CodeEdit;
             };
             //结束分析
             GramerReader.prototype.EndRead = function () {
-                var _this = this;
+                //对于没有父元素且不为错误,则计算可能的父符号
                 this._GrammerGroup.ToEnumerble()
                     .Where(function (item) { return item.Item2 != null && item.Item2.Parent == null && item.Item2.GramerState != LangAnaly.Model.GramerInfoState.Error; })
-                    .ForEach(function (gramerItem, index) {
-                    var mayParentSymbolGroup = new List();
-                    //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
-                    if (mayParentSymbolGroup.Count() == 0) {
-                        var curState = gramerItem.Item1;
-                        var reduce = curState.ActionGroup.ToEnumerble()
-                            .FirstOrDefault(null, function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce &&
-                            item.TargetRule.SymbolGroup.Count() > 0; });
-                        if (reduce != null) {
-                            mayParentSymbolGroup.Set(reduce.TargetRule.NonTerminal);
-                        }
-                    }
-                    //从上一个状态开始,找最近的GoTo动作上的符号
-                    if (mayParentSymbolGroup.Count() == 0) {
-                        while (index > 0) {
-                            var preInfo = _this._GrammerGroup.Get(index - 1);
-                            var preGramer = preInfo.Item2;
-                            if (preGramer == null || preGramer.GramerState != LangAnaly.Model.GramerInfoState.Error) {
-                                var preState = preInfo.Item1;
-                                mayParentSymbolGroup = preState.ActionGroup.ToEnumerble()
-                                    .Where(function (sItem) { return sItem.ActionType == LangAnaly.Model.ActionType.Goto; })
-                                    .Select(function (sItem) { return sItem.Symbol; })
-                                    .Reverse()
-                                    .ToList();
-                                if (mayParentSymbolGroup.Count() > 0) {
-                                    break;
-                                }
-                            }
-                            index--;
-                        }
-                    }
-                    gramerItem.Item2.MayParentSymbolGroup = mayParentSymbolGroup;
+                    .ForEach(function (gramerItem) {
+                    gramerItem.Item2.MayParentSymbolGroup = gramerItem.Item1.GetMayParentSymbolGroup();
                 });
             };
             //获取指定位置的语法信息(行,列,内容符号名称列表)
@@ -766,12 +731,39 @@ var CodeEdit;
             };
             //设置错误语法(语法)
             GramerReader.prototype.SetEroGramer = function (grammer) {
-                if (this._GrammerGroup.Count() > 1) {
-                    var preGramer = this._GrammerGroup.Get().Item2;
-                    if (preGramer.Index < 0) {
-                        grammer.MayParent = preGramer;
+                var index = this._GrammerGroup.Count() - 1;
+                var preACGrammer = null;
+                var preACState = null;
+                //找到最前的补全元素
+                while (index > 0) {
+                    var preGrammer = this._GrammerGroup.Get(index).Item2;
+                    if (preGrammer.Index >= 0) {
+                        break;
+                    }
+                    else {
+                        preACGrammer = preGrammer;
+                        preACState = this._GrammerGroup.Get(index).Item1;
+                    }
+                    index--;
+                }
+                //如果存在补全元素,且错误语法为补全元素的一部分,则设置可能的父元素
+                if (preACGrammer != null && grammer.Value) {
+                    var maySymbolGroup = this._EgtStorer.DFAStateGroup.Get(0)
+                        .GetMayAcceptSymbolGroup(grammer.Value);
+                    if (maySymbolGroup.Contains(preACGrammer.Symbol)) {
+                        //如果补全元素有父元素则设置为可能的父元素
+                        if (preACGrammer.Parent != null) {
+                            grammer.MayParent = preACGrammer;
+                        }
+                        else {
+                            //否则根据补全元素的LALR状态获取可能的父元素
+                            var group = new List([preACGrammer.Symbol]);
+                            group.SetRange(preACState.GetMayParentSymbolGroup());
+                            grammer.MayParentSymbolGroup = group;
+                        }
                     }
                 }
+                //将错误语法加到堆栈中
                 this._GrammerGroup.Set(new Tuple(None, grammer));
                 return this;
             };
@@ -1193,6 +1185,42 @@ var CodeEdit;
                         .FirstOrDefault(null, function (item) { return item.IsFit(cha); });
                     return edge;
                 };
+                //��ȡ���ܽ��ܵķ���(�ַ���,���ʹ���״̬)
+                DFAState.prototype.GetMayAcceptSymbolGroup = function (str, visiteStateGroup) {
+                    if (visiteStateGroup === void 0) { visiteStateGroup = new List(); }
+                    var group = new List();
+                    //������ʹ��򷵻�,������
+                    if (visiteStateGroup.Contains(this)) {
+                        return group;
+                    }
+                    else {
+                        visiteStateGroup.Set(this);
+                    }
+                    //����ַ�������Ϊ0,����ƥ��
+                    if (str.length > 0) {
+                        var edge = this.GetEdge(str[0]);
+                        //ƥ��ʧ��ֱ�ӷ���
+                        if (edge == null) {
+                            return group;
+                        }
+                        else {
+                            return edge.TargetState.GetMayAcceptSymbolGroup(str.substr(1), visiteStateGroup);
+                        }
+                    }
+                    else {
+                        //��ǰ״̬�Ŀɽ��ܵķ���
+                        if (this.AcceptSymbol != null) {
+                            group.Set(this.AcceptSymbol);
+                        }
+                        //����״̬�Ŀɽ��ܵķ���
+                        var nextGroup = this.EdgGroup.ToEnumerble()
+                            .SelectMany(function (item) { return item.TargetState.GetMayAcceptSymbolGroup(str, visiteStateGroup).ToArray(); })
+                            .ToList();
+                        group.SetRange(nextGroup);
+                        group = group.ToEnumerble().Distinct().ToList();
+                        return group;
+                    }
+                };
                 return DFAState;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
             Model.DFAState = DFAState;
@@ -1397,12 +1425,51 @@ var CodeEdit;
                     var _this = _super !== null && _super.apply(this, arguments) || this;
                     //�����б�
                     _this.ActionGroup = new List();
+                    _this._MayParentSymbolGroup = null;
                     return _this;
                 }
                 //��ȡ����(����)
                 LALRState.prototype.GetAction = function (symbol) {
                     var action = this.ActionGroup.ToEnumerble().FirstOrDefault(null, function (item) { return item.Symbol == symbol; });
                     return action;
+                };
+                //��ȡ���ܵĸ�����
+                LALRState.prototype.GetMayParentSymbolGroup = function () {
+                    //��������,��ֱ�ӷ���
+                    if (this._MayParentSymbolGroup != null) {
+                        return this._MayParentSymbolGroup;
+                    }
+                    else {
+                        var group = this.GetMayParentSymbolGroup$(1, new List());
+                        group = group.ToEnumerble().Distinct().ToList();
+                        this._MayParentSymbolGroup = group;
+                        return group;
+                    }
+                };
+                //��ȡ���ܵĸ�����
+                LALRState.prototype.GetMayParentSymbolGroup$ = function (deep, visitedStateGroup) {
+                    //������ʹ��򷵻�,�����Ƿ��ʹ�
+                    if (visitedStateGroup.Contains(this)) {
+                        return new List();
+                    }
+                    else {
+                        visitedStateGroup.Set(this);
+                    }
+                    //�ҵ����е���ȴ��ڵ��ڵ�ǰ��ȵĹ�ԼԪ��
+                    var curGroup = this.ActionGroup.ToEnumerble()
+                        .Where(function (item) { return item
+                        .ActionType ==
+                        Model.ActionType.Reduce &&
+                        item.TargetRule.SymbolGroup.Count() >= deep; })
+                        .Select(function (item) { return item.TargetRule.NonTerminal; })
+                        .ToList();
+                    //���������GoToԪ��,�ҵ����+1�ĸ�Ԫ��
+                    var mayGroup = this.ActionGroup.ToEnumerble()
+                        .Where(function (item) { return item.ActionType == Model.ActionType.Shift || item.ActionType == Model.ActionType.Goto; })
+                        .SelectMany(function (item) { return item.TargetState.GetMayParentSymbolGroup$(deep + 1, visitedStateGroup).ToArray(); })
+                        .ToList();
+                    var resultGroup = curGroup.SetRange(mayGroup);
+                    return resultGroup;
                 };
                 return LALRState;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));

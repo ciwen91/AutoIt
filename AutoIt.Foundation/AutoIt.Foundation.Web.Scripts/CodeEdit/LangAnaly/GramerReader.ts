@@ -100,48 +100,11 @@ namespace CodeEdit.LangAnaly {
 
         //结束分析
         EndRead() {
+            //对于没有父元素且不为错误,则计算可能的父符号
             this._GrammerGroup.ToEnumerble()
                 .Where(item=>item.Item2!=null&&item.Item2.Parent==null&&item.Item2.GramerState!=Model.GramerInfoState.Error)
-                .ForEach((gramerItem, index) => {
-                    var mayParentSymbolGroup: List<Model.Symbol> = new List<Model.Symbol>();
-
-                    //如果当前状态有规约(且规约的主体符号数大于0),则为产生式主题符号
-                    if (mayParentSymbolGroup.Count() == 0) {
-                        var curState = gramerItem.Item1;
-                        var reduce = curState.ActionGroup.ToEnumerble()
-                            .FirstOrDefault(null,
-                                item => item.ActionType == Model.ActionType.Reduce &&
-                                item.TargetRule.SymbolGroup.Count() > 0);
-                        if (reduce != null) {
-                            mayParentSymbolGroup.Set(reduce.TargetRule.NonTerminal);
-                        }
-                    }
-
-                    //从上一个状态开始,找最近的GoTo动作上的符号
-                    if (mayParentSymbolGroup.Count() == 0) {
-                        while (index > 0) {
-                            var preInfo = this._GrammerGroup.Get(index - 1);
-                            var preGramer = preInfo.Item2;
-
-                            if (preGramer == null || preGramer.GramerState != Model.GramerInfoState.Error) {
-                                var preState = preInfo.Item1; 
-
-                                    mayParentSymbolGroup = preState.ActionGroup.ToEnumerble()
-                                        .Where(sItem => sItem.ActionType == Model.ActionType.Goto)
-                                        .Select(sItem => sItem.Symbol)
-                                        .Reverse()
-                                        .ToList();
-
-                                if (mayParentSymbolGroup.Count() > 0) {
-                                    break;
-                                }
-                            }
-
-                            index--;
-                        }
-                    }
-
-                    gramerItem.Item2.MayParentSymbolGroup = mayParentSymbolGroup;
+                .ForEach((gramerItem) => {
+                    gramerItem.Item2.MayParentSymbolGroup = gramerItem.Item1.GetMayParentSymbolGroup();
                 });
         }
 
@@ -236,14 +199,46 @@ namespace CodeEdit.LangAnaly {
 
         //设置错误语法(语法)
         SetEroGramer(grammer: Model.GramerInfo): GramerReader {
-            if (this._GrammerGroup.Count()>1) {
-                var preGramer = this._GrammerGroup.Get().Item2;
-                if (preGramer.Index < 0) {
-                    grammer.MayParent = preGramer;
+            var index = this._GrammerGroup.Count() - 1;
+            var preACGrammer: Model.GramerInfo = null;
+            var preACState: Model.LALRState = null;
+            
+            //找到最前的补全元素
+            while (index > 0) {
+                var preGrammer = this._GrammerGroup.Get(index).Item2;
+
+                if (preGrammer.Index >= 0) {
+                    break;
+                }
+                else {
+                    preACGrammer = preGrammer;
+                    preACState = this._GrammerGroup.Get(index).Item1;
+                }
+
+                index--;
+            }
+
+            //如果存在补全元素,且错误语法为补全元素的一部分,则设置可能的父元素
+            if (preACGrammer != null && grammer.Value) {
+                var maySymbolGroup = this._EgtStorer.DFAStateGroup.Get(0)
+                    .GetMayAcceptSymbolGroup(grammer.Value);
+                if (maySymbolGroup.Contains(preACGrammer.Symbol)) {
+                    //如果补全元素有父元素则设置为可能的父元素
+                    if (preACGrammer.Parent != null) {
+                        grammer.MayParent = preACGrammer;
+                    }
+                    else {
+                        //否则根据补全元素的LALR状态获取可能的父元素
+                        var group = new List<Model.Symbol>([preACGrammer.Symbol]);
+                        group.SetRange(preACState.GetMayParentSymbolGroup());
+                        grammer.MayParentSymbolGroup = group;
+                    }
                 }
             }
 
+            //将错误语法加到堆栈中
             this._GrammerGroup.Set(new Tuple(<Model.LALRState>None, grammer));
+
             return this;
         }
 
