@@ -73,10 +73,10 @@
 
                             //如果语义错误,则撤回语法并设置为错误
                             if (!this.IsGramerMeanEro(gramer)) {
-                                this._GramerReader.BackGrammer();   
+                                this._GramerReader.BackGrammer();
                             } else {
                                 this.GramerRead(gramer);
-                            }      
+                            }
 
                             //Reduce时继续处理当前Token
                             continue;
@@ -90,17 +90,18 @@
 
                             return resultGrammer;
                         }
-                       //如果是错误,尝试撤销语法(块开始元素),尝试补全语法
+                        //如果是错误,尝试撤销语法(块开始元素),尝试补全语法
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
                             //如果是块开始元素,则撤销前面的语法(直至正确为止)
-                            if (gramer.Symbol != null && this.BlockStartNameGroup.Contains(gramer.Symbol.Name)) {
-                                this._GramerReader.BackGrammer();
-                                //继续消耗字符
-                                continue;
+                            if (gramer.Symbol != null && (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF")) {
+                                if (this._GramerReader.AutoComplete()) {
+                                    //继续消耗字符
+                                    continue;
+                                }
                             }
 
                             //尝试补全语法
-                            var isAutoComplete = this._GramerReader.AutoComplete();
+                            var isAutoComplete = this._GramerReader.AutoComplete(true);
                             if (isAutoComplete) {
                                 //继续消耗字符
                                 continue;

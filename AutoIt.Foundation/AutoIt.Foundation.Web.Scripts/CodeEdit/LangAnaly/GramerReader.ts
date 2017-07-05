@@ -80,6 +80,17 @@ namespace CodeEdit.LangAnaly {
                             gramerSymbol));
                     return gramerSymbol;
                 }
+                //跳转
+                else if (action.ActionType == Model.ActionType.Goto) {
+                    var gramerSymbol = new LangAnaly.Model.GramerInfo(LangAnaly.Model.GramerInfoState.Reduce, tokenInfo);
+
+                    this._GrammerGroup
+                        .Set(new Tuple<Model.LALRState,
+                            Model.
+                            GramerInfo>(action.TargetState,
+                            gramerSymbol));
+                    return gramerSymbol;
+                }
                 //接受
                 else if (action.ActionType == Model.ActionType.Accept) {
                     //根语法
@@ -160,33 +171,46 @@ namespace CodeEdit.LangAnaly {
         }
 
         //自动补全不完整的语法
-        AutoComplete(): boolean {
+        AutoComplete(onlyOption: boolean = false): boolean {
             //当前语法
             var grammer = this._GrammerGroup.Get().Item2;
             //空的(最开始)、错误的、完整的、必须的不补全
             if (grammer == null ||
                 grammer.GramerState == Model.GramerInfoState.Error ||
-                this.IsComplete(grammer) ||
-                !this.IsInOptionPro(grammer)) {
+                (onlyOption && (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)))) {
                 return false;
             }
 
             var index = this.GetIndex(grammer);
+            var startIndex = index;
 
             //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
             while (true) {
                 var state = this._GrammerGroup.Get(index).Item1;
                 var actionGroup = state.ActionGroup.ToEnumerble();
 
-                if (actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                if (index > startIndex && actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce)) {
                     break;
                 }
 
                 //寻找第一个移入类的动作
-                var shift = actionGroup.First(item => item.ActionType == Model.ActionType.Shift);
+                var shift = actionGroup
+                    .OrderBy(item => {
+                        if (item.ActionType == Model.ActionType.Shift) {
+                            return 1;
+                        }
+                        else if (item.ActionType == Model.ActionType.Goto) {
+                            return 2;
+                        }
+                        else {
+                            return 0;
+                        }
+                    }).Last();
                 //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                 var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                 this.ReadGramer(tokenInfo);
+
+                console.log(shift.Symbol);
 
                 index++;
             }

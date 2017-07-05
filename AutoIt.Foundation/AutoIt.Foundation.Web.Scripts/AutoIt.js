@@ -630,6 +630,12 @@ var CodeEdit;
                             .Set(new Tuple(targetState, gramerSymbol));
                         return gramerSymbol;
                     }
+                    else if (action.ActionType == LangAnaly.Model.ActionType.Goto) {
+                        var gramerSymbol = new LangAnaly.Model.GramerInfo(LangAnaly.Model.GramerInfoState.Reduce, tokenInfo);
+                        this._GrammerGroup
+                            .Set(new Tuple(action.TargetState, gramerSymbol));
+                        return gramerSymbol;
+                    }
                     else if (action.ActionType == LangAnaly.Model.ActionType.Accept) {
                         //根语法
                         var gramerInfo = this._GrammerGroup.Get().Item2;
@@ -700,29 +706,42 @@ var CodeEdit;
                 return parentMaySymbolGroup;
             };
             //自动补全不完整的语法
-            GramerReader.prototype.AutoComplete = function () {
+            GramerReader.prototype.AutoComplete = function (onlyOption) {
+                if (onlyOption === void 0) { onlyOption = false; }
                 //当前语法
                 var grammer = this._GrammerGroup.Get().Item2;
                 //空的(最开始)、错误的、完整的、必须的不补全
                 if (grammer == null ||
                     grammer.GramerState == LangAnaly.Model.GramerInfoState.Error ||
-                    this.IsComplete(grammer) ||
-                    !this.IsInOptionPro(grammer)) {
+                    (onlyOption && (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)))) {
                     return false;
                 }
                 var index = this.GetIndex(grammer);
+                var startIndex = index;
                 //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
                 while (true) {
                     var state = this._GrammerGroup.Get(index).Item1;
                     var actionGroup = state.ActionGroup.ToEnumerble();
-                    if (actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                    if (index > startIndex && actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
                         break;
                     }
                     //寻找第一个移入类的动作
-                    var shift = actionGroup.First(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Shift; });
+                    var shift = actionGroup
+                        .OrderBy(function (item) {
+                        if (item.ActionType == LangAnaly.Model.ActionType.Shift) {
+                            return 1;
+                        }
+                        else if (item.ActionType == LangAnaly.Model.ActionType.Goto) {
+                            return 2;
+                        }
+                        else {
+                            return 0;
+                        }
+                    }).Last();
                     //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                     var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                     this.ReadGramer(tokenInfo);
+                    console.log(shift.Symbol);
                     index++;
                 }
                 //状态为自动补全
@@ -936,13 +955,14 @@ var CodeEdit;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
                                 //如果是块开始元素,则撤销前面的语法(直至正确为止)
-                                if (gramer.Symbol != null && this.BlockStartNameGroup.Contains(gramer.Symbol.Name)) {
-                                    this._GramerReader.BackGrammer();
-                                    //继续消耗字符
-                                    continue;
+                                if (gramer.Symbol != null && (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF")) {
+                                    if (this._GramerReader.AutoComplete()) {
+                                        //继续消耗字符
+                                        continue;
+                                    }
                                 }
                                 //尝试补全语法
-                                var isAutoComplete = this._GramerReader.AutoComplete();
+                                var isAutoComplete = this._GramerReader.AutoComplete(true);
                                 if (isAutoComplete) {
                                     //继续消耗字符
                                     continue;
