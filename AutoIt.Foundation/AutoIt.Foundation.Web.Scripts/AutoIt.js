@@ -171,7 +171,7 @@ var CodeMirrorExtend = (function () {
             return "error";
         }
         //如果语法为自动完成且下一个语法不为错误,则样式为错误
-        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
+        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete && gramerInfo.Parent == null) {
             var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
             var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
             var isNextError = nextAnalyInfo != null &&
