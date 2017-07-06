@@ -194,18 +194,24 @@ namespace CodeEdit.LangAnaly {
                 }
 
                 //寻找第一个移入类的动作
-                var shift = actionGroup
-                    .OrderBy(item => {
-                        if (item.ActionType == Model.ActionType.Shift) {
-                            return 1;
-                        }
-                        else if (item.ActionType == Model.ActionType.Goto) {
-                            return 2;
-                        }
-                        else {
-                            return 0;
-                        }
-                    }).Last();
+                var shift = actionGroup.Where(item => item.ActionType == Model.ActionType.Reduce &&
+                        item.TargetRule.SymbolGroup.Count() > 0)
+                    .OrderByCompareFunc((a, b) => Model.Produce
+                        .Compare(a.TargetRule.NonTerminal, b.TargetRule.NonTerminal, this._EgtStorer.ProduceGroup))
+                    .FirstOrDefault(null);
+
+                if (shift == null) {
+                    shift = actionGroup.Where(item => item.ActionType == Model.ActionType.Goto)
+                        .OrderByCompareFunc((a, b) => Model.Produce
+                            .Compare(a.Symbol, b.Symbol, this._EgtStorer.ProduceGroup))
+                        .FirstOrDefault(null);
+                }
+
+                if (shift == null) {
+                    shift = actionGroup.OrderBy(item => item.ActionType == Model.ActionType.Shift ? 1 : 0)
+                        .Last();
+                }
+
                 //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                 var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                 this.ReadGramer(tokenInfo);

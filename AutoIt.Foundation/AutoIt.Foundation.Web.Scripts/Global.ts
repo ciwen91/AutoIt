@@ -104,6 +104,21 @@ enumerable.prototype.ToList = function () {
     this.ForEach(item => group.Set(item));
     return group;
 }
+enumerable.prototype.OrderByCompareFunc=function(func) {
+    var group = this.ToArray();
+
+    for (var i = 0; i < group.length-1; i++) {
+        for (var j = i + 1; j < group.length; j++) {
+            if (func(group[i], group[j]) > 0) {
+                var temp = group[i];
+                group[i] = group[j];
+                group[j] = temp;
+            }
+        }
+    }
+
+    return $.Enumerable.From(group);
+}
 
 //同步获取Ajax数据
 function getAjaxData(url):string {

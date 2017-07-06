@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -712,6 +707,7 @@ var CodeEdit;
             };
             //自动补全不完整的语法
             GramerReader.prototype.AutoComplete = function (onlyOption) {
+                var _this = this;
                 if (onlyOption === void 0) { onlyOption = false; }
                 //当前语法
                 var grammer = this._GrammerGroup.Get().Item2;
@@ -731,18 +727,21 @@ var CodeEdit;
                         break;
                     }
                     //寻找第一个移入类的动作
-                    var shift = actionGroup
-                        .OrderBy(function (item) {
-                        if (item.ActionType == LangAnaly.Model.ActionType.Shift) {
-                            return 1;
-                        }
-                        else if (item.ActionType == LangAnaly.Model.ActionType.Goto) {
-                            return 2;
-                        }
-                        else {
-                            return 0;
-                        }
-                    }).Last();
+                    var shift = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce &&
+                        item.TargetRule.SymbolGroup.Count() > 0; })
+                        .OrderByCompareFunc(function (a, b) { return LangAnaly.Model.Produce
+                        .Compare(a.TargetRule.NonTerminal, b.TargetRule.NonTerminal, _this._EgtStorer.ProduceGroup); })
+                        .FirstOrDefault(null);
+                    if (shift == null) {
+                        shift = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Goto; })
+                            .OrderByCompareFunc(function (a, b) { return LangAnaly.Model.Produce
+                            .Compare(a.Symbol, b.Symbol, _this._EgtStorer.ProduceGroup); })
+                            .FirstOrDefault(null);
+                    }
+                    if (shift == null) {
+                        shift = actionGroup.OrderBy(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Shift ? 1 : 0; })
+                            .Last();
+                    }
                     //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                     var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                     this.ReadGramer(tokenInfo);
@@ -1515,24 +1514,24 @@ var CodeEdit;
                     return _super !== null && _super.apply(this, arguments) || this;
                 }
                 Produce.Compare = function (a, b, group) {
-                    var isBig = group.ToEnumerble().Any(function (item) { return item.NonTerminal == a && item.SymbolGroup.Contains(b); });
-                    var isSmall = group.ToEnumerble().Any(function (item) { return item.NonTerminal == b && item.SymbolGroup.Contains(a); });
+                    var isSmall = group.ToEnumerble().Any(function (item) { return item.NonTerminal == a && item.SymbolGroup.Contains(b); });
+                    var isBig = group.ToEnumerble().Any(function (item) { return item.NonTerminal == b && item.SymbolGroup.Contains(a); });
                     var result = 0;
-                    if (isBig) {
-                        result += 1;
-                    }
                     if (isSmall) {
                         result -= 1;
+                    }
+                    if (isBig) {
+                        result += 1;
                     }
                     if (result == 0) {
                         var first = group.ToEnumerble()
                             .Select(function (item) { return item.NonTerminal; })
                             .FirstOrDefault(null, function (item) { return item == a || item == b; });
                         if (first == a) {
-                            result = 1;
+                            result = -1;
                         }
                         else if (first == b) {
-                            result = -1;
+                            result = 1;
                         }
                     }
                     return result;
@@ -2118,6 +2117,19 @@ enumerable.prototype.ToList = function () {
     var group = new List();
     this.ForEach(function (item) { return group.Set(item); });
     return group;
+};
+enumerable.prototype.OrderByCompareFunc = function (func) {
+    var group = this.ToArray();
+    for (var i = 0; i < group.length - 1; i++) {
+        for (var j = i + 1; j < group.length; j++) {
+            if (func(group[i], group[j]) > 0) {
+                var temp = group[i];
+                group[i] = group[j];
+                group[j] = temp;
+            }
+        }
+    }
+    return $.Enumerable.From(group);
 };
 //同步获取Ajax数据
 function getAjaxData(url) {

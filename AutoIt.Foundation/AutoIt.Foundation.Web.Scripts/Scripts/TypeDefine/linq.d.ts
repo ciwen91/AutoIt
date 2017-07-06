@@ -106,6 +106,7 @@ declare namespace linq {
         OrderBy(keySelector?: string): OrderedEnumerable<T>;
         OrderByDescending(keySelector?: ($: T) => any): OrderedEnumerable<T>;
         OrderByDescending(keySelector?: string): OrderedEnumerable<T>;
+        OrderByCompareFunc(compareFunc:(a:T,b:T)=>number):Enumerable<T>;
         Reverse(): Enumerable<T>;
         Shuffle(): Enumerable<T>;
         //Grouping Methods

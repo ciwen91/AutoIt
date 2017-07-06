@@ -7,27 +7,27 @@ module CodeEdit.LangAnaly.Model {
         SymbolGroup: List<CodeEdit.LangAnaly.Model.Symbol>;
 
        static Compare(a: Symbol, b: Symbol, group: List<Produce>): number {
-           var isBig = group.ToEnumerble().Any(item => item.NonTerminal == a && item.SymbolGroup.Contains(b));
-           var isSmall = group.ToEnumerble().Any(item => item.NonTerminal == b && item.SymbolGroup.Contains(a));
+           var isSmall = group.ToEnumerble().Any(item => item.NonTerminal == a && item.SymbolGroup.Contains(b));
+           var isBig = group.ToEnumerble().Any(item => item.NonTerminal == b && item.SymbolGroup.Contains(a));
 
            var result = 0;
-           if (isBig) {
-               result += 1;
-           }
            if (isSmall) {
                result -= 1;
            } 
-
+           if (isBig) {
+               result += 1;
+           }
+           
            if (result == 0) {
               var first=  group.ToEnumerble()
                    .Select(item=>item.NonTerminal)
                    .FirstOrDefault(null, item => item == a || item == b);
 
                if (first == a) {
-                   result = 1;
+                   result = -1;
               }
                else if (first == b) {
-                   result = -1;
+                   result = 1;
                }
            }
 
