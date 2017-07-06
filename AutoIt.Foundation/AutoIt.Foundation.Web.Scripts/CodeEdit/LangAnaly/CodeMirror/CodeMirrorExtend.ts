@@ -91,7 +91,37 @@ class CodeMirrorExtend {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
             (<any>editor).Extend = this;
+
+            var gramer = this._LangAnaly._GramerReader._GrammerGroup.Get().Item2;
+            if (gramer != null) {
+                console.clear();
+                this.ShowGramerTree(gramer,0);
+            }
         }
+    }
+
+    private ShowGramerTree(gramer:CodeEdit.LangAnaly.Model.GramerInfo,index:number,deep:number=0) {
+        console.log("  ".Repeat(deep) +
+            deep +
+            "-" +
+            index +
+            ":" +
+            gramer.Symbol.Name +
+            "(" +
+            gramer.Index +
+            "," +
+            gramer.Line +
+            "," +
+            gramer.Col 
+            +"|" +
+            gramer.GramerState +
+            "," +
+            CodeEdit.LangAnaly.Model.GramerInfoState[gramer.GramerState] +
+            ")");
+
+        gramer.GetChildGroup().ToEnumerble().ForEach((item,i) => {
+            this.ShowGramerTree(item, i, deep + 1);
+        });
     }
 
     //消耗语法

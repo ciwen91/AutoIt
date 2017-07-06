@@ -5,7 +5,7 @@ namespace CodeEdit.LangAnaly {
         //Egt信息
         private _EgtStorer: EgtStorer;
         //语法堆栈(下一个状态,当前语法)
-        private _GrammerGroup: List<Tuple<Model.LALRState, Model.GramerInfo>> = new
+         _GrammerGroup: List<Tuple<Model.LALRState, Model.GramerInfo>> = new
             List<Tuple<Model.LALRState, Model.GramerInfo>>();
 
         constructor(egtStorer: EgtStorer) {
@@ -186,10 +186,12 @@ namespace CodeEdit.LangAnaly {
 
             //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
             while (true) {
+                index = this._GrammerGroup.Count() - 1;
+
                 var state = this._GrammerGroup.Get(index).Item1;
                 var actionGroup = state.ActionGroup.ToEnumerble();
 
-                if (index > startIndex && actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce)) {
+                if (actionGroup.Any(item => item.ActionType == Model.ActionType.Accept)||(index > startIndex && actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce))) {
                     break;
                 }
 
@@ -205,10 +207,10 @@ namespace CodeEdit.LangAnaly {
                         var produce = reduceActionGroup.Get(0).TargetRule;
                         var cnt = produce.SymbolGroup.Count();
                         while (cnt > 0) {
-                            tempIndex--;
                             if (this._GrammerGroup.Get(tempIndex).Item2.GramerState != Model.GramerInfoState.Error) {
                                 cnt--;
                             }
+                            tempIndex--;
                         }
 
                         var curState = this._GrammerGroup.Get(tempIndex).Item1;
@@ -224,7 +226,13 @@ namespace CodeEdit.LangAnaly {
 
                             reduceActionGroup = reduceGroup;
 
+                            var reduceRule = reduceActionGroup.Get(0).TargetRule;
                             var reduceSymbol = reduceActionGroup.Get(0).TargetRule.NonTerminal;
+
+                            if (reduceRule.SymbolGroup.Count() > 0) {
+                                break;
+                            }
+
                             targetState = targetState.GetAction(reduceSymbol).TargetState;
                         }
                     }
@@ -246,7 +254,14 @@ namespace CodeEdit.LangAnaly {
 
                 //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                 var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
-                this.ReadGramer(tokenInfo);
+
+                while (true) {
+                    var grm = this.ReadGramer(tokenInfo);
+                    if (tokenInfo.Symbol.Name == "EOF" || grm.GramerState != Model.GramerInfoState.Reduce) {
+                        break;
+                    }
+                }
+                
 
                 console.log(shift.Symbol);
 

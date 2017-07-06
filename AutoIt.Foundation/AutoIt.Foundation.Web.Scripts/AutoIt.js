@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -118,7 +113,36 @@ var CodeMirrorExtend = (function () {
             this._LangAnaly.Analy(text);
             this._AnalyedText = text;
             editor.Extend = this;
+            var gramer = this._LangAnaly._GramerReader._GrammerGroup.Get().Item2;
+            if (gramer != null) {
+                console.clear();
+                this.ShowGramerTree(gramer, 0);
+            }
         }
+    };
+    CodeMirrorExtend.prototype.ShowGramerTree = function (gramer, index, deep) {
+        var _this = this;
+        if (deep === void 0) { deep = 0; }
+        console.log("  ".Repeat(deep) +
+            deep +
+            "-" +
+            index +
+            ":" +
+            gramer.Symbol.Name +
+            "(" +
+            gramer.Index +
+            "," +
+            gramer.Line +
+            "," +
+            gramer.Col
+            + "|" +
+            gramer.GramerState +
+            "," +
+            CodeEdit.LangAnaly.Model.GramerInfoState[gramer.GramerState] +
+            ")");
+        gramer.GetChildGroup().ToEnumerble().ForEach(function (item, i) {
+            _this.ShowGramerTree(item, i, deep + 1);
+        });
     };
     //消耗语法
     CodeMirrorExtend.prototype.ConsumeAnalyInfo = function (stream, gramerInfo, line, col) {
@@ -726,9 +750,10 @@ var CodeEdit;
                 var startIndex = index;
                 //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
                 while (true) {
+                    index = this._GrammerGroup.Count() - 1;
                     var state = this._GrammerGroup.Get(index).Item1;
                     var actionGroup = state.ActionGroup.ToEnumerble();
-                    if (index > startIndex && actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })) {
+                    if (actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Accept; }) || (index > startIndex && actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; }))) {
                         break;
                     }
                     //寻找第一个移入类的动作
@@ -741,10 +766,10 @@ var CodeEdit;
                             var produce = reduceActionGroup.Get(0).TargetRule;
                             var cnt = produce.SymbolGroup.Count();
                             while (cnt > 0) {
-                                tempIndex--;
                                 if (this._GrammerGroup.Get(tempIndex).Item2.GramerState != LangAnaly.Model.GramerInfoState.Error) {
                                     cnt--;
                                 }
+                                tempIndex--;
                             }
                             var curState = this._GrammerGroup.Get(tempIndex).Item1;
                             var targetState = curState.GetAction(produce.NonTerminal).TargetState;
@@ -755,7 +780,11 @@ var CodeEdit;
                                     break;
                                 }
                                 reduceActionGroup = reduceGroup;
+                                var reduceRule = reduceActionGroup.Get(0).TargetRule;
                                 var reduceSymbol = reduceActionGroup.Get(0).TargetRule.NonTerminal;
+                                if (reduceRule.SymbolGroup.Count() > 0) {
+                                    break;
+                                }
                                 targetState = targetState.GetAction(reduceSymbol).TargetState;
                             }
                         }
@@ -773,7 +802,12 @@ var CodeEdit;
                     }
                     //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
                     var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
-                    this.ReadGramer(tokenInfo);
+                    while (true) {
+                        var grm = this.ReadGramer(tokenInfo);
+                        if (tokenInfo.Symbol.Name == "EOF" || grm.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
+                            break;
+                        }
+                    }
                     console.log(shift.Symbol);
                     index++;
                 }
