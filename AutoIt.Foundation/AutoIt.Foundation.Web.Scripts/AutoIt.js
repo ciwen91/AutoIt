@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -727,11 +732,35 @@ var CodeEdit;
                         break;
                     }
                     //寻找第一个移入类的动作
-                    var shift = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce &&
-                        item.TargetRule.SymbolGroup.Count() > 0; })
-                        .OrderByCompareFunc(function (a, b) { return LangAnaly.Model.Produce
-                        .Compare(a.TargetRule.NonTerminal, b.TargetRule.NonTerminal, _this._EgtStorer.ProduceGroup); })
-                        .FirstOrDefault(null);
+                    var shift = null;
+                    if (shift == null) {
+                        var reduceActionGroup = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce &&
+                            item.TargetRule.SymbolGroup.Count() > 0; }).ToList();
+                        if (reduceActionGroup.Count() > 1) {
+                            var tempIndex = index;
+                            var produce = reduceActionGroup.Get(0).TargetRule;
+                            var cnt = produce.SymbolGroup.Count();
+                            while (cnt > 0) {
+                                tempIndex--;
+                                if (this._GrammerGroup.Get(tempIndex).Item2.GramerState != LangAnaly.Model.GramerInfoState.Error) {
+                                    cnt--;
+                                }
+                            }
+                            var curState = this._GrammerGroup.Get(tempIndex).Item1;
+                            var targetState = curState.GetAction(produce.NonTerminal).TargetState;
+                            while (true) {
+                                var reduceGroup = targetState.ActionGroup.ToEnumerble().Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })
+                                    .ToList();
+                                if (reduceGroup.Count() < 1) {
+                                    break;
+                                }
+                                reduceActionGroup = reduceGroup;
+                                var reduceSymbol = reduceActionGroup.Get(0).TargetRule.NonTerminal;
+                                targetState = targetState.GetAction(reduceSymbol).TargetState;
+                            }
+                        }
+                        shift = reduceActionGroup.ToEnumerble().FirstOrDefault(null);
+                    }
                     if (shift == null) {
                         shift = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Goto; })
                             .OrderByCompareFunc(function (a, b) { return LangAnaly.Model.Produce

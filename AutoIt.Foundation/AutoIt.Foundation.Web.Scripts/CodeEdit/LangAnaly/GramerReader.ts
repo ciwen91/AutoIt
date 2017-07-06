@@ -194,11 +194,43 @@ namespace CodeEdit.LangAnaly {
                 }
 
                 //寻找第一个移入类的动作
-                var shift = actionGroup.Where(item => item.ActionType == Model.ActionType.Reduce &&
-                        item.TargetRule.SymbolGroup.Count() > 0)
-                    .OrderByCompareFunc((a, b) => Model.Produce
-                        .Compare(a.TargetRule.NonTerminal, b.TargetRule.NonTerminal, this._EgtStorer.ProduceGroup))
-                    .FirstOrDefault(null);
+                var shift: Model.LALRAction = null;
+
+                if (shift == null) {
+                    var reduceActionGroup = actionGroup.Where(item => item.ActionType == Model.ActionType.Reduce &&
+                        item.TargetRule.SymbolGroup.Count() > 0).ToList();
+                   
+                    if (reduceActionGroup.Count() > 1) {
+                        var tempIndex = index;
+                        var produce = reduceActionGroup.Get(0).TargetRule;
+                        var cnt = produce.SymbolGroup.Count();
+                        while (cnt > 0) {
+                            tempIndex--;
+                            if (this._GrammerGroup.Get(tempIndex).Item2.GramerState != Model.GramerInfoState.Error) {
+                                cnt--;
+                            }
+                        }
+
+                        var curState = this._GrammerGroup.Get(tempIndex).Item1;
+                        var targetState = curState.GetAction(produce.NonTerminal).TargetState;
+
+                        while (true) {
+                            var reduceGroup = targetState.ActionGroup.ToEnumerble().Where(item => item.ActionType == Model.ActionType.Reduce)
+                                .ToList();
+
+                            if (reduceGroup.Count() < 1) {
+                                break;
+                            }
+
+                            reduceActionGroup = reduceGroup;
+
+                            var reduceSymbol = reduceActionGroup.Get(0).TargetRule.NonTerminal;
+                            targetState = targetState.GetAction(reduceSymbol).TargetState;
+                        }
+                    }
+
+                    shift = reduceActionGroup.ToEnumerble().FirstOrDefault(null);
+                }           
 
                 if (shift == null) {
                     shift = actionGroup.Where(item => item.ActionType == Model.ActionType.Goto)
