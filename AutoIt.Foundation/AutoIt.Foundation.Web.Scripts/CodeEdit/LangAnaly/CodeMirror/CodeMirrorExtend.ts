@@ -149,7 +149,7 @@ class CodeMirrorExtend {
         var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
 
         //如果语法为空,则样式为空
-        if (gramerInfo == null) {
+        if (gramerInfo == null) { 
             return null;
         }
 
