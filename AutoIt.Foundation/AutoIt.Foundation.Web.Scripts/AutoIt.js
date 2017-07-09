@@ -746,6 +746,10 @@ var CodeEdit;
                     (onlyOption && (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)))) {
                     return false;
                 }
+                var grmState = this._GrammerGroup.Get().Item1;
+                if (grmState.ActionGroup.ToEnumerble().Any(function (item) { return item.Symbol.Name == "EOF"; })) {
+                    return false;
+                }
                 var index = this.GetIndex(grammer);
                 var startIndex = index;
                 //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
@@ -753,37 +757,58 @@ var CodeEdit;
                     index = this._GrammerGroup.Count() - 1;
                     var state = this._GrammerGroup.Get(index).Item1;
                     var actionGroup = state.ActionGroup.ToEnumerble();
-                    if (actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Accept; }) || (index > startIndex && actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; }))) {
+                    if (actionGroup.Any(function (item) { return item.Symbol.Name == "EOF"; })
+                        || (index > startIndex && actionGroup.Any(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; }))) {
                         break;
                     }
                     //寻找第一个移入类的动作
                     var shift = null;
                     if (shift == null) {
-                        var reduceActionGroup = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce &&
-                            item.TargetRule.SymbolGroup.Count() > 0; }).ToList();
+                        var reduceActionGroup = actionGroup.Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; } /*&&
+                            item.TargetRule.SymbolGroup.Count() > 0*/).ToList();
                         if (reduceActionGroup.Count() > 1) {
                             var tempIndex = index;
                             var produce = reduceActionGroup.Get(0).TargetRule;
                             var cnt = produce.SymbolGroup.Count();
                             while (cnt > 0) {
-                                if (this._GrammerGroup.Get(tempIndex).Item2.GramerState != LangAnaly.Model.GramerInfoState.Error) {
+                                tempIndex--;
+                                if (this._GrammerGroup.Get(tempIndex).Item2 == null ||
+                                    this._GrammerGroup.Get(tempIndex).Item2.GramerState != LangAnaly.Model.GramerInfoState.Error) {
                                     cnt--;
                                 }
-                                tempIndex--;
                             }
                             var curState = this._GrammerGroup.Get(tempIndex).Item1;
                             var targetState = curState.GetAction(produce.NonTerminal).TargetState;
+                            var stateGroup = new List();
+                            stateGroup.Set(curState);
                             while (true) {
+                                stateGroup.Set(targetState);
                                 var reduceGroup = targetState.ActionGroup.ToEnumerble().Where(function (item) { return item.ActionType == LangAnaly.Model.ActionType.Reduce; })
                                     .ToList();
                                 if (reduceGroup.Count() < 1) {
                                     break;
                                 }
+                                var reduceRule = reduceGroup.Get(0).TargetRule;
+                                var reduceSymbol = reduceGroup.Get(0).TargetRule.NonTerminal;
                                 reduceActionGroup = reduceGroup;
-                                var reduceRule = reduceActionGroup.Get(0).TargetRule;
-                                var reduceSymbol = reduceActionGroup.Get(0).TargetRule.NonTerminal;
-                                if (reduceRule.SymbolGroup.Count() > 0) {
-                                    break;
+                                if (reduceRule.SymbolGroup.Count() > stateGroup.Count() - 1) {
+                                    cnt = reduceRule.SymbolGroup.Count() - stateGroup.Count() + 1;
+                                    stateGroup.Clear();
+                                    while (cnt > 0) {
+                                        tempIndex--;
+                                        if (this._GrammerGroup.Get(tempIndex).Item2 == null ||
+                                            this._GrammerGroup.Get(tempIndex).Item2.GramerState !=
+                                                LangAnaly.Model.GramerInfoState.Error) {
+                                            cnt--;
+                                        }
+                                    }
+                                    targetState = this._GrammerGroup.Get(tempIndex).Item1;
+                                    stateGroup.Set(targetState);
+                                }
+                                else {
+                                    Loop.For(reduceRule.SymbolGroup.Count())
+                                        .ForEach(function (item) { return targetState = stateGroup.Remove(); });
+                                    targetState = stateGroup.Get();
                                 }
                                 targetState = targetState.GetAction(reduceSymbol).TargetState;
                             }
@@ -804,7 +829,7 @@ var CodeEdit;
                     var tokenInfo = new LangAnaly.Model.TokenInfo(LangAnaly.Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
                     while (true) {
                         var grm = this.ReadGramer(tokenInfo);
-                        if (tokenInfo.Symbol.Name == "EOF" || grm.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
+                        if (grm.GramerState != LangAnaly.Model.GramerInfoState.Reduce) {
                             break;
                         }
                     }
@@ -814,44 +839,6 @@ var CodeEdit;
                 //状态为自动补全
                 grammer.GramerState = LangAnaly.Model.GramerInfoState.AutoComplete;
                 return true;
-            };
-            //设置错误语法(语法)
-            GramerReader.prototype.SetEroGramer = function (grammer) {
-                var index = this._GrammerGroup.Count() - 1;
-                var preACGrammer = null;
-                var preACState = null;
-                //找到最前的补全元素
-                while (index > 0) {
-                    var preGrammer = this._GrammerGroup.Get(index).Item2;
-                    if (preGrammer.Index >= 0) {
-                        break;
-                    }
-                    else {
-                        preACGrammer = preGrammer;
-                        preACState = this._GrammerGroup.Get(index).Item1;
-                    }
-                    index--;
-                }
-                //如果存在补全元素,且错误语法为补全元素的一部分,则设置可能的父元素
-                if (preACGrammer != null && grammer.Value) {
-                    var maySymbolGroup = this._EgtStorer.DFAStateGroup.Get(0)
-                        .GetMayAcceptSymbolGroup(grammer.Value);
-                    if (maySymbolGroup.Contains(preACGrammer.Symbol)) {
-                        //如果补全元素有父元素则设置为可能的父元素
-                        if (preACGrammer.Parent != null) {
-                            grammer.MayParent = preACGrammer;
-                        }
-                        else {
-                            //否则根据补全元素的LALR状态获取可能的父元素
-                            var group = new List([preACGrammer.Symbol]);
-                            group.SetRange(preACState.GetMayParentSymbolGroup());
-                            grammer.MayParentSymbolGroup = group;
-                        }
-                    }
-                }
-                //将错误语法加到堆栈中
-                this._GrammerGroup.Set(new Tuple(None, grammer));
-                return this;
             };
             //语法是否完成
             GramerReader.prototype.IsComplete = function (grammer) {
@@ -904,6 +891,44 @@ var CodeEdit;
                     .FirstOrDefault(null, whereFunc);
                 return result;
             };
+            //设置错误语法(语法)
+            GramerReader.prototype.SetEroGramer = function (grammer) {
+                var index = this._GrammerGroup.Count() - 1;
+                var preACGrammer = null;
+                var preACState = null;
+                //找到最前的补全元素
+                while (index > 0) {
+                    var preGrammer = this._GrammerGroup.Get(index).Item2;
+                    if (preGrammer.Index >= 0) {
+                        break;
+                    }
+                    else {
+                        preACGrammer = preGrammer;
+                        preACState = this._GrammerGroup.Get(index).Item1;
+                    }
+                    index--;
+                }
+                //如果存在补全元素,且错误语法为补全元素的一部分,则设置可能的父元素
+                if (preACGrammer != null && grammer.Value) {
+                    var maySymbolGroup = this._EgtStorer.DFAStateGroup.Get(0)
+                        .GetMayAcceptSymbolGroup(grammer.Value);
+                    if (maySymbolGroup.Contains(preACGrammer.Symbol)) {
+                        //如果补全元素有父元素则设置为可能的父元素
+                        if (preACGrammer.Parent != null) {
+                            grammer.MayParent = preACGrammer;
+                        }
+                        else {
+                            //否则根据补全元素的LALR状态获取可能的父元素
+                            var group = new List([preACGrammer.Symbol]);
+                            group.SetRange(preACState.GetMayParentSymbolGroup());
+                            grammer.MayParentSymbolGroup = group;
+                        }
+                    }
+                }
+                //将错误语法加到堆栈中
+                this._GrammerGroup.Set(new Tuple(None, grammer));
+                return this;
+            };
             //撤销语法
             GramerReader.prototype.BackGrammer = function () {
                 //将当前语法设置为错误
@@ -934,7 +959,7 @@ var CodeEdit;
             };
             //获取语法在栈中的位置(语法)
             GramerReader.prototype.GetIndex = function (grammer) {
-                var index = $.Enumerable.From(this._GrammerGroup.ToArray())
+                var index = this._GrammerGroup.ToEnumerble()
                     .Select(function (item) { return item.Item2; })
                     .IndexOf(grammer);
                 return index;
@@ -983,7 +1008,7 @@ var CodeEdit;
                                 var gramerVal = gramer.Index >= 0 ? val.substr(gramer.Index, token.Index - gramer.Index) : "";
                                 //如果是内容符号,则还要包括前面的空白
                                 if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
-                                    //从语法或符号的开始索引之前查找 
+                                    //从语法或 符号的开始索引之前查找 
                                     var index = gramer.Index >= 0 ? gramer.Index : token.Index;
                                     var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
                                     //如果前面有空白,则重新定位
@@ -1022,14 +1047,10 @@ var CodeEdit;
                             }
                             else if (gramer.GramerState == LangAnaly.Model.GramerInfoState.Error) {
                                 //如果是块开始元素,则撤销前面的语法(直至正确为止)
-                                if (gramer.Symbol != null && (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF")) {
-                                    if (this._GramerReader.AutoComplete()) {
-                                        //继续消耗字符
-                                        continue;
-                                    }
-                                }
+                                var autoMust = gramer.Symbol != null &&
+                                    (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF");
                                 //尝试补全语法
-                                var isAutoComplete = this._GramerReader.AutoComplete(true);
+                                var isAutoComplete = this._GramerReader.AutoComplete(!autoMust);
                                 if (isAutoComplete) {
                                     //继续消耗字符
                                     continue;

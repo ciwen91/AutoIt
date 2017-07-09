@@ -47,7 +47,7 @@
 
                             //如果是内容符号,则还要包括前面的空白
                             if (this.ContentNameGroup.Contains(gramer.Symbol.Name)) {
-                                //从语法或符号的开始索引之前查找 
+                                //从语法或 符号的开始索引之前查找 
                                 var index = gramer.Index >= 0 ? gramer.Index : token.Index;
                                 var preWhiteSpace = val.MatchPre("^\\s+", index - 1);
 
@@ -72,7 +72,7 @@
                             }
 
                             //如果语义错误,则撤回语法并设置为错误
-                            if (!this.IsGramerMeanEro(gramer)) {
+                            if (!this.IsGramerMeanEro(gramer)) {//???
                                 this._GramerReader.BackGrammer();
                             } else {
                                 this.GramerRead(gramer);
@@ -93,15 +93,11 @@
                         //如果是错误,尝试撤销语法(块开始元素),尝试补全语法
                         else if (gramer.GramerState == Model.GramerInfoState.Error) {
                             //如果是块开始元素,则撤销前面的语法(直至正确为止)
-                            if (gramer.Symbol != null && (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF")) {
-                                if (this._GramerReader.AutoComplete()) {
-                                    //继续消耗字符
-                                    continue;
-                                }
-                            }
-
+                            var autoMust = gramer.Symbol != null &&//???
+                                (this.BlockStartNameGroup.Contains(gramer.Symbol.Name) || token.Symbol.Name == "EOF");
+                            
                             //尝试补全语法
-                            var isAutoComplete = this._GramerReader.AutoComplete(true);
+                            var isAutoComplete = this._GramerReader.AutoComplete(!autoMust);
                             if (isAutoComplete) {
                                 //继续消耗字符
                                 continue;
