@@ -170,132 +170,56 @@ namespace CodeEdit.LangAnaly {
             return parentMaySymbolGroup;
         }
 
-        //自动补全不完整的语法
+        //自动补全不完整的语法(是否只补全可选的)
         AutoComplete(onlyOption: boolean = false): boolean {
             //当前语法
             var grammer = this._GrammerGroup.Get().Item2;
-            //空的(最开始)、错误的、完整的、必须的不补全
+
+              //空的(最开始)、错误的的不补全
             if (grammer == null ||
-                grammer.GramerState == Model.GramerInfoState.Error ||
-                (onlyOption && (this.IsComplete(grammer) || !this.IsInOptionPro(grammer)))) {
+                grammer.GramerState == Model.GramerInfoState.Error) {
                 return false;
             }
 
-            var grmState = this._GrammerGroup.Get().Item1;
-            if (grmState.ActionGroup.ToEnumerble().Any(item => item.Symbol.Name == "EOF")) {
+            //对于补全可选的,完整的,非可选的不补全
+            if (onlyOption && (this.IsComplete(grammer) || !this.IsInOptionPro(grammer))) {
                 return false;
             }
-
-            var index = this.GetIndex(grammer);
-            var startIndex = index;
+         
+            var index = 0;
 
             //从当前状态开始不断移入节点,直到可以规约(根据语法信息)
             while (true) {
-                index = this._GrammerGroup.Count() - 1;
+                //当前状态堆栈(不包含错误元素)
+                var stateGroup = this._GrammerGroup.ToEnumerble()
+                    .Where(item => item.Item2 == null || item.Item2.GramerState != Model.GramerInfoState.Error)
+                    .Select(item => item.Item1)
+                    .ToList();
+                var curState = stateGroup.Get();
 
-                var state = this._GrammerGroup.Get(index).Item1;
-                var actionGroup = state.ActionGroup.ToEnumerble();
-
-                if (actionGroup.Any(item => item.Symbol.Name=="EOF")
-                    || (index > startIndex && actionGroup.Any(item => item.ActionType == Model.ActionType.Reduce))) {
+                 //可以完成的不补全
+                if (curState.CanAccept()) {
                     break;
                 }
 
-                //寻找第一个移入类的动作
-                var shift: Model.LALRAction = null;
-
-                if (shift == null) {
-                    var reduceActionGroup = actionGroup.Where(item => item.ActionType == Model.ActionType.Reduce /*&&
-                        item.TargetRule.SymbolGroup.Count() > 0*/).ToList();
-                   
-                    if (reduceActionGroup.Count() > 1) {
-                        var tempIndex = index;
-                        var produce = reduceActionGroup.Get(0).TargetRule;
-                        var cnt = produce.SymbolGroup.Count();
-                        while (cnt > 0) {
-                            tempIndex--;
-                            if (this._GrammerGroup.Get(tempIndex).Item2 == null ||
-                                this._GrammerGroup.Get(tempIndex).Item2.GramerState != Model.GramerInfoState.Error) {
-                                cnt--;
-                            }
-                        }
-
-                        var curState = this._GrammerGroup.Get(tempIndex).Item1;
-                        var targetState = curState.GetAction(produce.NonTerminal).TargetState;
-
-                        var stateGroup = new List<Model.LALRState>();
-                        stateGroup.Set(curState);
-
-                        while (true) {
-                            stateGroup.Set(targetState);
-
-                            var reduceGroup = targetState.ActionGroup.ToEnumerble().Where(item => item.ActionType == Model.ActionType.Reduce)
-                                .ToList();
-
-                            if (reduceGroup.Count() < 1) {
-                                break;
-                            }
-
-                            var reduceRule = reduceGroup.Get(0).TargetRule;
-                            var reduceSymbol = reduceGroup.Get(0).TargetRule.NonTerminal;
-
-                            reduceActionGroup = reduceGroup;
-
-                            if (reduceRule.SymbolGroup.Count() > stateGroup.Count() - 1) {
-                                cnt = reduceRule.SymbolGroup.Count() - stateGroup.Count() + 1;
-                                stateGroup.Clear();
-
-
-                                while (cnt > 0) {
-                                    tempIndex--;
-                                    if (this._GrammerGroup.Get(tempIndex).Item2 == null ||
-                                        this._GrammerGroup.Get(tempIndex).Item2.GramerState !=
-                                        Model.GramerInfoState.Error) {
-                                        cnt--;
-                                    }
-                                }
-
-                                targetState = this._GrammerGroup.Get(tempIndex).Item1;
-                                stateGroup.Set(targetState);
-
-                            } else {
-                                Loop.For(reduceRule.SymbolGroup.Count())
-                                    .ForEach(item => targetState = stateGroup.Remove());
-                                targetState = stateGroup.Get();
-                            }
-
-
-                            targetState = targetState.GetAction(reduceSymbol).TargetState;           
-                        }
-                    }
-
-                    shift = reduceActionGroup.ToEnumerble().FirstOrDefault(null);
-                }           
-
-                if (shift == null) {
-                    shift = actionGroup.Where(item => item.ActionType == Model.ActionType.Goto)
-                        .OrderByCompareFunc((a, b) => Model.Produce
-                            .Compare(a.Symbol, b.Symbol, this._EgtStorer.ProduceGroup))
-                        .FirstOrDefault(null);
+                //第二次Reduce则停止???
+                if (index > 0 && curState.CanReduce()) {
+                    break;
                 }
 
-                if (shift == null) {
-                    shift = actionGroup.OrderBy(item => item.ActionType == Model.ActionType.Shift ? 1 : 0)
-                        .Last();
-                }
-
+                //寻找第一个移入类的符号
+                var sym = curState.GetNextSymbol(stateGroup, this._EgtStorer.ProduceGroup);
                 //构造移入符号并读入符号(坐标为-1是为了不干扰定位)
-                var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, shift.Symbol, null, -1, -1, -1);
+                var tokenInfo = new Model.TokenInfo(Model.TokenInfoState.Accept, sym, null, -1, -1, -1);
+                console.log(sym);
 
+                //如果是规约,则持续消耗符号
                 while (true) {
                     var grm = this.ReadGramer(tokenInfo);
-                    if (/*tokenInfo.Symbol.Name == "EOF" ||*/ grm.GramerState != Model.GramerInfoState.Reduce) {
+                    if (grm.GramerState != Model.GramerInfoState.Reduce) {
                         break;
                     }
                 }
-                
-
-                console.log(shift.Symbol);
 
                 index++;
             }
