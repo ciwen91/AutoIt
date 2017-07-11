@@ -86,7 +86,6 @@
                             this.GramerAccept(gramer);
                             //根语法为Accept语法的第一个子语法
                             var resultGrammer = gramer.GetChildGroup().Get(0);
-                            this._GramerReader.EndRead();
 
                             return resultGrammer;
                         }
@@ -116,8 +115,6 @@
                 }
             }
 
-            this._GramerReader.EndRead();
-
             return null;
         } 
         //获取指定位置的分析信息(行,列)     
@@ -125,8 +122,7 @@
             //如果位于语法树中,则返回语法信息和可能的父符号
             var grammer = this._GramerReader.GetGrammerInfo(line, col, this.ContentNameGroup);
             if (grammer != null) {
-                var parentMaySymbolGroup = this._GramerReader.GetParentMaySymbolGroup(grammer);
-                return new Model.GramerAnalyInfo(grammer, parentMaySymbolGroup);
+                return new Model.GramerAnalyInfo(grammer);
             }
 
             return null;

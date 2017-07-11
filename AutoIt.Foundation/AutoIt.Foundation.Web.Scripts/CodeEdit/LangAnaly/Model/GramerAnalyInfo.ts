@@ -3,12 +3,11 @@
     export class GramerAnalyInfo {
         //语法信息
         GramerInfo: GramerInfo;
-        //可能的符号集合
-        ParantMaySymbolGroup: List<Symbol>;
+        ParantMaySymbolGroup:List<Model.Symbol>;
 
-        constructor(gramerInfo: GramerInfo, parantMaySymbolGroup: List<Symbol>) {
+        constructor(gramerInfo: GramerInfo) {
             this.GramerInfo = gramerInfo;
-            this.ParantMaySymbolGroup = parantMaySymbolGroup;
+            this.ParantMaySymbolGroup = gramerInfo.GetParentMaySymbolGroup();
         }
     }
 }

@@ -25,6 +25,29 @@ module CodeEdit.LangAnaly.Model {
             this.Data = startToken.Data;
         }
 
+        //获取所有可能的父符号(当前语法)
+        GetParentMaySymbolGroup(): List<Model.Symbol> {
+            var parentMaySymbolGroup = new List<Model.Symbol>();
+
+            //如果有父语法,则为父语法的符号
+            if (this.Parent != null && this.GramerState != Model.GramerInfoState.Error) {
+                var parentGramer = this.Parent;
+                while (parentGramer != null) {
+                    parentMaySymbolGroup.Set(parentGramer.Symbol);
+                    parentGramer = parentGramer.Parent;
+                }
+            } else if (this.MayParent != null) {
+                var parentGramer = this.MayParent;
+                while (parentGramer != null) {
+                    parentMaySymbolGroup.Set(parentGramer.Symbol);
+                    parentGramer = parentGramer.Parent;
+                }
+            } else {
+                parentMaySymbolGroup = this.MayParentSymbolGroup;
+            }
+
+            return parentMaySymbolGroup;
+        }
         //获取子语法
         GetChildGroup(): List<GramerInfo> {
             return this._ChildGroup;

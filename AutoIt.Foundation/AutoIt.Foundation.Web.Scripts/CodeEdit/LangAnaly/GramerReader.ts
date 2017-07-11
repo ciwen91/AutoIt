@@ -109,16 +109,6 @@ namespace CodeEdit.LangAnaly {
             }
         }
 
-        //结束分析
-        EndRead() {
-            //对于没有父元素且不为错误,则计算可能的父符号
-            this._GrammerGroup.ToEnumerble()
-                .Where(item=>item.Item2!=null&&item.Item2.Parent==null&&item.Item2.GramerState!=Model.GramerInfoState.Error)
-                .ForEach((gramerItem) => {
-                    gramerItem.Item2.MayParentSymbolGroup = gramerItem.Item1.GetMayParentSymbolGroup();
-                });
-        }
-
         //获取指定位置的语法信息(行,列,内容符号名称列表)
         GetGrammerInfo(line: number, col: number, contentNameGroup: List<string>): Model.GramerInfo {
             //初始列表为顶级语法列表
@@ -144,30 +134,6 @@ namespace CodeEdit.LangAnaly {
             }
 
             return null;
-        }
-
-        //获取所有可能的父符号(当前语法)
-        GetParentMaySymbolGroup(gramer: Model.GramerInfo): List<Model.Symbol> {
-            var parentMaySymbolGroup = new List<Model.Symbol>();
-
-            //如果有父语法,则为父语法的符号
-            if (gramer.Parent != null && gramer.GramerState != Model.GramerInfoState.Error) {
-                var parentGramer = gramer.Parent;
-                while (parentGramer != null) {
-                    parentMaySymbolGroup.Set(parentGramer.Symbol);
-                    parentGramer = parentGramer.Parent;
-                }
-            } else if (gramer.MayParent != null) {
-                var parentGramer = gramer.MayParent;
-                while (parentGramer != null) {
-                    parentMaySymbolGroup.Set(parentGramer.Symbol);
-                    parentGramer = parentGramer.Parent;
-                }
-            } else {
-                parentMaySymbolGroup = gramer.MayParentSymbolGroup;
-            }
-
-            return parentMaySymbolGroup;
         }
 
         //自动补全不完整的语法(是否只补全可选的)
@@ -224,10 +190,14 @@ namespace CodeEdit.LangAnaly {
                 index++;
             }
 
-            //状态为自动补全
-            grammer.GramerState = Model.GramerInfoState.AutoComplete;
+            if (index == 0) {
+                return false;
+            } else {
+                //状态为自动补全
+                grammer.GramerState = Model.GramerInfoState.AutoComplete;
+                return true;
+            }
 
-            return true;
         }
 
         //语法是否完成

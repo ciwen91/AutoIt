@@ -80,7 +80,7 @@ CodeMirror.defineOption("autoTag",
                     if (info.ParantMaySymbolGroup.Count() > 0 && info.ParantMaySymbolGroup.Get(0).Name == "Start Tag") {
                         var nameGramer = gramerReader
                             .GetClosetGrammer(item => item.Symbol.Name == "Name" &&
-                                gramerReader.GetParentMaySymbolGroup(item)
+                                item.GetParentMaySymbolGroup()
                                 .ToEnumerble()
                                 .Any(sItem => sItem.Name.indexOf("Tag") >= 0),
                                 info.GramerInfo);
