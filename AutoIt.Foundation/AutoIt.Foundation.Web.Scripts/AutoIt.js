@@ -171,7 +171,9 @@ var CodeMirrorExtend = (function () {
             return "error";
         }
         //如果语法为自动完成且下一个语法不为错误,则样式为错误
-        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete && gramerInfo.Parent == null) {
+        if (gramerInfo
+            .GramerState ==
+            CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
             var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
             var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
             var isNextError = nextAnalyInfo != null &&
@@ -205,16 +207,17 @@ CodeMirror.defineMode("xml", function (editorConfig, config) {
         var name = gramerInfo.Symbol.Name;
         var parentMayNameGroup = analyInfo.ParantMaySymbolGroup.ToEnumerble()
             .Select(function (item) { return item.Name; });
+        var firstParentName = parentMayNameGroup.FirstOrDefault("");
         //尖括号
         if (name == "<" || name == ">" || name == "</" || name == "/>") {
             style = "tag bracket";
         }
         else if (name == "Name") {
             //标签名(父节点为标签)
-            if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Tag") >= 0) {
+            if (firstParentName.indexOf("Tag") >= 0) {
                 style = "tag";
             }
-            else if (parentMayNameGroup.Count() > 0 && parentMayNameGroup.ElementAt(0).indexOf("Attribute") >= 0) {
+            else if (firstParentName.indexOf("Attribute") >= 0) {
                 style = "attribute";
             }
         }
@@ -245,26 +248,29 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
         var extend = cm.Extend;
         var analy = extend._LangAnaly;
         var ranges = cm.listSelections();
-        for (var i = 0; i < ranges.length; i++) {
-            var range = ranges[i];
+        if (ranges.length > 0) {
+            var range = ranges[0];
             setTimeout(function () {
                 var gramerReader = analy._GramerReader;
                 var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
-                if (info.ParantMaySymbolGroup.Count() > 0 && info.ParantMaySymbolGroup.Get(0).Name == "Start Tag") {
+                if (info.ParantMaySymbolGroup.Count() > 0 &&
+                    info.ParantMaySymbolGroup.Get(0).Name == "Start Tag") {
                     var nameGramer = gramerReader
                         .GetClosetGrammer(function (item) { return item.Symbol.Name == "Name" &&
                         item.GetParentMaySymbolGroup()
                             .ToEnumerble()
                             .Any(function (sItem) { return sItem.Name.indexOf("Tag") >= 0; }); }, info.GramerInfo);
                     var tag = nameGramer.Value;
-                    range.anchor.ch++;
-                    cm.replaceRange(">\n\n</" + tag + ">", range.head, range.anchor, "+insert");
-                    // debugger;
+                    var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
+                    cm.replaceRange("\n\n</" + tag + ">", newPos, newPos);
+                    //比上一行多一层缩进
                     cm.indentLine(range.head.line + 1, "prev", true);
                     cm.indentLine(range.head.line + 1, "add", true);
+                    //比上一行少一层缩进
                     cm.indentLine(range.head.line + 2, "prev", true);
                     cm.indentLine(range.head.line + 2, "subtract", true);
-                    var newPos = CodeMirror.Pos(range.head.line + 1, cm.getLine(range.head.line + 1).length);
+                    //定位到中间行的尾部
+                    newPos = CodeMirror.Pos(range.head.line + 1, cm.getLine(range.head.line + 1).length);
                     cm.setSelections([{ head: newPos, anchor: newPos }]);
                 }
             }, 0);
@@ -276,14 +282,13 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
         var analy = extend._LangAnaly;
         var range = cm.listSelections()[0];
         setTimeout(function () {
-            var gramerReader = analy._GramerReader;
             var info = analy.GetAnalyInfo(range.head.line, range.head.ch);
             console.log(info);
             if (info.ParantMaySymbolGroup.Count() > 0 &&
                 info.ParantMaySymbolGroup.Get(0).Name == "Val" &&
                 info.ParantMaySymbolGroup.ToEnumerble().Any(function (item) { return item.Name == "Attribute"; })) {
-                cm.replaceRange('"', range.head, range.anchor);
                 var newPos = CodeMirror.Pos(range.head.line, range.head.ch + 1);
+                cm.replaceRange('"', newPos, newPos);
                 cm.setSelections([{ head: newPos, anchor: newPos }]);
             }
         }, 0);

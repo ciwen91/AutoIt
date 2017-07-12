@@ -27,7 +27,8 @@ class CodeMirrorExtend {
     }
 
     //创建编辑器(Html元素,配置)
-    static CreateEditor(elm: HTMLTextAreaElement, option: CodeMirror.EditorConfiguration): CodeMirror.EditorConfiguration {
+    private static CreateEditor(elm: HTMLTextAreaElement, option: CodeMirror.EditorConfiguration): CodeMirror.
+        EditorConfiguration {
         //设置编辑器ID
         var editorID = Math.random();
         (<any>option).EditorID = editorID;
@@ -79,7 +80,7 @@ class CodeMirrorExtend {
     }
 
     //更新分析器(如果文本变化重新分析)
-    UpdateAnalyzer() {
+    private  UpdateAnalyzer() {
         var editor = Cast<CodeMirror.EditorFromTextArea>(window[this._EditorID]);
 
         var text = editor.getValue();
@@ -125,7 +126,7 @@ class CodeMirrorExtend {
     }
 
     //消耗语法
-    ConsumeAnalyInfo(stream: CodeMirror.StringStream,
+    private  ConsumeAnalyInfo(stream: CodeMirror.StringStream,
         gramerInfo: CodeEdit.LangAnaly.Model.GramerInfo,
         line: number,
         col: number) {
@@ -145,11 +146,11 @@ class CodeMirrorExtend {
     }
 
     //获取样式
-    GetStyle(gramerAnalyInfo: CodeEdit.LangAnaly.Model.GramerAnalyInfo): string {
+    private GetStyle(gramerAnalyInfo: CodeEdit.LangAnaly.Model.GramerAnalyInfo): string {
         var gramerInfo = gramerAnalyInfo == null ? null : gramerAnalyInfo.GramerInfo;
 
         //如果语法为空,则样式为空
-        if (gramerInfo == null) { 
+        if (gramerInfo == null) {
             return null;
         }
 
@@ -159,7 +160,9 @@ class CodeMirrorExtend {
         }
 
         //如果语法为自动完成且下一个语法不为错误,则样式为错误
-        if (gramerInfo.GramerState == CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete&&gramerInfo.Parent==null) {
+        if (gramerInfo
+            .GramerState ==
+            CodeEdit.LangAnaly.Model.GramerInfoState.AutoComplete) {
             var nextPoint = gramerInfo.NextPoint(this._AnalyedText);
             var nextAnalyInfo = this._LangAnaly.GetAnalyInfo(nextPoint.Y, nextPoint.X);
 
