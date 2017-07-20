@@ -55,7 +55,7 @@ class CodeMirrorExtend {
     }
 
     //高亮文本
-    HighLight(stream: CodeMirror.StringStream, state: any):string {
+    HighLight(stream: CodeMirror.StringStream, state: any): string {
         //获取当前位置.如果是第一列,则行加1
         if (stream.pos == 0) {
             state.Line += 1;
@@ -82,7 +82,7 @@ class CodeMirrorExtend {
     //更新分析器(如果文本变化重新分析)
     private  UpdateAnalyzer() {
         var editor = Cast<CodeMirror.EditorFromTextArea>(window[this._EditorID]);
-
+       
         var text = editor.getValue();
         //CodeMirror从首个非空白行开始处理
         text = text.replace(/^\n/mg, "");
@@ -96,7 +96,12 @@ class CodeMirrorExtend {
             var gramer = this._LangAnaly._GramerReader._GrammerGroup.Get().Item2;
             if (gramer != null) {
                 console.clear();
-                this.ShowGramerTree(gramer,0);
+                this.ShowGramerTree(gramer, 0);
+
+                setTimeout(function() {
+                    (<any>editor).showHint();
+                },100);
+                
             }
         }
     }

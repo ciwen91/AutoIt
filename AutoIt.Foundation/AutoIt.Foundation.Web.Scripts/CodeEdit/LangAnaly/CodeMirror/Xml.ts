@@ -135,6 +135,21 @@ CodeMirror.defineOption("autoTag",
         cm.addKeyMap(map);
     });
 
+CodeMirror.registerHelper("hint","xml",function(cm, options) {
+    var cur = cm.getCursor();
+    var extend = <CodeMirrorExtend>cm.Extend;
+    var analy = extend._LangAnaly;
+    var analyInfo = analy.GetAnalyInfo(cur.line, cur.ch);
+
+    console.log(analyInfo);
+
+    return {
+        list: ["abc", "123", "中文"],
+        from: cur,
+        to: cur
+    };
+});
+
 
 
 

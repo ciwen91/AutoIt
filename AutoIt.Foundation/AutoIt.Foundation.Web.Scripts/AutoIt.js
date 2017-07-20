@@ -117,6 +117,9 @@ var CodeMirrorExtend = (function () {
             if (gramer != null) {
                 console.clear();
                 this.ShowGramerTree(gramer, 0);
+                setTimeout(function () {
+                    editor.showHint();
+                }, 100);
             }
         }
     };
@@ -295,6 +298,18 @@ CodeMirror.defineOption("autoTag", true, function (cm, val, old) {
         return CodeMirror.Pass;
     };
     cm.addKeyMap(map);
+});
+CodeMirror.registerHelper("hint", "xml", function (cm, options) {
+    var cur = cm.getCursor();
+    var extend = cm.Extend;
+    var analy = extend._LangAnaly;
+    var analyInfo = analy.GetAnalyInfo(cur.line, cur.ch);
+    console.log(analyInfo);
+    return {
+        list: ["abc", "123", "中文"],
+        from: cur,
+        to: cur
+    };
 });
 var CodeEdit;
 (function (CodeEdit) {
