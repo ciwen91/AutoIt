@@ -17,6 +17,10 @@ class Dictionary<TKey, TValue> {
         return index;
     }
 
+    public Contains(key: TKey): boolean {
+        return this.Index(key) >= 0;
+    }
+
     //获取值(键,默认值)
     public Get(key: TKey, dft?: TValue): TValue {
         var index = this.Index(key);

@@ -278,6 +278,7 @@
     <TypeScriptCompile Include="DataStruct\Func.ts" />
     <TypeScriptCompile Include="DataStruct\LinePoint.ts" />
     <TypeScriptCompile Include="DataStruct\List.ts" />
+    <TypeScriptCompile Include="DataStruct\Lookup.ts" />
     <TypeScriptCompile Include="DataStruct\Stream.ts" />
     <TypeScriptCompile Include="DataStruct\Tuple.ts" />
     <TypeScriptCompile Include="Global.ts" />
@@ -287,6 +288,8 @@
     <TypeScriptCompile Include="MetaData\Core\ElmInfo.ts" />
     <TypeScriptCompile Include="MetaData\Core\SimpleType.ts" />
     <TypeScriptCompile Include="MetaData\Core\TypeInfo.ts" />
+    <TypeScriptCompile Include="MetaData\MetaDataHelper.ts" />
+    <TypeScriptCompile Include="MetaData\ValLimit\ValLimitAtr.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitBase.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForDataTime.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForDouble.ts" />

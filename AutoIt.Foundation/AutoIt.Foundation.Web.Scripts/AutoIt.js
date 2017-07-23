@@ -2066,6 +2066,9 @@ var Dictionary = (function () {
             .IndexOf(key);
         return index;
     };
+    Dictionary.prototype.Contains = function (key) {
+        return this.Index(key) >= 0;
+    };
     //获取值(键,默认值)
     Dictionary.prototype.Get = function (key, dft) {
         var index = this.Index(key);
@@ -2140,6 +2143,13 @@ var LinePoint = (function () {
     return LinePoint;
 }());
 LinePoint.Empty = new LinePoint(0, 0, 0);
+var Lookup = (function (_super) {
+    __extends(Lookup, _super);
+    function Lookup() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Lookup;
+}(Dictionary));
 //Base64流
 var Stream = (function () {
     function Stream(str) {
@@ -2184,7 +2194,27 @@ function CastToAry(t) {
 }
 //获取对象类型
 function GetType(obj) {
-    return obj.constructor;
+    //obj是类型
+    if (obj.prototype) {
+        return obj;
+    }
+    else {
+        return obj.constructor;
+    }
+}
+function getParentType(type) {
+    return type.prototype && type.prototype.__proto__ ? type.prototype.__proto__.constructor : null;
+}
+//是否为某个类型
+function IsType(obj, type) {
+    var objType = GetType(obj);
+    while (objType) {
+        if (objType == type) {
+            return true;
+        }
+        objType = getParentType(objType);
+    }
+    return false;
 }
 //判断一个对象是否为空
 function IsEmpty(obj) {
@@ -2420,6 +2450,39 @@ var MetaData;
     }());
     MetaData.TypeInfo = TypeInfo;
 })(MetaData || (MetaData = {}));
+var MetaDataHelper = (function () {
+    function MetaDataHelper() {
+    }
+    MetaDataHelper.Set = function (type, val, memberName) {
+        if (memberName === void 0) { memberName = null; }
+        this._Dic.Get(type, new Lookup())
+            .Get(memberName, new List())
+            .Set(val);
+    };
+    MetaDataHelper.Get = function (type, atrType, memberName) {
+        if (memberName === void 0) { memberName = null; }
+        var item = this.GetAll(type, atrType, memberName)
+            .ToEnumerble()
+            .FirstOrDefault(null);
+        return item;
+    };
+    MetaDataHelper.GetAll = function (type, atrType, memberName) {
+        if (memberName === void 0) { memberName = null; }
+        var group = this._Dic.Get(type, new Lookup())
+            .Get(memberName, new List());
+        group = group.ToEnumerble()
+            .Where(function (item) { return IsType(item, atrType); })
+            .ToList();
+        return group;
+    };
+    return MetaDataHelper;
+}());
+MetaDataHelper._Dic = new Dictionary();
+function ValLimitAtr(valLimit) {
+    return function (target, propertyKey) {
+        MetaDataHelper.Set(target, valLimit, propertyKey);
+    };
+}
 var MetaData;
 (function (MetaData) {
     var ValLimitBase = (function () {
@@ -2500,34 +2563,91 @@ var MetaData;
         return ValLimitForStr;
     }(MetaData.ValLimitBase));
 })(MetaData || (MetaData = {}));
-var Control = (function () {
-    function Control() {
-    }
-    return Control;
-}());
-var Grid = (function (_super) {
-    __extends(Grid, _super);
-    function Grid() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.ChildGroup = new List();
-        return _this;
-    }
-    return Grid;
-}(Control));
-__decorate([
-    ValLimit(new MetaData.ValLimitForInt(10, 100))
-], Grid.prototype, "Cols", void 0);
-var TextBox = (function (_super) {
-    __extends(TextBox, _super);
-    function TextBox() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return TextBox;
-}(Control));
-function ValLimit(valLimitBase) {
-    return function (target, propertyKey) {
-    };
+var UI;
+(function (UI) {
+    var Control = (function () {
+        function Control() {
+            this.Width = None;
+            this.Height = None;
+        }
+        return Control;
+    }());
+    UI.Control = Control;
+    var Grid = (function (_super) {
+        __extends(Grid, _super);
+        function Grid() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.Cols = 1;
+            _this.ChildGroup = new List();
+            return _this;
+        }
+        return Grid;
+    }(Control));
+    __decorate([
+        ValLimitAtr(new MetaData.ValLimitForInt(10, 100))
+    ], Grid.prototype, "Cols", void 0);
+    UI.Grid = Grid;
+    var TextBox = (function (_super) {
+        __extends(TextBox, _super);
+        function TextBox() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.Enable = true;
+            return _this;
+        }
+        return TextBox;
+    }(Control));
+    UI.TextBox = TextBox;
+    var Other = (function () {
+        function Other() {
+        }
+        return Other;
+    }());
+    UI.Other = Other;
+})(UI || (UI = {}));
+setTimeout(function () {
+    init();
+}, 0);
+function init() {
+    var classgroup = getAll();
+    var typeInfoGroup = new Dictionary();
+    classgroup.ToEnumerble()
+        .ForEach(function (item) {
+        fillTypeInfo(item, typeInfoGroup, classgroup);
+    });
+    console.log($.Enumerable.From(typeInfoGroup.ToArray()).Select(function (item) { return item.Item2; }).ToArray());
 }
+function getAll() {
+    var group = new List();
+    for (var key in UI) {
+        var item = UI[key];
+        if (IsType(item, UI.Control)) {
+            group.Set(item);
+        }
+    }
+    return group;
+}
+function fillTypeInfo(controlType, infoGroup, typeGroup) {
+    if (infoGroup.Contains(controlType)) {
+        return infoGroup.Get(controlType);
+    }
+    var parent = getParentType(controlType);
+    var parentType = null;
+    if (typeGroup.Contains(parent)) {
+        parentType = fillTypeInfo(parent, infoGroup, typeGroup);
+    }
+    var typeInfo = new MetaData.TypeInfo(controlType.name, parentType);
+    infoGroup.Set(controlType, typeInfo);
+    return typeInfo;
+}
+//setTimeout(function() {
+//        for (var item in UI) {
+//            if (IsType(UI[item], UI.Control)) {
+//                console.log(GetType(UI[item]).name);
+//                new MetaData.TypeInfo("")
+//            }
+//        }
+//    },
+//    0);
 /*
 //var control = new MetaData.TypeInfo("Control");
 

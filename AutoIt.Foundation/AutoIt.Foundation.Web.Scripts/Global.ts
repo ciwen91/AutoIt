@@ -15,7 +15,32 @@ function CastToAry<T>(t: T | T[]): T[] {
 }
 //获取对象类型
 function GetType(obj: any): any {
-    return obj.constructor;
+    //obj是类型
+    if (obj.prototype) {
+        return obj;
+    }
+    //obj为实例
+    else {
+        return obj.constructor;   
+    }   
+}
+
+function getParentType(type:any) {
+    return type.prototype && type.prototype.__proto__ ? type.prototype.__proto__.constructor : null;
+}
+
+//是否为某个类型
+function IsType(obj:any,type:any) {
+    var objType = GetType(obj);
+
+    while (objType) {
+        if (objType == type) {
+            return true;
+        }
+        objType = getParentType(objType);
+    }
+
+    return false;
 }
 //判断一个对象是否为空
 function IsEmpty(obj: any): boolean {

@@ -16,6 +16,8 @@ namespace AutoIt.Foundation.Test
     {
         static void Main(string[] args)
         {
+            var group = new List<int>();
+            
             //            JsonConvert.DefaultSettings = () =>
             //            {
             //                var setting = new JsonSerializerSettings();
