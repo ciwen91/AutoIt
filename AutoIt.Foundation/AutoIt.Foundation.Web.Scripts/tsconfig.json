@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "system",
+    "experimentalDecorators": true,
+    "sourceMap": false,
+    "target": "es5",
+    "outFile": "AutoIt.js"
+  }
+}

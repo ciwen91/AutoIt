@@ -3,6 +3,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -37,10 +43,10 @@ var Binding = (function () {
             });
         }
     };
-    //绑定信息
-    Binding.Key = "Binding";
     return Binding;
 }());
+//绑定信息
+Binding.Key = "Binding";
 //获取下一个位置（开始位置,偏移数）
 String.prototype.NextPoint = function (startPoint, count) {
     var x = startPoint.X;
@@ -411,6 +417,7 @@ var CodeEdit;
                 this.DFAStateGroup = new List();
                 //LALR状态集合
                 this.LALRStateGroup = new List();
+                //#endregion
             }
             //创建存储器
             EgtStorer.CreateFromStr = function (str) {
@@ -987,72 +994,6 @@ var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
-        var Lang;
-        (function (Lang) {
-            ///<reference path="../LangAnalyBase.ts"/>
-            var PrintLangManager = (function (_super) {
-                __extends(PrintLangManager, _super);
-                function PrintLangManager(egtStr) {
-                    _super.call(this, egtStr);
-                }
-                PrintLangManager.prototype.TokenRead = function (tokenInfo) {
-                    //if (this.PrintToken) {
-                    //    console.log("%c" + tokenInfo.Value + "," + tokenInfo.Symbol.Name, "color:blue;");
-                    //}
-                };
-                PrintLangManager.prototype.GramerRead = function (gramerInfo) {
-                    //console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
-                    //    "," + gramerInfo.Value + "$", "color:green;");
-                };
-                PrintLangManager.prototype.GramerAccept = function (gramerInfo) {
-                    //console.log("%c" + gramerInfo.Symbol.Name + "," + gramerInfo.Value, "color:red;");
-                };
-                return PrintLangManager;
-            }(CodeEdit.LangAnaly.LangAnalyBase));
-            Lang.PrintLangManager = PrintLangManager;
-        })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
-    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
-})(CodeEdit || (CodeEdit = {}));
-var CodeEdit;
-(function (CodeEdit) {
-    var LangAnaly;
-    (function (LangAnaly) {
-        var XmlLangAnaly = (function (_super) {
-            __extends(XmlLangAnaly, _super);
-            function XmlLangAnaly() {
-                _super.apply(this, arguments);
-            }
-            XmlLangAnaly.prototype.IsGramerMeanEro = function (gramerInfo) {
-                //标签名称
-                var symbolName = gramerInfo.Symbol.Name;
-                if (symbolName == "End Tag") {
-                    //起始标签
-                    var startGramer = this._GramerReader
-                        .GetClosetGrammer(function (item) { return item.Symbol != null && item.Symbol.Name == "Start Tag"; });
-                    var startTagName = this.GetTagName(startGramer.Value);
-                    //结束标签与起始标签名称不一致,则语法无意义
-                    var endTagName = this.GetTagName(gramerInfo.Value);
-                    if (endTagName != startTagName) {
-                        return false;
-                    }
-                }
-                return _super.prototype.IsGramerMeanEro.call(this, gramerInfo);
-            };
-            //获取标签名称(文本)
-            XmlLangAnaly.prototype.GetTagName = function (text) {
-                var group = /\w+/g.exec(text);
-                var tagName = group ? group[0] : "";
-                return tagName;
-            };
-            return XmlLangAnaly;
-        }(LangAnaly.LangAnalyBase));
-        LangAnaly.XmlLangAnaly = XmlLangAnaly;
-    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
-})(CodeEdit || (CodeEdit = {}));
-var CodeEdit;
-(function (CodeEdit) {
-    var LangAnaly;
-    (function (LangAnaly) {
         //语法分析基类
         var LangAnalyBase = (function () {
             function LangAnalyBase(egtStr) {
@@ -1175,20 +1116,89 @@ var CodeEdit;
         LangAnaly.LangAnalyBase = LangAnalyBase;
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
+///<reference path="../LangAnalyBase.ts"/>
+var CodeEdit;
+///<reference path="../LangAnalyBase.ts"/>
+(function (CodeEdit) {
+    var LangAnaly;
+    (function (LangAnaly) {
+        var Lang;
+        (function (Lang) {
+            var PrintLangManager = (function (_super) {
+                __extends(PrintLangManager, _super);
+                function PrintLangManager(egtStr) {
+                    return _super.call(this, egtStr) || this;
+                }
+                PrintLangManager.prototype.TokenRead = function (tokenInfo) {
+                    //if (this.PrintToken) {
+                    //    console.log("%c" + tokenInfo.Value + "," + tokenInfo.Symbol.Name, "color:blue;");
+                    //}
+                };
+                PrintLangManager.prototype.GramerRead = function (gramerInfo) {
+                    //console.log("%c" + ' '.Repeat(gramerInfo.GetLevel() * 3) + gramerInfo.GetLevel() + ":" + gramerInfo.Symbol.Name +
+                    //    "," + gramerInfo.Value + "$", "color:green;");
+                };
+                PrintLangManager.prototype.GramerAccept = function (gramerInfo) {
+                    //console.log("%c" + gramerInfo.Symbol.Name + "," + gramerInfo.Value, "color:red;");
+                };
+                return PrintLangManager;
+            }(CodeEdit.LangAnaly.LangAnalyBase));
+            Lang.PrintLangManager = PrintLangManager;
+        })(Lang = LangAnaly.Lang || (LangAnaly.Lang = {}));
+    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
+})(CodeEdit || (CodeEdit = {}));
+///<reference path="../LangAnalyBase.ts"/>
+var CodeEdit;
+///<reference path="../LangAnalyBase.ts"/>
+(function (CodeEdit) {
+    var LangAnaly;
+    (function (LangAnaly) {
+        var XmlLangAnaly = (function (_super) {
+            __extends(XmlLangAnaly, _super);
+            function XmlLangAnaly() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            XmlLangAnaly.prototype.IsGramerMeanEro = function (gramerInfo) {
+                //标签名称
+                var symbolName = gramerInfo.Symbol.Name;
+                if (symbolName == "End Tag") {
+                    //起始标签
+                    var startGramer = this._GramerReader
+                        .GetClosetGrammer(function (item) { return item.Symbol != null && item.Symbol.Name == "Start Tag"; });
+                    var startTagName = this.GetTagName(startGramer.Value);
+                    //结束标签与起始标签名称不一致,则语法无意义
+                    var endTagName = this.GetTagName(gramerInfo.Value);
+                    if (endTagName != startTagName) {
+                        return false;
+                    }
+                }
+                return _super.prototype.IsGramerMeanEro.call(this, gramerInfo);
+            };
+            //获取标签名称(文本)
+            XmlLangAnaly.prototype.GetTagName = function (text) {
+                var group = /\w+/g.exec(text);
+                var tagName = group ? group[0] : "";
+                return tagName;
+            };
+            return XmlLangAnaly;
+        }(LangAnaly.LangAnalyBase));
+        LangAnaly.XmlLangAnaly = XmlLangAnaly;
+    })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
+})(CodeEdit || (CodeEdit = {}));
 var CodeEdit;
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //LALR动作类型
+            //LALR��������
+            var ActionType;
             (function (ActionType) {
                 ActionType[ActionType["Shift"] = 1] = "Shift";
                 ActionType[ActionType["Reduce"] = 2] = "Reduce";
                 ActionType[ActionType["Goto"] = 3] = "Goto";
                 ActionType[ActionType["Accept"] = 4] = "Accept";
-            })(Model.ActionType || (Model.ActionType = {}));
-            var ActionType = Model.ActionType;
+            })(ActionType = Model.ActionType || (Model.ActionType = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1198,12 +1208,12 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //分组字符模式
+            //�����ַ�ģʽ
+            var AdvanceMode;
             (function (AdvanceMode) {
                 AdvanceMode[AdvanceMode["Token"] = 0] = "Token";
                 AdvanceMode[AdvanceMode["Character"] = 1] = "Character";
-            })(Model.AdvanceMode || (Model.AdvanceMode = {}));
-            var AdvanceMode = Model.AdvanceMode;
+            })(AdvanceMode = Model.AdvanceMode || (Model.AdvanceMode = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1225,18 +1235,20 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="EgtEntityBase.ts"/>>
 var CodeEdit;
+///<reference path="EgtEntityBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //字符集(DFA边)
+            //�ַ���(DFA��)
             var CharSet = (function (_super) {
                 __extends(CharSet, _super);
                 function CharSet() {
-                    _super.apply(this, arguments);
-                    //字符集项
-                    this.Group = new List();
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    //�ַ�����
+                    _this.Group = new List();
+                    return _this;
                 }
                 return CharSet;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
@@ -1250,7 +1262,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //字符集项
+            //�ַ�����
             var CharSetItem = (function () {
                 function CharSetItem() {
                 }
@@ -1266,11 +1278,11 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //DFA边
+            //DFA��
             var DFAEdge = (function () {
                 function DFAEdge() {
                 }
-                //字符是否在边上
+                //�ַ��Ƿ��ڱ���
                 DFAEdge.prototype.IsFit = function (cha) {
                     var code = cha.charCodeAt(0);
                     return $.Enumerable.From(this.CharSet.Group.ToArray()).Any(function (item) { return code >= item.Start && code <= item.End; });
@@ -1287,35 +1299,36 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //DFA状态
+            //DFA״̬
             var DFAState = (function (_super) {
                 __extends(DFAState, _super);
                 function DFAState() {
-                    _super.apply(this, arguments);
-                    //边集合
-                    this.EdgGroup = new List();
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    //�߼���
+                    _this.EdgGroup = new List();
+                    return _this;
                 }
-                //获取匹配的边(字符)
+                //��ȡƥ��ı�(�ַ�)
                 DFAState.prototype.GetEdge = function (cha) {
                     var edge = $.Enumerable.From(this.EdgGroup.ToArray())
                         .FirstOrDefault(null, function (item) { return item.IsFit(cha); });
                     return edge;
                 };
-                //获取可能接受的符号(字符串,访问过的状态)
+                //��ȡ���ܽ��ܵķ���(�ַ���,���ʹ���״̬)
                 DFAState.prototype.GetMayAcceptSymbolGroup = function (str, visiteStateGroup) {
                     if (visiteStateGroup === void 0) { visiteStateGroup = new List(); }
                     var group = new List();
-                    //如果访问过则返回,否则标记
+                    //������ʹ��򷵻�,������
                     if (visiteStateGroup.Contains(this)) {
                         return group;
                     }
                     else {
                         visiteStateGroup.Set(this);
                     }
-                    //如果字符串长度为0,则尝试匹配
+                    //����ַ�������Ϊ0,����ƥ��
                     if (str.length > 0) {
                         var edge = this.GetEdge(str[0]);
-                        //匹配失败直接返回
+                        //ƥ��ʧ��ֱ�ӷ���
                         if (edge == null) {
                             return group;
                         }
@@ -1324,11 +1337,11 @@ var CodeEdit;
                         }
                     }
                     else {
-                        //当前状态的可接受的符号
+                        //��ǰ״̬�Ŀɽ��ܵķ���
                         if (this.AcceptSymbol != null) {
                             group.Set(this.AcceptSymbol);
                         }
-                        //后面状态的可接受的符号
+                        //����״̬�Ŀɽ��ܵķ���
                         var nextGroup = this.EdgGroup.ToEnumerble()
                             .SelectMany(function (item) { return item.TargetState.GetMayAcceptSymbolGroup(str, visiteStateGroup).ToArray(); })
                             .ToList();
@@ -1349,12 +1362,12 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //Group结束模式
+            //Group����ģʽ
+            var EndingMode;
             (function (EndingMode) {
                 EndingMode[EndingMode["Open"] = 0] = "Open";
                 EndingMode[EndingMode["Close"] = 1] = "Close";
-            })(Model.EndingMode || (Model.EndingMode = {}));
-            var EndingMode = Model.EndingMode;
+            })(EndingMode = Model.EndingMode || (Model.EndingMode = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1382,7 +1395,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //符号信息基类
+            //������Ϣ����
             var SymbolInfoBase = (function () {
                 function SymbolInfoBase(symbol, value, line, col, index) {
                     this.Symbol = symbol;
@@ -1397,11 +1410,11 @@ var CodeEdit;
                     var curPoint = new LinePoint(-1, col, line);
                     return curPoint.Compare(startPoint) >= 0 && curPoint.Compare(endPoint) <= 0;
                 };
-                //开始位置
+                //��ʼλ��
                 SymbolInfoBase.prototype.StartLintPoint = function () {
                     return new LinePoint(this.Index, this.Col, this.Line);
                 };
-                //结束位置
+                //����λ��
                 SymbolInfoBase.prototype.EndLinePoint = function () {
                     var point = this.Value.NextPoint(LinePoint.Empty, this.Value.length - 1);
                     var endPoint = this.StartLintPoint().Add(point);
@@ -1415,30 +1428,32 @@ var CodeEdit;
 })(CodeEdit || (CodeEdit = {}));
 ///<reference path="SymbolInfoBase.ts"/>>
 var CodeEdit;
+///<reference path="SymbolInfoBase.ts"/>>
 (function (CodeEdit) {
     var LangAnaly;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //语法信息
+            //�﷨��Ϣ
             var GramerInfo = (function (_super) {
                 __extends(GramerInfo, _super);
                 function GramerInfo(gramerState, startToken) {
-                    _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index);
-                    //产生式
-                    this.Produce = null;
-                    //子语法集合
-                    this._ChildGroup = new List();
-                    this.MayParent = null;
-                    this.MayParentSymbolGroup = new List();
-                    this.GramerState = gramerState;
-                    this.StartToken = startToken;
-                    this.Data = startToken.Data;
+                    var _this = _super.call(this, startToken.Symbol, startToken.Value, startToken.Line, startToken.Col, startToken.Index) || this;
+                    //����ʽ
+                    _this.Produce = null;
+                    //���﷨����
+                    _this._ChildGroup = new List();
+                    _this.MayParent = null;
+                    _this.MayParentSymbolGroup = new List();
+                    _this.GramerState = gramerState;
+                    _this.StartToken = startToken;
+                    _this.Data = startToken.Data;
+                    return _this;
                 }
-                //获取所有可能的父符号(当前语法)
+                //��ȡ���п��ܵĸ�����(��ǰ�﷨)
                 GramerInfo.prototype.GetParentMaySymbolGroup = function () {
                     var parentMaySymbolGroup = new List();
-                    //如果有父语法,则为父语法的符号
+                    //����и��﷨,��Ϊ���﷨�ķ���
                     if (this.Parent != null && this.GramerState != Model.GramerInfoState.Error) {
                         var parentGramer = this.Parent;
                         while (parentGramer != null) {
@@ -1458,18 +1473,18 @@ var CodeEdit;
                     }
                     return parentMaySymbolGroup;
                 };
-                //获取子语法
+                //��ȡ���﷨
                 GramerInfo.prototype.GetChildGroup = function () {
                     return this._ChildGroup;
                 };
-                //设置子语法
+                //�������﷨
                 GramerInfo.prototype.SetChildGroup = function (childGroup) {
                     var _this = this;
                     this._ChildGroup = childGroup;
                     this._ChildGroup.ToEnumerble()
                         .ForEach(function (item) { return item.Parent = _this; });
                 };
-                //获取语法层级
+                //��ȡ�﷨�㼶
                 GramerInfo.prototype.GetLevel = function () {
                     if (this.Produce == null) {
                         return -1;
@@ -1481,7 +1496,7 @@ var CodeEdit;
                         return this._ChildGroup.ToEnumerble().Max(function (item) { return item.GetLevel() + 1; });
                     }
                 };
-                //下一个位置(字符串)
+                //��һ��λ��(�ַ���)
                 GramerInfo.prototype.NextPoint = function (val) {
                     var nextPoint = val.NextPoint(this.EndLinePoint(), 1);
                     return nextPoint;
@@ -1498,20 +1513,20 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //语法状态
+            //�﷨״̬
+            var GramerInfoState;
             (function (GramerInfoState) {
-                //移入
+                //����
                 GramerInfoState[GramerInfoState["Shift"] = 0] = "Shift";
-                //规约
+                //��Լ
                 GramerInfoState[GramerInfoState["Reduce"] = 1] = "Reduce";
-                //接受
+                //����
                 GramerInfoState[GramerInfoState["Accept"] = 2] = "Accept";
-                //错误
+                //����
                 GramerInfoState[GramerInfoState["Error"] = 3] = "Error";
-                //(错误)自动补全
+                //(����)�Զ���ȫ
                 GramerInfoState[GramerInfoState["AutoComplete"] = 4] = "AutoComplete";
-            })(Model.GramerInfoState || (Model.GramerInfoState = {}));
-            var GramerInfoState = Model.GramerInfoState;
+            })(GramerInfoState = Model.GramerInfoState || (Model.GramerInfoState = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1521,11 +1536,11 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //分组
+            //����
             var Group = (function (_super) {
                 __extends(Group, _super);
                 function Group() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 return Group;
             }(Model.EgtEntityBase));
@@ -1539,7 +1554,7 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //LALR动作
+            //LALR����
             var LALRAction = (function () {
                 function LALRAction() {
                 }
@@ -1555,23 +1570,25 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //LALR状态
+            //LALR״̬
             var LALRState = (function (_super) {
                 __extends(LALRState, _super);
                 function LALRState() {
-                    _super.apply(this, arguments);
-                    //动作列表
-                    this.ActionGroup = new List();
-                    this._MayParentSymbolGroup = null;
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    //�����б�
+                    _this.ActionGroup = new List();
+                    _this._MayParentSymbolGroup = null;
+                    return _this;
+                    //#endregion
                 }
-                //获取动作(符号)
+                //��ȡ����(����)
                 LALRState.prototype.GetAction = function (symbol) {
                     var action = this.ActionGroup.ToEnumerble().FirstOrDefault(null, function (item) { return item.Symbol == symbol; });
                     return action;
                 };
-                //获取可能的父符号
+                //��ȡ���ܵĸ�����
                 LALRState.prototype.GetMayParentSymbolGroup = function () {
-                    //如果计算过,则直接返回
+                    //��������,��ֱ�ӷ���
                     if (this._MayParentSymbolGroup != null) {
                         return this._MayParentSymbolGroup;
                     }
@@ -1582,16 +1599,16 @@ var CodeEdit;
                         return group;
                     }
                 };
-                //获取可能的父符号
+                //��ȡ���ܵĸ�����
                 LALRState.prototype.GetMayParentSymbolGroup$ = function (deep, visitedStateGroup) {
-                    //如果访问过则返回,否则标记访问过
+                    //������ʹ��򷵻�,�����Ƿ��ʹ�
                     if (visitedStateGroup.Contains(this)) {
                         return new List();
                     }
                     else {
                         visitedStateGroup.Set(this);
                     }
-                    //找到所有的深度大于等于当前深度的规约元素
+                    //�ҵ����е���ȴ��ڵ��ڵ�ǰ��ȵĹ�ԼԪ��
                     var curGroup = this.ActionGroup.ToEnumerble()
                         .Where(function (item) { return item
                         .ActionType ==
@@ -1599,7 +1616,7 @@ var CodeEdit;
                         item.TargetRule.SymbolGroup.Count() >= deep; })
                         .Select(function (item) { return item.TargetRule.NonTerminal; })
                         .ToList();
-                    //对于移入和GoTo元素,找到深度+1的父元素
+                    //���������GoToԪ��,�ҵ����+1�ĸ�Ԫ��
                     var mayGroup = this.ActionGroup.ToEnumerble()
                         .Where(function (item) { return item.ActionType == Model.ActionType.Shift || item.ActionType == Model.ActionType.Goto; })
                         .SelectMany(function (item) { return item.TargetState.GetMayParentSymbolGroup$(deep + 1, visitedStateGroup).ToArray(); })
@@ -1607,28 +1624,28 @@ var CodeEdit;
                     var resultGroup = curGroup.SetRange(mayGroup);
                     return resultGroup;
                 };
-                //#region 后面最容易规约的符号
-                //获取后面最容易规约的符号(当前状态堆栈:不含错误状态,所有产生式)
+                //#region ���������׹�Լ�ķ���
+                //��ȡ���������׹�Լ�ķ���(��ǰ״̬��ջ:��������״̬,���в���ʽ)
                 LALRState.prototype.GetNextSymbol = function (stateGroup, allProduce) {
                     var sym = null;
-                    //获取规约元素(最易规约)
+                    //��ȡ��ԼԪ��(���׹�Լ)
                     if (sym == null) {
                         sym = this.GetNextReduceSymbol(stateGroup);
                     }
-                    //获取GoTo元素(避免移入时一步步找和死循环,移入本身也会装好为GoTo)
+                    //��ȡGoToԪ��(��������ʱһ�����Һ���ѭ��,���뱾��Ҳ��װ��ΪGoTo)
                     if (sym == null) {
                         sym = this.GetNextGotoSymbol(allProduce);
                     }
-                    //获取移入元素
+                    //��ȡ����Ԫ��
                     if (sym == null) {
                         sym = this.GetNextShiftSymbol();
                     }
                     return sym;
                 };
-                //获取最容易规约的符号(当前状态堆栈:不含错误状态)
+                //��ȡ�����׹�Լ�ķ���(��ǰ״̬��ջ:��������״̬)
                 LALRState.prototype.GetNextReduceSymbol = function (stateGroup) {
                     var resultReduceGroup = new List();
-                    //不断规约,直至不能规约
+                    //���Ϲ�Լ,ֱ�����ܹ�Լ
                     while (true) {
                         var curState = stateGroup.Get();
                         var reduceGroup = curState.GetActionGroup(Model.ActionType.Reduce);
@@ -1638,15 +1655,15 @@ var CodeEdit;
                         resultReduceGroup = reduceGroup;
                         LALRState.Reduce(stateGroup);
                     }
-                    //取第一个规约最多的元素
+                    //ȡ��һ����Լ����Ԫ��
                     var sym = resultReduceGroup.ToEnumerble()
                         .Select(function (item) { return item.Symbol; })
                         .FirstOrDefault(null);
                     return sym;
                 };
-                //获取最容易跳转的符号(所有产生式)
+                //��ȡ��������ת�ķ���(���в���ʽ)
                 LALRState.prototype.GetNextGotoSymbol = function (allProduce) {
-                    //根据产生式的关系,获取跳转最多的产生式
+                    //���ݲ���ʽ�Ĺ�ϵ,��ȡ��ת���Ĳ���ʽ
                     var sym = this.ActionGroup.ToEnumerble()
                         .Where(function (item) { return item.ActionType == Model.ActionType.Goto; })
                         .OrderByCompareFunc(function (a, b) { return Model.Produce.Compare(a.Symbol, b.Symbol, allProduce); })
@@ -1654,9 +1671,9 @@ var CodeEdit;
                         .FirstOrDefault(null);
                     return sym;
                 };
-                //获取最容易移入的符号
+                //��ȡ����������ķ���
                 LALRState.prototype.GetNextShiftSymbol = function () {
-                    //暂取最后一个移入符号
+                    //��ȡ���һ���������
                     var sym = this.ActionGroup.ToEnumerble()
                         .Where(function (item) { return item.ActionType == Model.ActionType.Shift; })
                         .Select(function (item) { return item.Symbol; })
@@ -1664,46 +1681,46 @@ var CodeEdit;
                     return sym;
                 };
                 //#endregion
-                //#reginon 基础方法
-                //规约(当前状态堆栈:不包含错误状态)
+                //#reginon ��������
+                //��Լ(��ǰ״̬��ջ:����������״̬)
                 LALRState.Reduce = function (stateGroup) {
                     var curState = stateGroup.Get();
-                    //如果不能规约返回false
+                    //������ܹ�Լ����false
                     if (!curState.CanReduce()) {
                         return false;
                     }
                     else {
                         var produce = curState.GetProduce();
                         var cnt = produce.SymbolGroup.Count();
-                        //撤销主体符号个数状态
+                        //����������Ÿ���״̬
                         while (cnt > 0) {
                             stateGroup.Remove();
                             cnt--;
                         }
-                        //执行GoTo跳转
+                        //ִ��GoTo��ת
                         var state = stateGroup.Get();
                         var nextState = state.GetAction(produce.NonTerminal).TargetState;
                         stateGroup.Set(nextState);
                         return true;
                     }
                 };
-                //是否可以接受
+                //�Ƿ���Խ���
                 LALRState.prototype.CanAccept = function () {
                     var canAccept = this.ActionGroup.ToEnumerble().Any(function (item) { return item.Symbol.Name == "EOF"; });
                     return canAccept;
                 };
-                //是否可以规约
+                //�Ƿ���Թ�Լ
                 LALRState.prototype.CanReduce = function () {
                     var canReduce = this.ActionGroup.ToEnumerble().Any(function (item) { return item.ActionType == Model.ActionType.Reduce; });
                     return canReduce;
                 };
-                //获取产生式
+                //��ȡ����ʽ
                 LALRState.prototype.GetProduce = function () {
                     var actionGroup = this.GetActionGroup(Model.ActionType.Reduce);
                     var produce = actionGroup.Count() > 0 ? actionGroup.Get(0).TargetRule : null;
                     return produce;
                 };
-                //获取指定类型动作集合(动作类型)
+                //��ȡָ�����Ͷ�������(��������)
                 LALRState.prototype.GetActionGroup = function (typ) {
                     return this.ActionGroup.ToEnumerble()
                         .Where(function (item) { return item.ActionType == typ; })
@@ -1721,11 +1738,11 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //产生式
+            //����ʽ
             var Produce = (function (_super) {
                 __extends(Produce, _super);
                 function Produce() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 Produce.Compare = function (a, b, group) {
                     var isSmall = group.ToEnumerble().Any(function (item) { return item.NonTerminal == a && item.SymbolGroup.Contains(b); });
@@ -1762,11 +1779,11 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //符号
+            //����
             var Symbol = (function (_super) {
                 __extends(Symbol, _super);
                 function Symbol() {
-                    _super.apply(this, arguments);
+                    return _super !== null && _super.apply(this, arguments) || this;
                 }
                 return Symbol;
             }(CodeEdit.LangAnaly.Model.EgtEntityBase));
@@ -1780,24 +1797,24 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //符号类型
+            //��������
+            var SymbolType;
             (function (SymbolType) {
-                //非终结符
+                //���ս��
                 SymbolType[SymbolType["Nonterminal"] = 0] = "Nonterminal";
-                //终结符
+                //�ս��
                 SymbolType[SymbolType["Terminal"] = 1] = "Terminal";
-                //可忽略的符号
+                //�ɺ��Եķ���
                 SymbolType[SymbolType["Noise"] = 2] = "Noise";
-                //文本末尾
+                //�ı�ĩβ
                 SymbolType[SymbolType["EndofFile"] = 3] = "EndofFile";
-                //分组开始
+                //���鿪ʼ
                 SymbolType[SymbolType["GroupStart"] = 4] = "GroupStart";
-                //分组末尾
+                //����ĩβ
                 SymbolType[SymbolType["GroundEnd"] = 5] = "GroundEnd";
-                //错误
+                //����
                 SymbolType[SymbolType["Error"] = 7] = "Error";
-            })(Model.SymbolType || (Model.SymbolType = {}));
-            var SymbolType = Model.SymbolType;
+            })(SymbolType = Model.SymbolType || (Model.SymbolType = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -1807,12 +1824,13 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
-            //记号
+            //�Ǻ�
             var TokenInfo = (function (_super) {
                 __extends(TokenInfo, _super);
                 function TokenInfo(state, symbol, value, index, line, col) {
-                    _super.call(this, symbol, value, line, col, index);
-                    this.State = state;
+                    var _this = _super.call(this, symbol, value, line, col, index) || this;
+                    _this.State = state;
+                    return _this;
                 }
                 TokenInfo.NullToken = function () {
                     return new Model.TokenInfo(Model.TokenInfoState.Accept, null, null, -1, -1, -1);
@@ -1832,15 +1850,15 @@ var CodeEdit;
     (function (LangAnaly) {
         var Model;
         (function (Model) {
+            var TokenInfoState;
             (function (TokenInfoState) {
-                //接受
+                //����
                 TokenInfoState[TokenInfoState["Accept"] = 0] = "Accept";
-                //错误
+                //����
                 TokenInfoState[TokenInfoState["Error"] = 1] = "Error";
-                //结束
+                //����
                 TokenInfoState[TokenInfoState["End"] = 2] = "End";
-            })(Model.TokenInfoState || (Model.TokenInfoState = {}));
-            var TokenInfoState = Model.TokenInfoState;
+            })(TokenInfoState = Model.TokenInfoState || (Model.TokenInfoState = {}));
         })(Model = LangAnaly.Model || (LangAnaly.Model = {}));
     })(LangAnaly = CodeEdit.LangAnaly || (CodeEdit.LangAnaly = {}));
 })(CodeEdit || (CodeEdit = {}));
@@ -2027,10 +2045,10 @@ var Context = (function () {
         }
         return this._DicGroup.Get(0);
     };
-    //上下文队列
-    Context._DicGroup = new List();
     return Context;
 }());
+//上下文队列
+Context._DicGroup = new List();
 //字典类
 var Dictionary = (function () {
     function Dictionary() {
@@ -2119,9 +2137,9 @@ var LinePoint = (function () {
         var col = linePoint.Y == 0 ? this.X + linePoint.X : linePoint.X;
         return new LinePoint(index, col, line);
     };
-    LinePoint.Empty = new LinePoint(0, 0, 0);
     return LinePoint;
 }());
+LinePoint.Empty = new LinePoint(0, 0, 0);
 //Base64流
 var Stream = (function () {
     function Stream(str) {
@@ -2321,46 +2339,214 @@ function Base64ToBin(str) {
 //$.fn.ToHtml = function (): string {
 //    return $(this)[0].outerHTML;
 //} 
-//<Grid base="Container">
+var MetaData;
+(function (MetaData) {
+    var AtrInfo = (function () {
+        function AtrInfo(name, type, required, valLimit) {
+            if (required === void 0) { required = true; }
+            if (valLimit === void 0) { valLimit = null; }
+            this.Name = name;
+            this.Type = type;
+            this.Required = required;
+            this.ValLimit = valLimit;
+        }
+        return AtrInfo;
+    }());
+    MetaData.AtrInfo = AtrInfo;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ElmGroupMode;
+    (function (ElmGroupMode) {
+        ElmGroupMode[ElmGroupMode["Strict"] = 0] = "Strict";
+        ElmGroupMode[ElmGroupMode["Loose"] = 1] = "Loose";
+    })(ElmGroupMode = MetaData.ElmGroupMode || (MetaData.ElmGroupMode = {}));
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ElmGroupType;
+    (function (ElmGroupType) {
+        ElmGroupType[ElmGroupType["Once"] = 0] = "Once";
+        ElmGroupType[ElmGroupType["Choice"] = 1] = "Choice";
+        ElmGroupType[ElmGroupType["Many"] = 2] = "Many";
+    })(ElmGroupType = MetaData.ElmGroupType || (MetaData.ElmGroupType = {}));
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ElmInfo = (function () {
+        function ElmInfo(name, type) {
+            this.Name = name;
+            this.Type = type;
+        }
+        return ElmInfo;
+    }());
+    MetaData.ElmInfo = ElmInfo;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var SimpleType;
+    (function (SimpleType) {
+        SimpleType[SimpleType["string"] = 0] = "string";
+        SimpleType[SimpleType["byte"] = 1] = "byte";
+        SimpleType[SimpleType["int"] = 2] = "int";
+        SimpleType[SimpleType["long"] = 3] = "long";
+        SimpleType[SimpleType["double"] = 4] = "double";
+        SimpleType[SimpleType["bool"] = 5] = "bool";
+        SimpleType[SimpleType["datetime"] = 6] = "datetime";
+        SimpleType[SimpleType["date"] = 7] = "date";
+        SimpleType[SimpleType["time"] = 8] = "time";
+        SimpleType[SimpleType["enum"] = 9] = "enum";
+    })(SimpleType = MetaData.SimpleType || (MetaData.SimpleType = {}));
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var TypeInfo = (function () {
+        function TypeInfo(name, base) {
+            if (base === void 0) { base = null; }
+            this.Name = name;
+            this.Base = base;
+        }
+        TypeInfo.prototype.GetAttrGroup = function () {
+            var group = this.Base.GetAttrGroup();
+            group.SetRange(this.AtrGroup);
+            return group;
+        };
+        TypeInfo.prototype.GetElmGroup = function () {
+            var group = this.Base.GetElmGroup();
+            group.SetRange(this.ElmGroup);
+            return group;
+        };
+        return TypeInfo;
+    }());
+    MetaData.TypeInfo = TypeInfo;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ValLimitBase = (function () {
+        function ValLimitBase(pattern) {
+            if (pattern === void 0) { pattern = null; }
+            this.Pattern = pattern;
+        }
+        return ValLimitBase;
+    }());
+    MetaData.ValLimitBase = ValLimitBase;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ValLimitForDataTime = (function (_super) {
+        __extends(ValLimitForDataTime, _super);
+        function ValLimitForDataTime(type, format, parttern) {
+            if (type === void 0) { type = null; }
+            if (format === void 0) { format = null; }
+            if (parttern === void 0) { parttern = null; }
+            var _this = _super.call(this, parttern) || this;
+            _this.Type = type;
+            _this.Format = format;
+            return _this;
+        }
+        return ValLimitForDataTime;
+    }(MetaData.ValLimitBase));
+    MetaData.ValLimitForDataTime = ValLimitForDataTime;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ValLimitForInt = (function (_super) {
+        __extends(ValLimitForInt, _super);
+        function ValLimitForInt(min, max, parttern) {
+            if (min === void 0) { min = null; }
+            if (max === void 0) { max = null; }
+            if (parttern === void 0) { parttern = null; }
+            var _this = _super.call(this, parttern) || this;
+            _this.Min = min;
+            _this.Max = max;
+            return _this;
+        }
+        return ValLimitForInt;
+    }(MetaData.ValLimitBase));
+    MetaData.ValLimitForInt = ValLimitForInt;
+})(MetaData || (MetaData = {}));
+///<reference path="ValLimitForInt.ts"/>
+var MetaData;
+///<reference path="ValLimitForInt.ts"/>
+(function (MetaData) {
+    var ValLimitForDouble = (function (_super) {
+        __extends(ValLimitForDouble, _super);
+        function ValLimitForDouble(min, max, fraction, parttern) {
+            if (min === void 0) { min = null; }
+            if (max === void 0) { max = null; }
+            if (fraction === void 0) { fraction = null; }
+            if (parttern === void 0) { parttern = null; }
+            var _this = _super.call(this, min, max, parttern) || this;
+            _this.Fraction = fraction;
+            return _this;
+        }
+        return ValLimitForDouble;
+    }(MetaData.ValLimitForInt));
+    MetaData.ValLimitForDouble = ValLimitForDouble;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var ValLimitForStr = (function (_super) {
+        __extends(ValLimitForStr, _super);
+        function ValLimitForStr(minLength, maxLength, parttern) {
+            if (minLength === void 0) { minLength = null; }
+            if (maxLength === void 0) { maxLength = null; }
+            if (parttern === void 0) { parttern = null; }
+            var _this = _super.call(this, parttern) || this;
+            _this.MinLength = minLength;
+            _this.MaxLength = maxLength;
+            return _this;
+        }
+        return ValLimitForStr;
+    }(MetaData.ValLimitBase));
+})(MetaData || (MetaData = {}));
+var Control = (function () {
+    function Control() {
+    }
+    return Control;
+}());
+var Grid = (function (_super) {
+    __extends(Grid, _super);
+    function Grid() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.ChildGroup = new List();
+        return _this;
+    }
+    return Grid;
+}(Control));
+__decorate([
+    ValLimit(new MetaData.ValLimitForInt(10, 100))
+], Grid.prototype, "Cols", void 0);
+var TextBox = (function (_super) {
+    __extends(TextBox, _super);
+    function TextBox() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return TextBox;
+}(Control));
+function ValLimit(valLimitBase) {
+    return function (target, propertyKey) {
+    };
+}
+/*
+//var control = new MetaData.TypeInfo("Control");
+
+//var container = new MetaData.TypeInfo("Container");
+//var grid = new MetaData.TypeInfo("Grid",container);
+//var widthAtr = new MetaData.AtrInfo("Width",
+//    MetaData.SimpleType.int,
+//    false,
+//    new MetaData.ValLimitForDouble(0,3,3));
+//grid.AtrGroup.Set(widthAtr);
+//grid.ElmGroupMode = MetaData.ElmGroupMode.Loose;
+//grid.ElmGroupType = MetaData.ElmGroupType.Many;
+//grid.ElmGroup.Set(control);
+
+
+//<Grid base="Control">
 //    <width type="int" required="true"  min="0" max="3" fraction="3" />
 //   <_many>
 //        <control type="Controller"/>
 //         <grid  type="EasyUIGrid"/>
-//    </_many> 
-//</Grid>
-var TypeInfo = (function () {
-    function TypeInfo() {
-    }
-    return TypeInfo;
-}());
-var AtrInfo = (function () {
-    function AtrInfo() {
-    }
-    return AtrInfo;
-}());
-var ValInfo = (function () {
-    function ValInfo() {
-    }
-    return ValInfo;
-}());
-var Type;
-(function (Type) {
-    Type[Type["string"] = 0] = "string";
-    Type[Type["byte"] = 1] = "byte";
-    Type[Type["int"] = 2] = "int";
-    Type[Type["long"] = 3] = "long";
-    Type[Type["double"] = 4] = "double";
-    Type[Type["bool"] = 5] = "bool";
-    Type[Type["datetime"] = 6] = "datetime";
-    Type[Type["date"] = 7] = "date";
-    Type[Type["time"] = 8] = "time";
-    Type[Type["enum"] = 9] = "enum";
-})(Type || (Type = {}));
-function getType() {
-}
-function getAttributes() {
-}
-function getSonTypes() {
-}
-function getAttrValues() {
-}
+//    </_many>
+//</Grid>*/

@@ -1,4 +1,6 @@
-﻿namespace CodeEdit.LangAnaly {
+﻿ ///<reference path="../LangAnalyBase.ts"/>
+
+namespace CodeEdit.LangAnaly {
     export class XmlLangAnaly extends LangAnalyBase {
         IsGramerMeanEro(gramerInfo: Model.GramerInfo): boolean {
             //标签名称
