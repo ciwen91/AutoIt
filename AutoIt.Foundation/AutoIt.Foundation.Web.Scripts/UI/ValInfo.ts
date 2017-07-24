@@ -20,50 +20,55 @@
 }
 
 setTimeout(function() {
-    init();
+        var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
+
+        $.Enumerable.From(typeInfoGroup.ToArray())
+            .ForEach(item => {
+                console.log(item.Item2);
+            });
     },
     0);
 
-function init() {
-    var classgroup = getAll();
-    var typeInfoGroup = new Dictionary<any,MetaData.TypeInfo>();
+//function init() {
+//    var classgroup = getAll();
+//    var typeInfoGroup = new Dictionary<any,MetaData.TypeInfo>();
 
-   classgroup.ToEnumerble()
-        .ForEach(item => {
-            fillTypeInfo(item, typeInfoGroup, classgroup);
-        });
+//   classgroup.ToEnumerble()
+//        .ForEach(item => {
+//            fillTypeInfo(item, typeInfoGroup, classgroup);
+//        });
 
-   console.log($.Enumerable.From(typeInfoGroup.ToArray()).Select(item=>item.Item2).ToArray());
-}
+//   console.log($.Enumerable.From(typeInfoGroup.ToArray()).Select(item=>item.Item2).ToArray());
+//}
 
-function getAll():List<any> {
-    var group = new List<any>();
+//function getAll():List<any> {
+//    var group = new List<any>();
 
-    for (var key in UI) {
-        var item = UI[key];
-        if (IsType(item, UI.Control)) {
-            group.Set(item);
-        }
-    }
+//    for (var key in UI) {
+//        var item = UI[key];
+//        if (IsType(item, UI.Control)) {
+//            group.Set(item);
+//        }
+//    }
 
-    return group;
-}
+//    return group;
+//}
 
-function fillTypeInfo(controlType: any, infoGroup: Dictionary<any,MetaData.TypeInfo>, typeGroup: List<any>): MetaData.TypeInfo {
-    if (infoGroup.Contains(controlType)) {
-        return infoGroup.Get(controlType);
-    }
+//function fillTypeInfo(controlType: any, infoGroup: Dictionary<any,MetaData.TypeInfo>, typeGroup: List<any>): MetaData.TypeInfo {
+//    if (infoGroup.Contains(controlType)) {
+//        return infoGroup.Get(controlType);
+//    }
 
-    var parent = getParentType(controlType);
-    var parentType = null;
-    if (typeGroup.Contains(parent)) {
-        parentType = fillTypeInfo(parent, infoGroup, typeGroup);
-    }
+//    var parent = getParentType(controlType);
+//    var parentType = null;
+//    if (typeGroup.Contains(parent)) {
+//        parentType = fillTypeInfo(parent, infoGroup, typeGroup);
+//    }
    
-    var typeInfo = new MetaData.TypeInfo(controlType.name, parentType);
-    infoGroup.Set(controlType,typeInfo);
-    return typeInfo;
-}
+//    var typeInfo = new MetaData.TypeInfo(controlType.name, parentType);
+//    infoGroup.Set(controlType,typeInfo);
+//    return typeInfo;
+//}
 
 //setTimeout(function() {
 //        for (var item in UI) {

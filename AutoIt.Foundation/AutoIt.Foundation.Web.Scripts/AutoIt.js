@@ -2453,20 +2453,20 @@ var MetaData;
 var MetaDataHelper = (function () {
     function MetaDataHelper() {
     }
-    MetaDataHelper.Set = function (type, val, memberName) {
+    MetaDataHelper.SetAtr = function (type, val, memberName) {
         if (memberName === void 0) { memberName = null; }
         this._Dic.Get(type, new Lookup())
             .Get(memberName, new List())
             .Set(val);
     };
-    MetaDataHelper.Get = function (type, atrType, memberName) {
+    MetaDataHelper.GetAtr = function (type, atrType, memberName) {
         if (memberName === void 0) { memberName = null; }
-        var item = this.GetAll(type, atrType, memberName)
+        var item = this.GetAllAtr(type, atrType, memberName)
             .ToEnumerble()
             .FirstOrDefault(null);
         return item;
     };
-    MetaDataHelper.GetAll = function (type, atrType, memberName) {
+    MetaDataHelper.GetAllAtr = function (type, atrType, memberName) {
         if (memberName === void 0) { memberName = null; }
         var group = this._Dic.Get(type, new Lookup())
             .Get(memberName, new List());
@@ -2475,12 +2475,48 @@ var MetaDataHelper = (function () {
             .ToList();
         return group;
     };
+    MetaDataHelper.GetAllType = function (nameSpace, baseType) {
+        if (baseType === void 0) { baseType = null; }
+        var group = new List();
+        for (var key in nameSpace) {
+            var item = nameSpace[key];
+            if (!baseType || IsType(item, baseType)) {
+                group.Set(item);
+            }
+        }
+        return group;
+    };
+    MetaDataHelper.GetAllTypeInfo = function (nameSpace, baseType) {
+        var _this = this;
+        if (baseType === void 0) { baseType = null; }
+        var typeGroup = this.GetAllType(nameSpace, baseType);
+        var typeInfoGroup = new Dictionary();
+        typeGroup.ToEnumerble()
+            .ForEach(function (item) {
+            var info = _this.GetTypeInfo(item);
+            typeInfoGroup.Set(item, info);
+        });
+        return typeInfoGroup;
+    };
+    MetaDataHelper.GetTypeInfo = function (type) {
+        if (this._TypeInfoDic.Contains(type)) {
+            return this._TypeInfoDic.Get(type);
+        }
+        //处理父类
+        var parentType = getParentType(type);
+        var parentInfo = parentType ? this.GetTypeInfo(parentType) : null;
+        //处理当前类
+        var typeInfo = new MetaData.TypeInfo(type.name, parentInfo);
+        this._TypeInfoDic.Set(type, typeInfo);
+        return typeInfo;
+    };
     return MetaDataHelper;
 }());
 MetaDataHelper._Dic = new Dictionary();
+MetaDataHelper._TypeInfoDic = new Dictionary();
 function ValLimitAtr(valLimit) {
     return function (target, propertyKey) {
-        MetaDataHelper.Set(target, valLimit, propertyKey);
+        MetaDataHelper.SetAtr(target, valLimit, propertyKey);
     };
 }
 var MetaData;
@@ -2605,40 +2641,44 @@ var UI;
     UI.Other = Other;
 })(UI || (UI = {}));
 setTimeout(function () {
-    init();
-}, 0);
-function init() {
-    var classgroup = getAll();
-    var typeInfoGroup = new Dictionary();
-    classgroup.ToEnumerble()
+    var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
+    $.Enumerable.From(typeInfoGroup.ToArray())
         .ForEach(function (item) {
-        fillTypeInfo(item, typeInfoGroup, classgroup);
+        console.log(item.Item2);
     });
-    console.log($.Enumerable.From(typeInfoGroup.ToArray()).Select(function (item) { return item.Item2; }).ToArray());
-}
-function getAll() {
-    var group = new List();
-    for (var key in UI) {
-        var item = UI[key];
-        if (IsType(item, UI.Control)) {
-            group.Set(item);
-        }
-    }
-    return group;
-}
-function fillTypeInfo(controlType, infoGroup, typeGroup) {
-    if (infoGroup.Contains(controlType)) {
-        return infoGroup.Get(controlType);
-    }
-    var parent = getParentType(controlType);
-    var parentType = null;
-    if (typeGroup.Contains(parent)) {
-        parentType = fillTypeInfo(parent, infoGroup, typeGroup);
-    }
-    var typeInfo = new MetaData.TypeInfo(controlType.name, parentType);
-    infoGroup.Set(controlType, typeInfo);
-    return typeInfo;
-}
+}, 0);
+//function init() {
+//    var classgroup = getAll();
+//    var typeInfoGroup = new Dictionary<any,MetaData.TypeInfo>();
+//   classgroup.ToEnumerble()
+//        .ForEach(item => {
+//            fillTypeInfo(item, typeInfoGroup, classgroup);
+//        });
+//   console.log($.Enumerable.From(typeInfoGroup.ToArray()).Select(item=>item.Item2).ToArray());
+//}
+//function getAll():List<any> {
+//    var group = new List<any>();
+//    for (var key in UI) {
+//        var item = UI[key];
+//        if (IsType(item, UI.Control)) {
+//            group.Set(item);
+//        }
+//    }
+//    return group;
+//}
+//function fillTypeInfo(controlType: any, infoGroup: Dictionary<any,MetaData.TypeInfo>, typeGroup: List<any>): MetaData.TypeInfo {
+//    if (infoGroup.Contains(controlType)) {
+//        return infoGroup.Get(controlType);
+//    }
+//    var parent = getParentType(controlType);
+//    var parentType = null;
+//    if (typeGroup.Contains(parent)) {
+//        parentType = fillTypeInfo(parent, infoGroup, typeGroup);
+//    }
+//    var typeInfo = new MetaData.TypeInfo(controlType.name, parentType);
+//    infoGroup.Set(controlType,typeInfo);
+//    return typeInfo;
+//}
 //setTimeout(function() {
 //        for (var item in UI) {
 //            if (IsType(UI[item], UI.Control)) {
