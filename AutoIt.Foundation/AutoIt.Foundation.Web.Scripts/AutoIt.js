@@ -9,6 +9,53 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var Interceptor = (function () {
+    function Interceptor() {
+        this._BefHandlerGroup = [];
+        this._AftHandlerGroup = [];
+    }
+    Interceptor.prototype.SubBef = function (func) {
+        this._BefHandlerGroup.push(func);
+        return this;
+    };
+    Interceptor.prototype.SubBefForCast = function (func) {
+        return this.SubBef(function (p) { return [func(p), true]; });
+    };
+    Interceptor.prototype.SubBefForValide = function (func) {
+        return this.SubBef(function (p) { return [p, func(p)]; });
+    };
+    Interceptor.prototype.SubAft = function (func) {
+        this._AftHandlerGroup.push(func);
+        return this;
+    };
+    Interceptor.prototype.SubAftForCast = function (func) {
+        return this.SubAft(function (_a) {
+            var pResult = _a[0], p = _a[1];
+            return func(pResult);
+        });
+    };
+    Interceptor.prototype.Do = function (func, param) {
+        //执行BefHandler,如果返回值为true则替换参数,否则停止执行并返回默认值,
+        for (var _i = 0, _a = this._BefHandlerGroup; _i < _a.length; _i++) {
+            var itemBef = _a[_i];
+            var befResult = itemBef(param);
+            param = befResult[0];
+            if (!befResult[1]) {
+                return None;
+            }
+        }
+        //执行函数
+        var result = func(param);
+        //执行AftHandler,并替换返回值
+        for (var _b = 0, _c = this._AftHandlerGroup; _b < _c.length; _b++) {
+            var itemAft = _c[_b];
+            result = itemAft([result, param]);
+        }
+        //返回结果
+        return result;
+    };
+    return Interceptor;
+}());
 //绑定信息
 var BindInfo = (function () {
     function BindInfo(target, source) {
@@ -2150,6 +2197,32 @@ var Lookup = (function (_super) {
     }
     return Lookup;
 }(Dictionary));
+var ObjBase = (function () {
+    function ObjBase() {
+        this._ExtData = new Dictionary();
+    }
+    ObjBase.prototype.GetExtData = function (name, dft) {
+        var val = this._ExtData.Get(name, dft);
+        return val;
+    };
+    ObjBase.prototype.SetExtData = function (key, value) {
+        this._ExtData.Set(key, value);
+        return this;
+    };
+    ObjBase.prototype.GetMemberValue = function (memberName) {
+        if (typeof this[memberName] == "undefined") {
+            return None;
+        }
+        else {
+            return this[memberName];
+        }
+    };
+    ObjBase.prototype.SetMemberValue = function (memberName, value) {
+        this[memberName] = value;
+        return this;
+    };
+    return ObjBase;
+}());
 //Base64流
 var Stream = (function () {
     function Stream(str) {
@@ -2366,19 +2439,22 @@ function Base64ToBin(str) {
 //        func(None);
 //    }
 //}
-//$.fn.ToHtml = function (): string {
-//    return $(this)[0].outerHTML;
-//} 
+$.fn.ToHtml = function () {
+    return $(this)[0].outerHTML;
+};
 var MetaData;
 (function (MetaData) {
     var AtrInfo = (function () {
-        function AtrInfo(name, type, required, valLimit) {
-            if (required === void 0) { required = true; }
+        function AtrInfo(name, valLimit) {
             if (valLimit === void 0) { valLimit = null; }
+            this.Type = MetaData.SimpleType.string;
+            this.Required = false;
             this.Name = name;
-            this.Type = type;
-            this.Required = required;
             this.ValLimit = valLimit;
+            if (valLimit != null) {
+                this.Type = valLimit.Type;
+                this.Required = valLimit.Required;
+            }
         }
         return AtrInfo;
     }());
@@ -2450,15 +2526,42 @@ var MetaData;
     }());
     MetaData.TypeInfo = TypeInfo;
 })(MetaData || (MetaData = {}));
+function HtmlAtr(atrType) {
+    var htmlAtrInfo = new MetaData.HtmlAtrInfo(atrType);
+    return function (target, propertyKey) {
+        MetaDataHelper.SetAtr(target, htmlAtrInfo, propertyKey);
+    };
+}
+var MetaData;
+(function (MetaData) {
+    var HtmlAtrInfo = (function () {
+        function HtmlAtrInfo(type) {
+            this.Type = type;
+        }
+        return HtmlAtrInfo;
+    }());
+    MetaData.HtmlAtrInfo = HtmlAtrInfo;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
+    var HtmlAtrType;
+    (function (HtmlAtrType) {
+        HtmlAtrType[HtmlAtrType["HtmlAtr"] = 0] = "HtmlAtr";
+        HtmlAtrType[HtmlAtrType["StyleAtr"] = 1] = "StyleAtr";
+    })(HtmlAtrType = MetaData.HtmlAtrType || (MetaData.HtmlAtrType = {}));
+})(MetaData || (MetaData = {}));
 var MetaDataHelper = (function () {
     function MetaDataHelper() {
     }
+    /**************特性相关操作**************/
+    //附加特性(类型,特性,成员名称)
     MetaDataHelper.SetAtr = function (type, val, memberName) {
         if (memberName === void 0) { memberName = null; }
         this._Dic.Get(type, new Lookup())
             .Get(memberName, new List())
             .Set(val);
     };
+    //获取特性(类型,值,成员名称)
     MetaDataHelper.GetAtr = function (type, atrType, memberName) {
         if (memberName === void 0) { memberName = null; }
         var item = this.GetAllAtr(type, atrType, memberName)
@@ -2466,6 +2569,7 @@ var MetaDataHelper = (function () {
             .FirstOrDefault(null);
         return item;
     };
+    //获取所有特性(类型,值,成员名称)
     MetaDataHelper.GetAllAtr = function (type, atrType, memberName) {
         if (memberName === void 0) { memberName = null; }
         var group = this._Dic.Get(type, new Lookup())
@@ -2475,6 +2579,8 @@ var MetaDataHelper = (function () {
             .ToList();
         return group;
     };
+    /**************反射相关操作**************/
+    //获取所有类型(命名空间,基类型)
     MetaDataHelper.GetAllType = function (nameSpace, baseType) {
         if (baseType === void 0) { baseType = null; }
         var group = new List();
@@ -2486,6 +2592,15 @@ var MetaDataHelper = (function () {
         }
         return group;
     };
+    //获取所有属性名称(类型)
+    MetaDataHelper.GetAllPropName = function (type) {
+        var group = this._Dic.Get(type, new Lookup());
+        var resultGroup = $.Enumerable.From(group.ToArray())
+            .Select(function (item) { return item.Item1; })
+            .ToList();
+        return resultGroup;
+    };
+    //获取所有类型元信息(命名空间,基类型)
     MetaDataHelper.GetAllTypeInfo = function (nameSpace, baseType) {
         var _this = this;
         if (baseType === void 0) { baseType = null; }
@@ -2498,6 +2613,7 @@ var MetaDataHelper = (function () {
         });
         return typeInfoGroup;
     };
+    //获取类型元信息(类型)
     MetaDataHelper.GetTypeInfo = function (type) {
         if (this._TypeInfoDic.Contains(type)) {
             return this._TypeInfoDic.Get(type);
@@ -2508,11 +2624,19 @@ var MetaDataHelper = (function () {
         //处理当前类
         var typeInfo = new MetaData.TypeInfo(type.name, parentInfo);
         this._TypeInfoDic.Set(type, typeInfo);
+        //处理
         return typeInfo;
+    };
+    //获取所有属性元信息(类型)
+    MetaDataHelper.GetAtrInfo = function (type, atrName) {
+        var atr = this.GetAtr(type, MetaData.ValLimitBase, atrName);
+        var atrInfo = new MetaData.AtrInfo(atrName, atr);
+        return atrInfo;
     };
     return MetaDataHelper;
 }());
 MetaDataHelper._Dic = new Dictionary();
+/**************元数据相关操作**************/
 MetaDataHelper._TypeInfoDic = new Dictionary();
 function ValLimitAtr(valLimit) {
     return function (target, propertyKey) {
@@ -2522,8 +2646,9 @@ function ValLimitAtr(valLimit) {
 var MetaData;
 (function (MetaData) {
     var ValLimitBase = (function () {
-        function ValLimitBase(pattern) {
+        function ValLimitBase(type, pattern) {
             if (pattern === void 0) { pattern = null; }
+            this.Required = false;
             this.Pattern = pattern;
         }
         return ValLimitBase;
@@ -2534,12 +2659,12 @@ var MetaData;
 (function (MetaData) {
     var ValLimitForDataTime = (function (_super) {
         __extends(ValLimitForDataTime, _super);
-        function ValLimitForDataTime(type, format, parttern) {
-            if (type === void 0) { type = null; }
+        function ValLimitForDataTime(dateType, format, parttern) {
+            if (dateType === void 0) { dateType = null; }
             if (format === void 0) { format = null; }
             if (parttern === void 0) { parttern = null; }
-            var _this = _super.call(this, parttern) || this;
-            _this.Type = type;
+            var _this = _super.call(this, MetaData.SimpleType.datetime, parttern) || this;
+            _this.DateType = dateType;
             _this.Format = format;
             return _this;
         }
@@ -2555,7 +2680,7 @@ var MetaData;
             if (min === void 0) { min = null; }
             if (max === void 0) { max = null; }
             if (parttern === void 0) { parttern = null; }
-            var _this = _super.call(this, parttern) || this;
+            var _this = _super.call(this, MetaData.SimpleType.int, parttern) || this;
             _this.Min = min;
             _this.Max = max;
             return _this;
@@ -2591,14 +2716,142 @@ var MetaData;
             if (minLength === void 0) { minLength = null; }
             if (maxLength === void 0) { maxLength = null; }
             if (parttern === void 0) { parttern = null; }
-            var _this = _super.call(this, parttern) || this;
+            var _this = _super.call(this, MetaData.SimpleType.string, parttern) || this;
             _this.MinLength = minLength;
             _this.MaxLength = maxLength;
             return _this;
         }
         return ValLimitForStr;
     }(MetaData.ValLimitBase));
+    MetaData.ValLimitForStr = ValLimitForStr;
 })(MetaData || (MetaData = {}));
+var HtmlWraper = (function () {
+    function HtmlWraper(html) {
+        this._Html$ = $(html);
+    }
+    HtmlWraper.prototype.AddAtr = function (attrName, attrVal) {
+        if (attrVal != None) {
+            this._Html$.attr(attrName, attrVal.toString());
+        }
+        return this;
+    };
+    HtmlWraper.prototype.AddStyle = function (cssName, cssVal) {
+        if (cssVal != None) {
+            this._Html$.css(cssName, cssVal.toString());
+        }
+        return this;
+    };
+    HtmlWraper.prototype.SetStyle = function (style) {
+        if (style != None) {
+            this._Html$.attr("style", style);
+        }
+        return this;
+    };
+    HtmlWraper.prototype.AddClass = function (clsName) {
+        if (clsName != None) {
+            this._Html$.addClass(clsName.toString());
+        }
+        return this;
+    };
+    //AddEasyUIOption(optionName: string, optionVal: any) {
+    //    if (optionVal != None) {
+    //        var keyValue = `${optionName}:${ToValueStr(optionVal, "'")}`;
+    //        var option = this._Html$.attr('data-options');
+    //        option = option ? option + "," + keyValue : keyValue;
+    //        this._Html$.attr('data-options', option);
+    //    }
+    //    return this;
+    //}
+    HtmlWraper.prototype.AppendHtml = function (html) {
+        if (!IsEmpty(html)) {
+            this._Html$.append(html);
+        }
+        return this;
+    };
+    HtmlWraper.prototype.ToHtml = function () {
+        return this._Html$.ToHtml();
+    };
+    return HtmlWraper;
+}());
+HtmlWraper.Empty = new HtmlWraper("");
+var Control = (function (_super) {
+    __extends(Control, _super);
+    function Control() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        //@ValLimitAtr(new MetaData.ValLimitForStr())
+        _this.ID = NewGuidStr(16);
+        _this.Width = "";
+        _this.Height = "";
+        _this.Title = "";
+        _this.ClassName = "";
+        _this.Style = "";
+        _this.Parent = null;
+        _this.ChildGroup = [];
+        _this.OnGetChildHtml = new Interceptor();
+        return _this;
+    }
+    Control.prototype.GetHtml = function () {
+        //获取Html
+        var html = this.GetHtmlInner();
+        var htmlWrapper = new HtmlWraper(html);
+        //添加属性
+        this.IncludeHtmlAtr(htmlWrapper);
+        //添加子元素Html
+        for (var _i = 0, _a = this.ChildGroup; _i < _a.length; _i++) {
+            var item = _a[_i];
+            this.AppendChildHtml(htmlWrapper, item.GetHtml(), item);
+        }
+        return htmlWrapper.ToHtml();
+    };
+    ;
+    Control.prototype.AppendChildHtml = function (htmlWraper, html, control) {
+        htmlWraper.AppendHtml(html);
+    };
+    Control.prototype.Init = function () {
+        this.InitInner();
+        for (var _i = 0, _a = this.ChildGroup; _i < _a.length; _i++) {
+            var item = _a[_i];
+            item.Init();
+        }
+    };
+    Control.prototype.GetHtmlInner = function () {
+        return null;
+    };
+    Control.prototype.InitInner = function () {
+    };
+    Control.prototype.IncludeHtmlAtr = function (htmlWrapper) {
+        var type = GetType(this);
+        htmlWrapper.AddClass(this.ClassName || None);
+        htmlWrapper.SetStyle(this.Style || None);
+        for (var _i = 0, _a = MetaDataHelper.GetAllPropName(type).ToArray(); _i < _a.length; _i++) {
+            var propName = _a[_i];
+            var htmlAtrInfo = MetaDataHelper.GetAtr(type, MetaData.HtmlAtrInfo, propName);
+            if (htmlAtrInfo == null) {
+                continue;
+            }
+            if (htmlAtrInfo.Type == MetaData.HtmlAtrType.HtmlAtr) {
+                htmlWrapper.AddAtr(propName.toLowerCase(), this.GetMemberValue(propName));
+            }
+            else if (htmlAtrInfo.Type == MetaData.HtmlAtrType.StyleAtr) {
+                htmlWrapper.AddStyle(propName.toLowerCase(), this.GetMemberValue(propName));
+            }
+        }
+        return htmlWrapper;
+    };
+    return Control;
+}(ObjBase));
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
+], Control.prototype, "ID", void 0);
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.StyleAtr)
+], Control.prototype, "Width", void 0);
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.StyleAtr)
+], Control.prototype, "Height", void 0);
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
+], Control.prototype, "Title", void 0);
 var UI;
 (function (UI) {
     var Control = (function () {

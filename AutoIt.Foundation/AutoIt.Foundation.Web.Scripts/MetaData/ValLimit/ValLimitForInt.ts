@@ -4,7 +4,7 @@ namespace MetaData {
         Max?: number;
 
        constructor(min: number = null, max: number = null, parttern: string = null) {
-           super(parttern);
+           super(SimpleType.int,parttern);
            this.Min = min;
            this.Max = max;
        }

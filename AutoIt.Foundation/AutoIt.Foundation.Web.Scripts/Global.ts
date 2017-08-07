@@ -208,6 +208,7 @@ function Base64ToBin(str):string {
 //        func(None);
 //    }
 //}
-//$.fn.ToHtml = function (): string {
-//    return $(this)[0].outerHTML;
-//}
+$.fn.ToHtml = function (): string {
+    return $(this)[0].outerHTML;
+}
+

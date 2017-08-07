@@ -241,6 +241,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Aop\Interceptor.ts" />
     <TypeScriptCompile Include="Bind\BindInfo.ts" />
     <TypeScriptCompile Include="Bind\Binding.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\CodeMirrorExtend.ts" />
@@ -279,9 +280,13 @@
     <TypeScriptCompile Include="DataStruct\LinePoint.ts" />
     <TypeScriptCompile Include="DataStruct\List.ts" />
     <TypeScriptCompile Include="DataStruct\Lookup.ts" />
+    <TypeScriptCompile Include="DataStruct\ObjBase.ts" />
     <TypeScriptCompile Include="DataStruct\Stream.ts" />
     <TypeScriptCompile Include="DataStruct\Tuple.ts" />
     <TypeScriptCompile Include="Global.ts" />
+    <TypeScriptCompile Include="MetaData\Html\HtmlAtr.ts" />
+    <TypeScriptCompile Include="MetaData\Html\HtmlAtrInfo.ts" />
+    <TypeScriptCompile Include="MetaData\Html\HtmlAtrType.ts" />
     <TypeScriptCompile Include="MetaData\Core\AtrInfo.ts" />
     <TypeScriptCompile Include="MetaData\Core\ElmGroupMode.ts" />
     <TypeScriptCompile Include="MetaData\Core\ElmGroupType.ts" />
@@ -297,6 +302,7 @@
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForStr.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\easyui.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\TypeDefine\JQuery.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.d.ts" />
     <TypeScriptCompile Include="Scripts\TypeDefine\linq.jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\codemirror\codemirror-matchbrackets.d.ts" />
@@ -304,6 +310,8 @@
     <TypeScriptCompile Include="Scripts\typings\codemirror\codemirror-showhint.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\codemirror\index.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\codemirror\searchcursor.d.ts" />
+    <TypeScriptCompile Include="UI\Common\HtmlWraper.ts" />
+    <TypeScriptCompile Include="UI\ControlBase\Control.ts" />
     <TypeScriptCompile Include="UI\ValInfo.ts" />
   </ItemGroup>
   <ItemGroup />

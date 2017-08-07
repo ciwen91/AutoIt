@@ -1,15 +1,19 @@
 namespace MetaData {
     export class AtrInfo {
         Name: string;
-        Type: SimpleType;
-        Required: boolean;
+        Type: SimpleType=SimpleType.string;
+        Required: boolean=false;
         ValLimit: ValLimitBase;
 
-        constructor(name:string,type:SimpleType,required:boolean=true,valLimit:ValLimitBase=null) {
+        constructor(name: string,valLimit: ValLimitBase = null) {
             this.Name = name;
-            this.Type = type;
-            this.Required = required;
             this.ValLimit = valLimit;
+
+            if (valLimit != null) {
+                this.Type = valLimit.Type;
+                this.Required = valLimit.Required;  
+            }
+           
         }
     }
 }
