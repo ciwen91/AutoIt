@@ -14,7 +14,7 @@
     Parent: Control=null;
     ChildGroup: Control[] = [];
 
-    OnGetChildHtml: Interceptor<Control, string> = new Interceptor<Control, string>();
+    //OnGetChildHtml: Interceptor<Control, string> = new Interceptor<Control, string>();
 
  
     GetHtml(): string {
@@ -27,13 +27,14 @@
 
         //添加子元素Html
         for (var item of this.ChildGroup) {
-           this.AppendChildHtml(htmlWrapper,item.GetHtml(),item);
+            var sonHtml = this.GetChildHtml(item);
+            htmlWrapper.AppendHtml(sonHtml);
         }
 
         return htmlWrapper.ToHtml();
     };
-    AppendChildHtml(htmlWraper:HtmlWraper,html:string,control:Control) {
-        htmlWraper.AppendHtml(html);
+    GetChildHtml(control:Control) {
+        return control.GetHtml();
     }
     Init() {
         this.InitInner();

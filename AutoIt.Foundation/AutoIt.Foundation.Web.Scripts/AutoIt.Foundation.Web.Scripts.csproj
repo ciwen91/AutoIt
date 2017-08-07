@@ -244,6 +244,7 @@
     <TypeScriptCompile Include="Aop\Interceptor.ts" />
     <TypeScriptCompile Include="Bind\BindInfo.ts" />
     <TypeScriptCompile Include="Bind\Binding.ts" />
+    <TypeScriptCompile Include="ClassHelper\ArrayHelper.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\CodeMirrorExtend.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\CodeMirror\Xml.ts" />
     <TypeScriptCompile Include="CodeEdit\LangAnaly\EgtStorer.ts" />
@@ -275,13 +276,16 @@
     <TypeScriptCompile Include="ClassHelper\StringHelper.ts" />
     <TypeScriptCompile Include="Context\Context.ts" />
     <TypeScriptCompile Include="DataStruct\Action.ts" />
+    <TypeScriptCompile Include="DataStruct\AttachProperty.ts" />
     <TypeScriptCompile Include="DataStruct\Dictionary.ts" />
     <TypeScriptCompile Include="DataStruct\Func.ts" />
     <TypeScriptCompile Include="DataStruct\LinePoint.ts" />
     <TypeScriptCompile Include="DataStruct\List.ts" />
     <TypeScriptCompile Include="DataStruct\Lookup.ts" />
     <TypeScriptCompile Include="DataStruct\ObjBase.ts" />
+    <TypeScriptCompile Include="DataStruct\Size.ts" />
     <TypeScriptCompile Include="DataStruct\Stream.ts" />
+    <TypeScriptCompile Include="DataStruct\Table.ts" />
     <TypeScriptCompile Include="DataStruct\Tuple.ts" />
     <TypeScriptCompile Include="Global.ts" />
     <TypeScriptCompile Include="MetaData\Html\HtmlAtr.ts" />
@@ -296,6 +300,7 @@
     <TypeScriptCompile Include="MetaData\MetaDataHelper.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitAtr.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitBase.ts" />
+    <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForBool.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForDataTime.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForDouble.ts" />
     <TypeScriptCompile Include="MetaData\ValLimit\ValLimitForInt.ts" />
@@ -312,6 +317,10 @@
     <TypeScriptCompile Include="Scripts\typings\codemirror\searchcursor.d.ts" />
     <TypeScriptCompile Include="UI\Common\HtmlWraper.ts" />
     <TypeScriptCompile Include="UI\ControlBase\Control.ts" />
+    <TypeScriptCompile Include="UI\EasyUI.ts" />
+    <TypeScriptCompile Include="UI\Layout\DockLayout.ts" />
+    <TypeScriptCompile Include="UI\Layout\GridLayout.ts" />
+    <TypeScriptCompile Include="UI\Layout\Panel.ts" />
     <TypeScriptCompile Include="UI\ValInfo.ts" />
   </ItemGroup>
   <ItemGroup />

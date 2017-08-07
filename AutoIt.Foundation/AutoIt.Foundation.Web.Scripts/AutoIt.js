@@ -94,6 +94,18 @@ var Binding = (function () {
 }());
 //绑定信息
 Binding.Key = "Binding";
+var ArrayHelper = (function () {
+    function ArrayHelper() {
+    }
+    ArrayHelper.FromInt = function (from, to) {
+        var group = [];
+        for (var i = from; i <= to; i++) {
+            group.push(i);
+        }
+        return group;
+    };
+    return ArrayHelper;
+}());
 //获取下一个位置（开始位置,偏移数）
 String.prototype.NextPoint = function (startPoint, count) {
     var x = startPoint.X;
@@ -2096,6 +2108,11 @@ var Context = (function () {
 }());
 //上下文队列
 Context._DicGroup = new List();
+var AttachProperty = (function () {
+    function AttachProperty() {
+    }
+    return AttachProperty;
+}());
 //字典类
 var Dictionary = (function () {
     function Dictionary() {
@@ -2223,6 +2240,13 @@ var ObjBase = (function () {
     };
     return ObjBase;
 }());
+var Size = (function () {
+    function Size(width, height) {
+        this.Width = width;
+        this.Height = height;
+    }
+    return Size;
+}());
 //Base64流
 var Stream = (function () {
     function Stream(str) {
@@ -2241,6 +2265,50 @@ var Stream = (function () {
         return this.Position < this.ByteGroup.Count();
     };
     return Stream;
+}());
+var Table = (function () {
+    function Table(colCount) {
+        this.Data = [];
+        this.Pos = LinePoint.Empty;
+        this.ColCount = colCount;
+    }
+    Table.prototype.Add = function (size, obj) {
+        size = DeepClone(size);
+        size.Width = Math.min(size.Width, this.ColCount);
+        //查找新的Point
+        this.Pos = this.Mark(this.Pos, size, obj);
+        return this;
+    };
+    Table.prototype.Mark = function (point, size, obj) {
+        //如果超过长度则转到下一行
+        if (point.X + size.Width > this.ColCount) {
+            return this.Mark(new LinePoint(point.Index, point.Y + 1, 0), size, obj);
+        }
+        //从当前位置开始,检查是否有Size大小的空间.如果没有则转到下一列
+        for (var i = point.Y; i < point.Y + size.Height; i++) {
+            this.EnsurRow(i);
+            for (var j = point.X; j < point.X + size.Width; j++) {
+                if (this.Data[i][j]) {
+                    return this.Mark(new LinePoint(point.Index, point.X + 1, point.Y), size, obj);
+                }
+            }
+        }
+        //标记已被使用
+        for (var i = point.Y; i < point.Y + size.Height; i++) {
+            for (var j = point.X; j < point.X + size.Width; j++) {
+                this.Data[i][j] = obj;
+            }
+        }
+        //返回下一个元素的起始坐标
+        return new LinePoint(point.Index + 1, point.X + size.Width, point.Y);
+    };
+    Table.prototype.EnsurRow = function (row) {
+        if (!this.Data[row]) {
+            this.Data[row] = [];
+        }
+        return this;
+    };
+    return Table;
 }());
 //元组
 var Tuple = (function () {
@@ -2657,6 +2725,17 @@ var MetaData;
 })(MetaData || (MetaData = {}));
 var MetaData;
 (function (MetaData) {
+    var ValLimitForBool = (function (_super) {
+        __extends(ValLimitForBool, _super);
+        function ValLimitForBool() {
+            return _super.call(this, MetaData.SimpleType.bool) || this;
+        }
+        return ValLimitForBool;
+    }(MetaData.ValLimitBase));
+    MetaData.ValLimitForBool = ValLimitForBool;
+})(MetaData || (MetaData = {}));
+var MetaData;
+(function (MetaData) {
     var ValLimitForDataTime = (function (_super) {
         __extends(ValLimitForDataTime, _super);
         function ValLimitForDataTime(dateType, format, parttern) {
@@ -2787,9 +2866,9 @@ var Control = (function (_super) {
         _this.Style = "";
         _this.Parent = null;
         _this.ChildGroup = [];
-        _this.OnGetChildHtml = new Interceptor();
         return _this;
     }
+    //OnGetChildHtml: Interceptor<Control, string> = new Interceptor<Control, string>();
     Control.prototype.GetHtml = function () {
         //获取Html
         var html = this.GetHtmlInner();
@@ -2799,13 +2878,14 @@ var Control = (function (_super) {
         //添加子元素Html
         for (var _i = 0, _a = this.ChildGroup; _i < _a.length; _i++) {
             var item = _a[_i];
-            this.AppendChildHtml(htmlWrapper, item.GetHtml(), item);
+            var sonHtml = this.GetChildHtml(item);
+            htmlWrapper.AppendHtml(sonHtml);
         }
         return htmlWrapper.ToHtml();
     };
     ;
-    Control.prototype.AppendChildHtml = function (htmlWraper, html, control) {
-        htmlWraper.AppendHtml(html);
+    Control.prototype.GetChildHtml = function (control) {
+        return control.GetHtml();
     };
     Control.prototype.Init = function () {
         this.InitInner();
@@ -2852,6 +2932,144 @@ __decorate([
 __decorate([
     HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
 ], Control.prototype, "Title", void 0);
+var _this = this;
+Panel.prototype.GetHtmlInner = function () {
+    return '<div class="easyui-panel"/>';
+};
+DockLayout.prototype.GetHtmlInner = function () {
+    return '<div class="easyui-layout" data-options="fit:true"/>';
+};
+DockLayout.prototype.GetChildHtml = function (control) {
+    var html = control.GetHtml();
+    if (_this.Top && control == _this.Top) {
+        html = AddEasyUIOption(html, 'region', 'north');
+    }
+    else if (_this.Left && control == _this.Left) {
+        html = AddEasyUIOption(html, 'region', 'west');
+    }
+    else if (_this.Center && control == _this.Center) {
+        html = AddEasyUIOption(html, 'region', 'center');
+    }
+    else if (_this.Right && control == _this.Right) {
+        html = AddEasyUIOption(html, 'region', 'east');
+    }
+    else if (_this.Bottom && control == _this.Bottom) {
+        html = AddEasyUIOption(html, 'region', 'south');
+    }
+    return html;
+};
+function AddEasyUIOption(html, name, val) {
+    if (val != None) {
+        //转换成Jquery对象
+        var html$ = $(html);
+        var keyValue = name + ":" + ToValueStr(val, "'");
+        //设置EasyUI属性
+        var option = html$.attr('data-options');
+        option = option ? option + "," + keyValue : keyValue;
+        this._Html$.attr('data-options', option);
+        //转换成Html
+        html = html$.ToHtml();
+    }
+    return html;
+}
+var DockLayout = (function (_super) {
+    __extends(DockLayout, _super);
+    function DockLayout() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Top = null;
+        _this.Left = null;
+        _this.Center = null;
+        _this.Right = null;
+        _this.Bottom = null;
+        return _this;
+    }
+    return DockLayout;
+}(Control));
+DockLayout.Split = new AttachProperty();
+var GridLayout = (function (_super) {
+    __extends(GridLayout, _super);
+    function GridLayout(colCount) {
+        var _this = _super.call(this) || this;
+        _this.CellPadding = "0px";
+        _this.CellMargin = "0px";
+        _this.Border = "0px";
+        _this.ColCount = 1;
+        _this.ColWidthGroup = [];
+        _this.RowHeightGroup = [];
+        _this.ColCount = colCount;
+        return _this;
+    }
+    GridLayout.prototype.GetHtmlInner = function () {
+        return '<table style="table-layout:fixed;"><tbody/></table>';
+    };
+    GridLayout.prototype.GetChildHtml = function (control) {
+        var _this = this;
+        //获取参数
+        var html = control.GetHtml();
+        var index = this.ChildGroup.indexOf(control);
+        //重新初始化Table
+        var isFirst = index == 0;
+        if (isFirst) {
+            this._Table = new Table(this.ColCount);
+        }
+        //填充Table结构,获得位置
+        var curPoint = this._Table.Pos;
+        var size = new Size(control.GetExtData(GridLayout.ColSpan, 1), control.GetExtData(GridLayout.RowSpan, 1));
+        this._Table.Add(size, control);
+        var nextPoint = this._Table.Pos;
+        //包括td
+        html = "<td rowspan='" + size.Height + "' colspan='" + size.Width + "'>" + html + "</td>";
+        //如果换了行
+        if (isFirst || nextPoint.Y > curPoint.Y) {
+            var heightStr = this.RowHeightGroup[nextPoint.Y] ? "height=" + this.RowHeightGroup[nextPoint.Y] : "";
+            html = "</tr><tr " + heightStr + ">" + html;
+        }
+        //如果是首行
+        if (isFirst) {
+            //首行限制宽度
+            var headHtml = "<tr style='height:0px;'>";
+            headHtml += $.Enumerable.From(ArrayHelper.FromInt(0, this.ColCount - 1))
+                .Select(function (i) { return "<td " + (_this.ColWidthGroup[i] ? "width='" + _this.ColWidthGroup[i] + "'" : "") + "></td>"; })
+                .ToArray()
+                .join("");
+            html = headHtml + html;
+        }
+        //如果是末行
+        var isLast = index == this.ChildGroup.length - 1;
+        if (isLast) {
+            html = html + '</tr>';
+        }
+        return html;
+    };
+    return GridLayout;
+}(Control));
+GridLayout.RowSpan = new AttachProperty();
+GridLayout.ColSpan = new AttachProperty();
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
+], GridLayout.prototype, "CellPadding", void 0);
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
+], GridLayout.prototype, "CellMargin", void 0);
+__decorate([
+    HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
+], GridLayout.prototype, "Border", void 0);
+var Panel = (function (_super) {
+    __extends(Panel, _super);
+    function Panel() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Collapsible = false;
+        _this.Fit = false;
+        return _this;
+    }
+    return Panel;
+}(Control));
+__decorate([
+    ValLimitAtr(new MetaData.ValLimitForBool())
+], Panel.prototype, "Collapsible", void 0);
+__decorate([
+    ValLimitAtr(new MetaData.ValLimitForBool())
+], Panel.prototype, "Fit", void 0);
 var UI;
 (function (UI) {
     var Control = (function () {
