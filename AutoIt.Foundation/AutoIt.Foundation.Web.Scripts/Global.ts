@@ -30,21 +30,22 @@ function getParentType(type:any) {
 }
 
 //是否为某个类型
-function IsType(obj:any,type:any) {
-    var objType = GetType(obj);
-
-    while (objType) {
-        if (objType == type) {
+function IsType(type:any,baseType:any) {
+    type = GetType(type);
+    baseType = GetType(baseType);
+   
+    while (type) {
+        if (type == baseType) {
             return true;
         }
-        objType = getParentType(objType);
+        type = getParentType(type);
     }
 
     return false;
 }
 //判断一个对象是否为空
 function IsEmpty(obj: any): boolean {
-    return obj === null || obj === "" || obj === None;
+    return obj === null || obj === "" || obj === None || typeof (obj) == "undefined";
 }
 
 //将对象转为字符串格式

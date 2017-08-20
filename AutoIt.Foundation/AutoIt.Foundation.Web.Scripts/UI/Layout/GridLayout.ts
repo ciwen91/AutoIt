@@ -5,7 +5,7 @@
     @HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
     CellPadding: string = "0px";
     @HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
-    CellMargin: string = "0px";
+    CellSpacing: string = "16";
     @HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
     Border: string = "0px";
   
@@ -27,6 +27,7 @@
 
     GetChildHtml(control: Control): string {
         //获取参数
+        //debugger;
         var html = control.GetHtml();
         var index = this.ChildGroup.indexOf(control);
 
@@ -44,19 +45,19 @@
 
         //包括td
         html = `<td rowspan='${size.Height}' colspan='${size.Width}'>${html}</td>`;
-     
+
         //如果换了行
         if (isFirst || nextPoint.Y > curPoint.Y) {
             var heightStr = this.RowHeightGroup[nextPoint.Y] ? "height=" + this.RowHeightGroup[nextPoint.Y] : "";
-            html = `</tr><tr ${heightStr}>` + html;
+            html = (isFirst ? '</colgroup>' : '</tr>') + `<tr ${heightStr}>` + html;
         }
 
         //如果是首行
         if (isFirst) {
             //首行限制宽度
-            var headHtml = "<tr style='height:0px;'>";
+            var headHtml = "<colgroup>";
             headHtml += $.Enumerable.From(ArrayHelper.FromInt(0, this.ColCount - 1))
-                .Select(i => `<td ${this.ColWidthGroup[i] ? "width='" + this.ColWidthGroup[i] + "'" : ""}></td>`)
+                .Select(i => `<col ${this.ColWidthGroup[i] ? "width='" + this.ColWidthGroup[i] + "'" : ""}/>`)
                 .ToArray()
                 .join("");
 

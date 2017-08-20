@@ -20,12 +20,13 @@
     }
 
     //获取所有特性(类型,值,成员名称)
-    static GetAllAtr(type: any, atrType: any, memberName: string=null): List<any> {
-        var group = this._Dic.Get(type, new Lookup<string, any>())
-            .Get(memberName, new List<any>());
-
-        group = group.ToEnumerble()
-            .Where(item => IsType(item,atrType))
+    static GetAllAtr(type: any, atrType: any, memberName: string = null): List<any> {
+        var group = this._Dic.ToEnumerble()
+            .Where(item => IsType(type,item.Item1))
+            .SelectMany(item => item.Item2.ToArray())
+            .Where(item => item.Item1 == memberName)
+            .SelectMany(item => item.Item2.ToArray())
+            .Where(item => IsType(atrType,item))
             .ToList();
 
         return group;
@@ -48,13 +49,14 @@
     }
     //获取所有属性名称(类型)
     static GetAllPropName(type: any):List<string> {
-        var group = this._Dic.Get(type, new Lookup<string, any>());
-
-        var resultGroup = $.Enumerable.From(group.ToArray())
+        var group = this._Dic.ToEnumerble()
+            .Where(item => IsType(type,item.Item1))
+            .SelectMany(item => item.Item2.ToArray())
             .Select(item => item.Item1)
+            .Distinct()
             .ToList();
 
-        return resultGroup;
+        return group;
     }
 
 

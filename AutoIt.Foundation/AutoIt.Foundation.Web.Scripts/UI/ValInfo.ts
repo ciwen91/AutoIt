@@ -19,15 +19,15 @@
     }
 }
 
-setTimeout(function() {
-        var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
+//setTimeout(function() {
+//        var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
 
-        $.Enumerable.From(typeInfoGroup.ToArray())
-            .ForEach(item => {
-                console.log(item.Item2);
-            });
-    },
-    0);
+//        $.Enumerable.From(typeInfoGroup.ToArray())
+//            .ForEach(item => {
+//                console.log(item.Item2);
+//            });
+//    },
+//    0);
 
 //function init() {
 //    var classgroup = getAll();

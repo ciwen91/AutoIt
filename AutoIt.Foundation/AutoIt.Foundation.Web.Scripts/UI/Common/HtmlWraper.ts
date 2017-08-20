@@ -7,21 +7,24 @@
         this._Html$ = $(html);
     }
 
-    AddAtr(attrName: string, attrVal: any): HtmlWraper {
+    GetAtr(atrName: string): string {
+        return this._Html$.attr(atrName);
+    }
+    SetAtr(attrName: string, attrVal: any): HtmlWraper {
         if (attrVal != None) {
             this._Html$.attr(attrName, attrVal.toString());
         }
 
         return this;
     }
-    AddStyle(cssName: string, cssVal: any): HtmlWraper {
+    SetStyle(cssName: string, cssVal: any): HtmlWraper {
         if (cssVal != None) {
             this._Html$.css(cssName, cssVal.toString());
         }
 
         return this;
     }
-    SetStyle(style: string):HtmlWraper {
+    ReplaceStyle(style: string):HtmlWraper {
         if (style != None) {
             this._Html$.attr("style", style);
         }

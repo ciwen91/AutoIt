@@ -2113,6 +2113,42 @@ var AttachProperty = (function () {
     }
     return AttachProperty;
 }());
+var DelegateOne = (function () {
+    function DelegateOne() {
+        this.ActionGroup = new List();
+    }
+    DelegateOne.prototype.Subscribe = function (action) {
+        this.ActionGroup.Set(action);
+    };
+    DelegateOne.prototype.UnSubscribe = function (action) {
+        this.ActionGroup.RemoveItem(action);
+    };
+    DelegateOne.prototype.Do = function (param) {
+        for (var _i = 0, _a = this.ActionGroup.ToArray(); _i < _a.length; _i++) {
+            var item = _a[_i];
+            item(param);
+        }
+    };
+    return DelegateOne;
+}());
+var DelegateTwo = (function () {
+    function DelegateTwo() {
+        this.ActionGroup = new List();
+    }
+    DelegateTwo.prototype.Subscribe = function (action) {
+        this.ActionGroup.Set(action);
+    };
+    DelegateTwo.prototype.UnSubscribe = function (action) {
+        this.ActionGroup.RemoveItem(action);
+    };
+    DelegateTwo.prototype.Do = function (param1, param2) {
+        for (var _i = 0, _a = this.ActionGroup.ToArray(); _i < _a.length; _i++) {
+            var item = _a[_i];
+            item(param1, param2);
+        }
+    };
+    return DelegateTwo;
+}());
 //字典类
 var Dictionary = (function () {
     function Dictionary() {
@@ -2174,8 +2210,18 @@ var Dictionary = (function () {
     Dictionary.prototype.ToArray = function () {
         return this._Data.concat([]);
     };
+    //转换为枚举
+    Dictionary.prototype.ToEnumerble = function () {
+        return $.Enumerable.From(this.ToArray());
+    };
     return Dictionary;
 }());
+var DateMode;
+(function (DateMode) {
+    DateMode[DateMode["Date"] = 0] = "Date";
+    DateMode[DateMode["Time"] = 1] = "Time";
+    DateMode[DateMode["DateTime"] = 2] = "DateTime";
+})(DateMode || (DateMode = {}));
 //位置信息
 var LinePoint = (function () {
     function LinePoint(index, x, y) {
@@ -2282,7 +2328,7 @@ var Table = (function () {
     Table.prototype.Mark = function (point, size, obj) {
         //如果超过长度则转到下一行
         if (point.X + size.Width > this.ColCount) {
-            return this.Mark(new LinePoint(point.Index, point.Y + 1, 0), size, obj);
+            return this.Mark(new LinePoint(point.Index, 0, point.Y + 1), size, obj);
         }
         //从当前位置开始,检查是否有Size大小的空间.如果没有则转到下一列
         for (var i = point.Y; i < point.Y + size.Height; i++) {
@@ -2318,6 +2364,18 @@ var Tuple = (function () {
     }
     return Tuple;
 }());
+var MemberVisitor = (function () {
+    function MemberVisitor() {
+    }
+    MemberVisitor.prototype.GetValue = function (func) {
+        return func();
+    };
+    MemberVisitor.prototype.SetValue = function (func, value) {
+        func(value);
+        return this;
+    };
+    return MemberVisitor;
+}());
 //定义的空值
 var None = new Object();
 //转换为指定类型
@@ -2347,19 +2405,20 @@ function getParentType(type) {
     return type.prototype && type.prototype.__proto__ ? type.prototype.__proto__.constructor : null;
 }
 //是否为某个类型
-function IsType(obj, type) {
-    var objType = GetType(obj);
-    while (objType) {
-        if (objType == type) {
+function IsType(type, baseType) {
+    type = GetType(type);
+    baseType = GetType(baseType);
+    while (type) {
+        if (type == baseType) {
             return true;
         }
-        objType = getParentType(objType);
+        type = getParentType(type);
     }
     return false;
 }
 //判断一个对象是否为空
 function IsEmpty(obj) {
-    return obj === null || obj === "" || obj === None;
+    return obj === null || obj === "" || obj === None || typeof (obj) == "undefined";
 }
 //将对象转为字符串格式
 function ToValueStr(obj, quote) {
@@ -2640,10 +2699,12 @@ var MetaDataHelper = (function () {
     //获取所有特性(类型,值,成员名称)
     MetaDataHelper.GetAllAtr = function (type, atrType, memberName) {
         if (memberName === void 0) { memberName = null; }
-        var group = this._Dic.Get(type, new Lookup())
-            .Get(memberName, new List());
-        group = group.ToEnumerble()
-            .Where(function (item) { return IsType(item, atrType); })
+        var group = this._Dic.ToEnumerble()
+            .Where(function (item) { return IsType(type, item.Item1); })
+            .SelectMany(function (item) { return item.Item2.ToArray(); })
+            .Where(function (item) { return item.Item1 == memberName; })
+            .SelectMany(function (item) { return item.Item2.ToArray(); })
+            .Where(function (item) { return IsType(atrType, item); })
             .ToList();
         return group;
     };
@@ -2662,11 +2723,13 @@ var MetaDataHelper = (function () {
     };
     //获取所有属性名称(类型)
     MetaDataHelper.GetAllPropName = function (type) {
-        var group = this._Dic.Get(type, new Lookup());
-        var resultGroup = $.Enumerable.From(group.ToArray())
+        var group = this._Dic.ToEnumerble()
+            .Where(function (item) { return IsType(type, item.Item1); })
+            .SelectMany(function (item) { return item.Item2.ToArray(); })
             .Select(function (item) { return item.Item1; })
+            .Distinct()
             .ToList();
-        return resultGroup;
+        return group;
     };
     //获取所有类型元信息(命名空间,基类型)
     MetaDataHelper.GetAllTypeInfo = function (nameSpace, baseType) {
@@ -2717,8 +2780,25 @@ var MetaData;
         function ValLimitBase(type, pattern) {
             if (pattern === void 0) { pattern = null; }
             this.Required = false;
+            this.Pattern = "";
             this.Pattern = pattern;
         }
+        ValLimitBase.prototype.Valid = function (val) {
+            var inValidMsgGroup = new List();
+            if (this.Required && IsEmpty(val)) {
+                inValidMsgGroup.Set("���ֶ��Ǳ����!");
+            }
+            if (!IsEmpty(val)) {
+                inValidMsgGroup.SetRange(this.ValidInner(val));
+                if (!IsEmpty(this.Pattern) && !new RegExp(this.Pattern).test(val)) {
+                    inValidMsgGroup.Set("��ʽ����ȷ!");
+                }
+            }
+            return inValidMsgGroup;
+        };
+        ValLimitBase.prototype.ValidInner = function (val) {
+            return new List();
+        };
         return ValLimitBase;
     }());
     MetaData.ValLimitBase = ValLimitBase;
@@ -2728,8 +2808,18 @@ var MetaData;
     var ValLimitForBool = (function (_super) {
         __extends(ValLimitForBool, _super);
         function ValLimitForBool() {
-            return _super.call(this, MetaData.SimpleType.bool) || this;
+            var _this = _super.call(this, MetaData.SimpleType.bool) || this;
+            _this._ChioceGroup = new List(["true", "false", "1", "0"]);
+            return _this;
         }
+        ValLimitForBool.prototype.ValidInner = function (val) {
+            var msgGroup = new List();
+            var lowerVal = val.toLowerCase();
+            if (!this._ChioceGroup.Contains(lowerVal)) {
+                msgGroup.Set("ֵֻ��Ϊ:" + this._ChioceGroup.ToArray().join() + "!");
+            }
+            return msgGroup;
+        };
         return ValLimitForBool;
     }(MetaData.ValLimitBase));
     MetaData.ValLimitForBool = ValLimitForBool;
@@ -2738,15 +2828,70 @@ var MetaData;
 (function (MetaData) {
     var ValLimitForDataTime = (function (_super) {
         __extends(ValLimitForDataTime, _super);
-        function ValLimitForDataTime(dateType, format, parttern) {
+        function ValLimitForDataTime(dateType, dateMode, parttern) {
             if (dateType === void 0) { dateType = null; }
-            if (format === void 0) { format = null; }
+            if (dateMode === void 0) { dateMode = DateMode.Date; }
             if (parttern === void 0) { parttern = null; }
             var _this = _super.call(this, MetaData.SimpleType.datetime, parttern) || this;
-            _this.DateType = dateType;
-            _this.Format = format;
+            _this.DateMode = dateMode;
             return _this;
         }
+        ValLimitForDataTime.prototype.ValidInner = function (val) {
+            var msgGroup = new List();
+            //��������
+            var dateRegex = '\\d{4}/\\d{2}/\\d{2}';
+            var timeRegex = '\\d{2}:\\d{2}:\\d{2}';
+            var regexStr = "";
+            if (this.DateMode == DateMode.Date) {
+                regexStr = dateRegex;
+            }
+            else if (this.DateMode == DateMode.Time) {
+                regexStr = timeRegex;
+            }
+            else if (this.DateMode == DateMode.DateTime) {
+                regexStr = "(" + dateRegex + ")\\s+(" + timeRegex + ")";
+            }
+            regexStr = "^" + regexStr + "$";
+            //��ʽУ��
+            var eroMsg = this.DateMode == DateMode.Date ? "���ڸ�ʽ����ȷ!" : "ʱ���ʽ����ȷ!";
+            var regex = new RegExp(regexStr);
+            if (!regex.test(val)) {
+                msgGroup.Set(eroMsg);
+            }
+            else {
+                var dateStr = "";
+                var timeStr = "";
+                if (this.DateMode == DateMode.Date) {
+                    dateStr = val;
+                }
+                else if (this.DateMode == DateMode.Time) {
+                    timeStr = val;
+                }
+                else if (this.DateMode == DateMode.DateTime) {
+                    dateStr = regex.exec(val)[1];
+                    timeStr = regex.exec(val)[2];
+                }
+                var isValid = true;
+                if (isValid && dateStr) {
+                    var date = new Date(dateStr);
+                    var dateStrGroup = dateStr.split('/');
+                    isValid = date.getFullYear() == parseInt(dateStrGroup[0]) &&
+                        (date.getMonth() + 1) == parseInt(dateStrGroup[1]) &&
+                        date.getDate() == parseInt(dateStrGroup[2]);
+                }
+                if (isValid && timeStr) {
+                    var timeStrGroup = timeStr.split(':');
+                    var hour = parseInt(timeStrGroup[0]);
+                    var min = parseInt(timeStrGroup[1]);
+                    var second = parseInt(timeStrGroup[1]);
+                    isValid = hour >= 0 && hour < 24 && min >= 0 && min < 60 && second >= 0 && second < 60;
+                }
+                if (!isValid) {
+                    msgGroup.Set(eroMsg);
+                }
+            }
+            return msgGroup;
+        };
         return ValLimitForDataTime;
     }(MetaData.ValLimitBase));
     MetaData.ValLimitForDataTime = ValLimitForDataTime;
@@ -2764,6 +2909,30 @@ var MetaData;
             _this.Max = max;
             return _this;
         }
+        ValLimitForInt.prototype.ValidInner = function (val) {
+            var msgGroup = new List();
+            if (!/^[1-9]\d*$/.test(val)) {
+                msgGroup.Set("��������!");
+            }
+            else {
+                var valInt = parseInt(val, 10);
+                //�Ƿ�������
+                var isIn = (!IsEmpty(this.Min) && valInt >= this.Min) || (!IsEmpty(this.Max) && valInt <= this.Max);
+                //���ô�����Ϣ
+                if (!isIn) {
+                    if (!IsEmpty(this.Min) && !IsEmpty(this.Max)) {
+                        msgGroup.Set("\u05B5\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD" + this.Min + "~" + this.Max + "\uFFFD\uFFFD\uFFFD\uFFFD!");
+                    }
+                    else if (!IsEmpty(this.Min)) {
+                        msgGroup.Set("\uFFFD\uFFFD\uFFFD\uFFFD\u0421\uFFFD\uFFFD" + this.Min + "!");
+                    }
+                    else if (!IsEmpty(this.Max)) {
+                        msgGroup.Set("\uFFFD\uFFFD\uFFFD\u0734\uFFFD\uFFFD\uFFFD" + this.Max + "!");
+                    }
+                }
+            }
+            return msgGroup;
+        };
         return ValLimitForInt;
     }(MetaData.ValLimitBase));
     MetaData.ValLimitForInt = ValLimitForInt;
@@ -2783,6 +2952,30 @@ var MetaData;
             _this.Fraction = fraction;
             return _this;
         }
+        ValLimitForDouble.prototype.ValidInner = function (val) {
+            var msgGroup = new List();
+            if (!/^[1-9]\d*(\.\d+)?$/.test(val)) {
+                msgGroup.Set("��������!");
+            }
+            else {
+                var valDouble = parseFloat(val);
+                //�Ƿ�������
+                var isIn = (!IsEmpty(this.Min) && valDouble >= this.Min) || (!IsEmpty(this.Max) && valDouble <= this.Max);
+                //���ô�����Ϣ
+                if (!isIn) {
+                    if (!IsEmpty(this.Min) && !IsEmpty(this.Max)) {
+                        msgGroup.Set("\u05B5\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD" + this.Min + "~" + this.Max + "\uFFFD\uFFFD\uFFFD\uFFFD!");
+                    }
+                    else if (!IsEmpty(this.Min)) {
+                        msgGroup.Set("\uFFFD\uFFFD\uFFFD\uFFFD\u0421\uFFFD\uFFFD" + this.Min + "!");
+                    }
+                    else if (!IsEmpty(this.Max)) {
+                        msgGroup.Set("\uFFFD\uFFFD\uFFFD\u0734\uFFFD\uFFFD\uFFFD" + this.Max + "!");
+                    }
+                }
+            }
+            return msgGroup;
+        };
         return ValLimitForDouble;
     }(MetaData.ValLimitForInt));
     MetaData.ValLimitForDouble = ValLimitForDouble;
@@ -2800,6 +2993,25 @@ var MetaData;
             _this.MaxLength = maxLength;
             return _this;
         }
+        ValLimitForStr.prototype.ValidInner = function (val) {
+            var msgGroup = new List();
+            var length = val.length;
+            //�Ƿ�������
+            var isIn = (!IsEmpty(this.MinLength) && length >= this.MinLength) || (!IsEmpty(this.MaxLength) && length <= this.MaxLength);
+            //���ô�����Ϣ
+            if (!isIn) {
+                if (!IsEmpty(this.MinLength) && !IsEmpty(this.MaxLength)) {
+                    msgGroup.Set("\uFFFD\uFFFD\uFFFD\u0231\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD" + this.MinLength + "~" + this.MaxLength + "\uFFFD\uFFFD\uFFFD\uFFFD!");
+                }
+                else if (!IsEmpty(this.MinLength)) {
+                    msgGroup.Set("\uFFFD\uFFFD\uFFFD\u0232\uFFFD\uFFFD\uFFFD\u0421\uFFFD\uFFFD" + this.MinLength + "!");
+                }
+                else if (!IsEmpty(this.MaxLength)) {
+                    msgGroup.Set("\uFFFD\uFFFD\uFFFD\u0232\uFFFD\uFFFD\u0734\uFFFD\uFFFD\uFFFD" + this.MaxLength + "!");
+                }
+            }
+            return msgGroup;
+        };
         return ValLimitForStr;
     }(MetaData.ValLimitBase));
     MetaData.ValLimitForStr = ValLimitForStr;
@@ -2808,19 +3020,22 @@ var HtmlWraper = (function () {
     function HtmlWraper(html) {
         this._Html$ = $(html);
     }
-    HtmlWraper.prototype.AddAtr = function (attrName, attrVal) {
+    HtmlWraper.prototype.GetAtr = function (atrName) {
+        return this._Html$.attr(atrName);
+    };
+    HtmlWraper.prototype.SetAtr = function (attrName, attrVal) {
         if (attrVal != None) {
             this._Html$.attr(attrName, attrVal.toString());
         }
         return this;
     };
-    HtmlWraper.prototype.AddStyle = function (cssName, cssVal) {
+    HtmlWraper.prototype.SetStyle = function (cssName, cssVal) {
         if (cssVal != None) {
             this._Html$.css(cssName, cssVal.toString());
         }
         return this;
     };
-    HtmlWraper.prototype.SetStyle = function (style) {
+    HtmlWraper.prototype.ReplaceStyle = function (style) {
         if (style != None) {
             this._Html$.attr("style", style);
         }
@@ -2856,34 +3071,38 @@ HtmlWraper.Empty = new HtmlWraper("");
 var Control = (function (_super) {
     __extends(Control, _super);
     function Control() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super.call(this) || this;
         //@ValLimitAtr(new MetaData.ValLimitForStr())
-        _this.ID = NewGuidStr(16);
-        _this.Width = "";
-        _this.Height = "";
+        _this.ID = NewGuidStr(6);
+        _this.Width = "100%";
+        _this.Height = "100%";
         _this.Title = "";
         _this.ClassName = "";
         _this.Style = "";
+        _this.TagObj = {};
         _this.Parent = null;
         _this.ChildGroup = [];
+        _this.IsInited = false;
         return _this;
     }
-    //OnGetChildHtml: Interceptor<Control, string> = new Interceptor<Control, string>();
     Control.prototype.GetHtml = function () {
+        this.SetTag(this.TagObj);
         //获取Html
         var html = this.GetHtmlInner();
         var htmlWrapper = new HtmlWraper(html);
         //添加属性
         this.IncludeHtmlAtr(htmlWrapper);
         //添加子元素Html
+        var sonHtml = "";
         for (var _i = 0, _a = this.ChildGroup; _i < _a.length; _i++) {
             var item = _a[_i];
-            var sonHtml = this.GetChildHtml(item);
+            sonHtml += this.GetChildHtml(item);
+        }
+        if (sonHtml) {
             htmlWrapper.AppendHtml(sonHtml);
         }
         return htmlWrapper.ToHtml();
     };
-    ;
     Control.prototype.GetChildHtml = function (control) {
         return control.GetHtml();
     };
@@ -2893,16 +3112,21 @@ var Control = (function (_super) {
             var item = _a[_i];
             item.Init();
         }
+        this.IsInited = true;
+    };
+    Control.prototype.SetTag = function (tagObj) {
     };
     Control.prototype.GetHtmlInner = function () {
-        return null;
+        return None;
+    };
+    Control.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
     };
     Control.prototype.InitInner = function () {
     };
     Control.prototype.IncludeHtmlAtr = function (htmlWrapper) {
         var type = GetType(this);
         htmlWrapper.AddClass(this.ClassName || None);
-        htmlWrapper.SetStyle(this.Style || None);
+        htmlWrapper.ReplaceStyle(this.Style || None);
         for (var _i = 0, _a = MetaDataHelper.GetAllPropName(type).ToArray(); _i < _a.length; _i++) {
             var propName = _a[_i];
             var htmlAtrInfo = MetaDataHelper.GetAtr(type, MetaData.HtmlAtrInfo, propName);
@@ -2910,12 +3134,13 @@ var Control = (function (_super) {
                 continue;
             }
             if (htmlAtrInfo.Type == MetaData.HtmlAtrType.HtmlAtr) {
-                htmlWrapper.AddAtr(propName.toLowerCase(), this.GetMemberValue(propName));
+                htmlWrapper.SetAtr(propName.toLowerCase(), this.GetMemberValue(propName));
             }
             else if (htmlAtrInfo.Type == MetaData.HtmlAtrType.StyleAtr) {
-                htmlWrapper.AddStyle(propName.toLowerCase(), this.GetMemberValue(propName));
+                htmlWrapper.SetStyle(propName.toLowerCase(), this.GetMemberValue(propName));
             }
         }
+        this.IncludeHtmlAtrInner(htmlWrapper);
         return htmlWrapper;
     };
     return Control;
@@ -2932,46 +3157,126 @@ __decorate([
 __decorate([
     HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
 ], Control.prototype, "Title", void 0);
-var _this = this;
-Panel.prototype.GetHtmlInner = function () {
-    return '<div class="easyui-panel"/>';
-};
-DockLayout.prototype.GetHtmlInner = function () {
-    return '<div class="easyui-layout" data-options="fit:true"/>';
-};
-DockLayout.prototype.GetChildHtml = function (control) {
-    var html = control.GetHtml();
-    if (_this.Top && control == _this.Top) {
-        html = AddEasyUIOption(html, 'region', 'north');
+var FormControl = (function (_super) {
+    __extends(FormControl, _super);
+    function FormControl() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Enable = true;
+        return _this;
     }
-    else if (_this.Left && control == _this.Left) {
-        html = AddEasyUIOption(html, 'region', 'west');
+    FormControl.prototype.SetEnable = function (isEnable) {
+        this.Enable = isEnable;
+    };
+    return FormControl;
+}(Control));
+///<reference path="FormControl.ts"/>
+var ValidateBox = (function (_super) {
+    __extends(ValidateBox, _super);
+    function ValidateBox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Required = false;
+        _this.Editable = true;
+        _this.Prompt = "";
+        _this.ValLimit = null;
+        _this.Formatter = null;
+        _this.OnChange = new DelegateTwo();
+        return _this;
     }
-    else if (_this.Center && control == _this.Center) {
-        html = AddEasyUIOption(html, 'region', 'center');
+    ValidateBox.prototype.Valid = function () {
+    };
+    ValidateBox.prototype.IsValid = function () {
+        return true;
+    };
+    ValidateBox.prototype.SetEditable = function (isEditable) {
+        this.Editable = isEditable;
+    };
+    ValidateBox.prototype.GetValue = function () {
+        return None;
+    };
+    ValidateBox.prototype.SetValue = function (val) {
+    };
+    return ValidateBox;
+}(FormControl));
+///<reference path="ValidateBox.ts"/>
+var Combox = (function (_super) {
+    __extends(Combox, _super);
+    function Combox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.OnSelect = new DelegateTwo();
+        return _this;
     }
-    else if (_this.Right && control == _this.Right) {
-        html = AddEasyUIOption(html, 'region', 'east');
+    Combox.prototype.GetData = function () {
+        return None;
+    };
+    Combox.prototype.SetData = function (data) {
+    };
+    return Combox;
+}(ValidateBox));
+var DateBox = (function (_super) {
+    __extends(DateBox, _super);
+    function DateBox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Mode = DateMode.Date;
+        return _this;
     }
-    else if (_this.Bottom && control == _this.Bottom) {
-        html = AddEasyUIOption(html, 'region', 'south');
+    return DateBox;
+}(ValidateBox));
+var NoInputValidateBox = (function (_super) {
+    __extends(NoInputValidateBox, _super);
+    function NoInputValidateBox() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    return html;
-};
-function AddEasyUIOption(html, name, val) {
-    if (val != None) {
-        //转换成Jquery对象
-        var html$ = $(html);
-        var keyValue = name + ":" + ToValueStr(val, "'");
-        //设置EasyUI属性
-        var option = html$.attr('data-options');
-        option = option ? option + "," + keyValue : keyValue;
-        this._Html$.attr('data-options', option);
-        //转换成Html
-        html = html$.ToHtml();
+    NoInputValidateBox.prototype.SetEditable = function (isEditable) {
+        this.Editable = isEditable;
+        _super.prototype.SetEnable.call(this, isEditable);
+    };
+    return NoInputValidateBox;
+}(ValidateBox));
+var NumberBox = (function (_super) {
+    __extends(NumberBox, _super);
+    function NumberBox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Precision = 0;
+        return _this;
     }
-    return html;
-}
+    return NumberBox;
+}(ValidateBox));
+var SliderBox = (function (_super) {
+    __extends(SliderBox, _super);
+    function SliderBox() {
+        var _this = _super.call(this) || this;
+        _this.IsRange = false;
+        _this.Width = '98%';
+        return _this;
+    }
+    return SliderBox;
+}(NumberBox));
+///<reference path="ValidateBox.ts"/>
+var SwitchBox = (function (_super) {
+    __extends(SwitchBox, _super);
+    function SwitchBox() {
+        var _this = _super.call(this) || this;
+        _this.Style += "max-width:70px;";
+        return _this;
+    }
+    return SwitchBox;
+}(ValidateBox));
+///<reference path="ValidateBox.ts"/>
+var TextBox = (function (_super) {
+    __extends(TextBox, _super);
+    function TextBox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Type = TextBoxType.Text;
+        _this.Multiline = false;
+        return _this;
+    }
+    return TextBox;
+}(ValidateBox));
+var TextBoxType;
+(function (TextBoxType) {
+    TextBoxType[TextBoxType["Text"] = 0] = "Text";
+    TextBoxType[TextBoxType["Password"] = 1] = "Password";
+})(TextBoxType || (TextBoxType = {}));
 var DockLayout = (function (_super) {
     __extends(DockLayout, _super);
     function DockLayout() {
@@ -2991,7 +3296,7 @@ var GridLayout = (function (_super) {
     function GridLayout(colCount) {
         var _this = _super.call(this) || this;
         _this.CellPadding = "0px";
-        _this.CellMargin = "0px";
+        _this.CellSpacing = "16";
         _this.Border = "0px";
         _this.ColCount = 1;
         _this.ColWidthGroup = [];
@@ -3005,6 +3310,7 @@ var GridLayout = (function (_super) {
     GridLayout.prototype.GetChildHtml = function (control) {
         var _this = this;
         //获取参数
+        //debugger;
         var html = control.GetHtml();
         var index = this.ChildGroup.indexOf(control);
         //重新初始化Table
@@ -3022,14 +3328,14 @@ var GridLayout = (function (_super) {
         //如果换了行
         if (isFirst || nextPoint.Y > curPoint.Y) {
             var heightStr = this.RowHeightGroup[nextPoint.Y] ? "height=" + this.RowHeightGroup[nextPoint.Y] : "";
-            html = "</tr><tr " + heightStr + ">" + html;
+            html = (isFirst ? '</colgroup>' : '</tr>') + ("<tr " + heightStr + ">") + html;
         }
         //如果是首行
         if (isFirst) {
             //首行限制宽度
-            var headHtml = "<tr style='height:0px;'>";
+            var headHtml = "<colgroup>";
             headHtml += $.Enumerable.From(ArrayHelper.FromInt(0, this.ColCount - 1))
-                .Select(function (i) { return "<td " + (_this.ColWidthGroup[i] ? "width='" + _this.ColWidthGroup[i] + "'" : "") + "></td>"; })
+                .Select(function (i) { return "<col " + (_this.ColWidthGroup[i] ? "width='" + _this.ColWidthGroup[i] + "'" : "") + "/>"; })
                 .ToArray()
                 .join("");
             html = headHtml + html;
@@ -3050,7 +3356,7 @@ __decorate([
 ], GridLayout.prototype, "CellPadding", void 0);
 __decorate([
     HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
-], GridLayout.prototype, "CellMargin", void 0);
+], GridLayout.prototype, "CellSpacing", void 0);
 __decorate([
     HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
 ], GridLayout.prototype, "Border", void 0);
@@ -3070,6 +3376,57 @@ __decorate([
 __decorate([
     ValLimitAtr(new MetaData.ValLimitForBool())
 ], Panel.prototype, "Fit", void 0);
+var TabsLayout = (function (_super) {
+    __extends(TabsLayout, _super);
+    function TabsLayout() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.OnSelect = new DelegateOne();
+        return _this;
+    }
+    TabsLayout.prototype.Add = function (title, content, closable, Icon) {
+        if (closable === void 0) { closable = false; }
+        if (Icon === void 0) { Icon = ""; }
+    };
+    TabsLayout.prototype.Close = function (title) {
+    };
+    TabsLayout.prototype.Exists = function (title) {
+        return false;
+    };
+    TabsLayout.prototype.Select = function (title) {
+    };
+    return TabsLayout;
+}(Control));
+var LinkButton = (function (_super) {
+    __extends(LinkButton, _super);
+    function LinkButton() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.Text = "";
+        _this.IconCls = "";
+        _this.IsEnable = true;
+        _this.OnClick = new DelegateOne();
+        return _this;
+    }
+    LinkButton.prototype.SetEnable = function (isEnable) {
+        this.IsEnable = isEnable;
+    };
+    return LinkButton;
+}(Control));
+var RawControl = (function (_super) {
+    __extends(RawControl, _super);
+    function RawControl(html, containerTag) {
+        if (containerTag === void 0) { containerTag = "span"; }
+        var _this = _super.call(this) || this;
+        if (containerTag) {
+            html = "<" + containerTag + ">" + html + "</" + containerTag + ">";
+        }
+        _this._Html = html;
+        return _this;
+    }
+    RawControl.prototype.GetHtmlInner = function () {
+        return this._Html;
+    };
+    return RawControl;
+}(Control));
 var UI;
 (function (UI) {
     var Control = (function () {
@@ -3111,13 +3468,14 @@ var UI;
     }());
     UI.Other = Other;
 })(UI || (UI = {}));
-setTimeout(function () {
-    var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
-    $.Enumerable.From(typeInfoGroup.ToArray())
-        .ForEach(function (item) {
-        console.log(item.Item2);
-    });
-}, 0);
+//setTimeout(function() {
+//        var typeInfoGroup = MetaDataHelper.GetAllTypeInfo(UI, UI.Control);
+//        $.Enumerable.From(typeInfoGroup.ToArray())
+//            .ForEach(item => {
+//                console.log(item.Item2);
+//            });
+//    },
+//    0);
 //function init() {
 //    var classgroup = getAll();
 //    var typeInfoGroup = new Dictionary<any,MetaData.TypeInfo>();
@@ -3181,3 +3539,286 @@ setTimeout(function () {
 //         <grid  type="EasyUIGrid"/>
 //    </_many>
 //</Grid>*/
+var View = (function (_super) {
+    __extends(View, _super);
+    function View() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return View;
+}(Control));
+var EditView = (function (_super) {
+    __extends(EditView, _super);
+    function EditView(metaData) {
+        var _this = _super.call(this) || this;
+        _this.MetaData = metaData;
+        _this.Build();
+        return _this;
+    }
+    EditView.prototype.GetHtmlInner = function () {
+        return "<form></form>";
+    };
+    EditView.prototype.Build = function () {
+        var _this = this;
+        var controlGroup = this.MetaData.ToEnumerble()
+            .GroupBy(function (item) { return item.Group; })
+            .Select(function (item) {
+            var group = item.Key() || "基本信息";
+            var tableLayout = new GridLayout(2);
+            tableLayout.ColWidthGroup = ["65"];
+            tableLayout.Height = "";
+            for (var _i = 0, _a = item.source; _i < _a.length; _i++) {
+                var meta = _a[_i];
+                var control = _this.MetaToControl(meta);
+                tableLayout.ChildGroup.push(new RawControl(control.Title));
+                tableLayout.ChildGroup.push(control);
+            }
+            return { Group: group, Control: tableLayout };
+        })
+            .ToList();
+        var child = null;
+        if (controlGroup.Count() == 1) {
+            child = controlGroup.Get(0).Control;
+        }
+        else if (controlGroup.Count() > 1) {
+            var tabs = new TabsLayout();
+            child = tabs;
+            controlGroup.ToEnumerble().ForEach(function (item) {
+                tabs.Add(item.Group, item.Control);
+            });
+        }
+        if (child != null) {
+            this.ChildGroup.push(child);
+        }
+    };
+    EditView.prototype.MetaToControl = function (meta) {
+        var control;
+        if (meta.Type == "string") {
+            control = new TextBox();
+        }
+        else if (meta.Type == "number") {
+            control = new NumberBox();
+            if (!IsEmpty(meta.Min) && !IsEmpty(meta.Max) && meta.Max - meta.Min <= 100) {
+                control = new SliderBox();
+            }
+        }
+        else if (meta.Type == "datetime") {
+            control = new DateBox();
+        }
+        else if (meta.Type == "bool") {
+            control = new SwitchBox();
+        }
+        else if (meta.Type === "enum") {
+        }
+        control.ID = this.ID + "_" + meta.Name;
+        for (var name in meta) {
+            control[name] = meta[name];
+        }
+        console.log(control);
+        return control;
+    };
+    return EditView;
+}(View));
+Panel.prototype.GetHtmlInner = function () {
+    return '<div class="easyui-panel"/>';
+};
+DockLayout.prototype.GetHtmlInner = function () {
+    return '<div class="easyui-layout" data-options="fit:true"/>';
+};
+DockLayout.prototype.GetChildHtml = function (control) {
+    var html = control.GetHtml();
+    var htmlWrapper = new HtmlWraper(html);
+    if (this.Top && control == this.Top) {
+        AddEasyUIOption(htmlWrapper, 'region', 'north');
+    }
+    else if (this.Left && control == this.Left) {
+        AddEasyUIOption(htmlWrapper, 'region', 'west');
+    }
+    else if (this.Center && control == this.Center) {
+        AddEasyUIOption(htmlWrapper, 'region', 'center');
+    }
+    else if (this.Right && control == this.Right) {
+        AddEasyUIOption(htmlWrapper, 'region', 'east');
+    }
+    else if (this.Bottom && control == this.Bottom) {
+        AddEasyUIOption(htmlWrapper, 'region', 'south');
+    }
+    return html;
+};
+TabsLayout.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = "tabs";
+};
+TabsLayout.prototype.GetHtmlInner = function () {
+    return '<div class="easyui-tabs" data-options="fit:true"></div>"';
+};
+TabsLayout.prototype.GetChildHtml = function (control) {
+    var html = control.GetHtml();
+    var layoutInfo = control.TagObj.TabsLayout;
+    html = "<div title=\"" + layoutInfo.Title + "\" style=\"padding: 3px\">" + html + "</div>";
+    var wraper = new HtmlWraper(html);
+    if (!IsEmpty(layoutInfo.Closable)) {
+        AddEasyUIOption(wraper, 'closable', layoutInfo.Closable);
+    }
+    if (!IsEmpty(layoutInfo.Icon)) {
+        AddEasyUIOption(wraper, 'iconCls', layoutInfo.Icon);
+    }
+    return wraper.ToHtml();
+};
+TabsLayout.prototype.Add = function (title, content, closable, icon) {
+    if (closable === void 0) { closable = false; }
+    if (icon === void 0) { icon = ""; }
+    content.TagObj.TabsLayout = {
+        Title: title,
+        Closable: closable,
+        Icon: icon
+    };
+    this.ChildGroup.push(content);
+    if (this.IsInited) {
+        DoEasyUIFun(this, 'add', {
+            title: title,
+            closable: closable,
+            icon: icon,
+            content: content.GetHtml()
+        });
+    }
+};
+TabsLayout.prototype.Close = function (title) {
+    DoEasyUIFun(this, 'close', title);
+};
+TabsLayout.prototype.Exists = function (title) {
+    return DoEasyUIFun(this, 'exists', title);
+};
+TabsLayout.prototype.Select = function (title) {
+    DoEasyUIFun(this, 'select', title);
+};
+/******************************EditBox******************************/
+FormControl.prototype.IncludeHtmlAtrInner = function (htmlWrapper) {
+    Control.prototype.IncludeHtmlAtrInner.call(this, htmlWrapper);
+    AddEasyUIOption(htmlWrapper, "disabled", !this.Enable);
+};
+FormControl.prototype.SetEnable = function (isEnable) {
+    this.IsEnable = isEnable;
+    DoEasyUIFun(this, isEnable ? "enable" : "disable");
+};
+ValidateBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = "validatebox";
+};
+ValidateBox.prototype.GetHtmlInner = function () {
+    return "<input class=\"easyui-" + this.TagObj.EasyUIType + "\"/>";
+};
+ValidateBox.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
+    FormControl.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+    AddEasyUIOption(htmlWraper, "required", this.Required);
+    AddEasyUIOption(htmlWraper, "editable", this.Editable);
+    AddEasyUIOption(htmlWraper, "missingMessage", this.Prompt);
+};
+ValidateBox.prototype.InitInner = function () {
+    var self = this;
+    DoEasyUIFun(self, None, {
+        onChange: function (newVal) {
+            self.OnChange.Do(self, newVal);
+        }
+    });
+};
+ValidateBox.prototype.Valid = function () {
+    DoEasyUIFun(this, "validate");
+};
+ValidateBox.prototype.IsValid = function () {
+    return DoEasyUIFun(this, "isValid");
+};
+ValidateBox.prototype.SetEditable = function (isEditable) {
+    this.Editable = isEditable;
+    DoEasyUIFun(this, "readonly", isEditable);
+};
+ValidateBox.prototype.GetValue = function () {
+    return DoEasyUIFun(this, 'getValue');
+    { }
+};
+ValidateBox.prototype.SetValue = function (val) {
+    DoEasyUIFun(this, 'setValue', val);
+};
+TextBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = 'textbox';
+};
+TextBox.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
+    ValidateBox.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+    AddEasyUIOption(htmlWraper, "type", this.Type == TextBoxType.Password ? 'password' : 'text');
+    AddEasyUIOption(htmlWraper, "multiline", this.Multiline);
+};
+NumberBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = "numberbox";
+};
+NumberBox.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
+    ValidateBox.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+    AddEasyUIOption(htmlWraper, "min", this.Min);
+    AddEasyUIOption(htmlWraper, "max", this.Max);
+    AddEasyUIOption(htmlWraper, "precision", this.Precision);
+};
+SliderBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = "slider";
+};
+SliderBox.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
+    NumberBox.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+    AddEasyUIOption(htmlWraper, "showTip", true);
+    AddEasyUIOption(htmlWraper, "range", this.IsRange);
+};
+DateBox.prototype.SetTag = function (tagObj) {
+    var type = '';
+    if (this.Mode == DateMode.Date) {
+        type = 'datebox';
+    }
+    else if (this.Mode == DateMode.Time) {
+        type = 'timespinner';
+    }
+    else if (this.Mode == DateMode.DateTime) {
+        type = 'datetimebox';
+    }
+    tagObj.EasyUIType = type;
+};
+SwitchBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = 'switchbutton';
+};
+SwitchBox.prototype.GetValue = function () {
+    return DoEasyUIFun(this, 'options').checked;
+};
+SwitchBox.prototype.SetValue = function (val) {
+    DoEasyUIFun(this, val ? "check" : "uncheck");
+};
+/******************************CommonFunc******************************/
+function AddEasyUIOption(htmlWrapper, name, val) {
+    if (!IsEmpty(val)) {
+        //转换成Jquery对象
+        var keyValue = name + ":" + ToValueStr(val, "'");
+        //设置EasyUI属性
+        var option = htmlWrapper.GetAtr('data-options');
+        option = option ? option + "," + keyValue : keyValue;
+        htmlWrapper.SetAtr('data-options', option);
+    }
+}
+function DoEasyUIFun(control, funName) {
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    var elm = $('#' + control.ID);
+    var easyUIElm = elm[control.TagObj.EasyUIType];
+    if (!HasEasyUIFunc(control, funName)) {
+        //对于不可编辑的元素,改变Enable状态
+        if (funName == "readonly") {
+            funName = args[0] ? "disable" : "enable";
+        }
+    }
+    if (IsEmpty(funName)) {
+        return easyUIElm.apply(elm, args);
+    }
+    else if (HasEasyUIFunc(control, funName)) {
+        return easyUIElm.apply(elm, funName, args);
+    }
+    else {
+        return None;
+    }
+}
+function HasEasyUIFunc(control, funName) {
+    var type = control.TagObj.EasyUIType;
+    var func = $.fn[type].methods[funName];
+    return func ? true : false;
+}

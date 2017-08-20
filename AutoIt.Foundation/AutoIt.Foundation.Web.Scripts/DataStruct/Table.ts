@@ -21,7 +21,7 @@
     private Mark(point: LinePoint, size: Size, obj: T): LinePoint {
         //如果超过长度则转到下一行
         if (point.X + size.Width > this.ColCount) {
-            return this.Mark(new LinePoint(point.Index, point.Y + 1, 0), size, obj);
+            return this.Mark(new LinePoint(point.Index, 0,point.Y + 1), size, obj);
         }
 
         //从当前位置开始,检查是否有Size大小的空间.如果没有则转到下一列

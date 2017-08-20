@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <meta charset="utf-8" />
+
+    <link href="Scripts/EasyUI/themes/default/easyui.css" rel="stylesheet" type="text/css" />
+    <link href="Scripts/EasyUI/themes/icon.css" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+    </style>
+
+    <script type="text/javascript" src="Scripts/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="Scripts/jquery.linq.js"></script>
+
+    <script type="text/javascript">
+        $(function () {       
+            $('body').height($(window).height());
+        })
+    </script>
+
+    <script type="text/javascript" src="Scripts/EasyUI/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="Scripts/EasyUI/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="Scripts/codemirror/lib/codemirror.js"></script>
+    <script type="text/javascript" src="Scripts/codemirror/addon/hint/show-hint.js"></script>
+    <script type="text/javascript" src="AutoIt.js"></script>
+
+
+
+    <script type="text/javascript">
+        $(function () {
+            var metaData = [{
+                Name:"Name",
+                Type: "string",
+                Title:"名称"
+            },
+            {
+                Name:"Status",
+                Type: "bool",
+                Title:"状态"
+            },
+            {
+                Name: "Price",
+                Type: "number",
+                Title: "价格"
+            },
+             {
+                 Name: "Num",
+                 Type: "number",
+                 Title: "序号",
+                 Min: 1,
+                 Max: 30
+             },
+            {
+                Name: "CreateTime",
+                Type: "datetime",
+                Title:"创建时间"
+            },
+            {
+                Group: "限制条件",
+                Name: "Version",
+                Type: "string",
+                Title: "版本"
+            },
+            {
+                Group: "限制条件",
+                Name: "Channel",
+                Type: "number",
+                Title: "渠道"
+            }];
+
+            var view = new EditView(new List(metaData));
+
+            var html = view.GetHtml();
+            console.log(html);      
+            $("body").append(html);
+            $.parser.parse("body");
+
+            setTimeout(function () {
+                view.Init();
+            }, 100);
+        });
+       
+    </script>
+</head>
+<body style="width:650px;margin:0 auto">
+
+</body>
+</html>

@@ -1,23 +1,29 @@
 ﻿abstract class Control extends ObjBase {
     //@ValLimitAtr(new MetaData.ValLimitForStr())
     @HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
-    ID: string = NewGuidStr(16);
+    ID: string = NewGuidStr(6);
     @HtmlAtr(MetaData.HtmlAtrType.StyleAtr)
-    Width: string = "";
+    Width: string = "100%";
     @HtmlAtr(MetaData.HtmlAtrType.StyleAtr)
-    Height: string = "";
+    Height: string = "100%";
     @HtmlAtr(MetaData.HtmlAtrType.HtmlAtr)
     Title: string = "";
     ClassName: string = "";
     Style: string = ""; 
 
+    TagObj:any={};
     Parent: Control=null;
     ChildGroup: Control[] = [];
 
-    //OnGetChildHtml: Interceptor<Control, string> = new Interceptor<Control, string>();
+    IsInited: boolean = false;
 
- 
+    constructor() {
+        super();
+    }
+
     GetHtml(): string {
+        this.SetTag(this.TagObj);
+
         //获取Html
         var html = this.GetHtmlInner();
         var htmlWrapper = new HtmlWraper(html);
@@ -26,13 +32,16 @@
         this.IncludeHtmlAtr(htmlWrapper);
 
         //添加子元素Html
+        var sonHtml = "";
         for (var item of this.ChildGroup) {
-            var sonHtml = this.GetChildHtml(item);
+            sonHtml += this.GetChildHtml(item);
+        }
+        if (sonHtml) {
             htmlWrapper.AppendHtml(sonHtml);
         }
 
         return htmlWrapper.ToHtml();
-    };
+    }
     GetChildHtml(control:Control) {
         return control.GetHtml();
     }
@@ -42,11 +51,18 @@
         for (var item of this.ChildGroup) {
             item.Init();
         }
+
+        this.IsInited = true;
     }
 
+    SetTag(tagObj: any) {
 
+    }
     GetHtmlInner(): string {
-        return null;
+        return None;
+    }
+    IncludeHtmlAtrInner(htmlWraper:HtmlWraper) {
+        
     }
     InitInner() {
         
@@ -54,10 +70,10 @@
 
     private IncludeHtmlAtr(htmlWrapper: HtmlWraper): HtmlWraper {
         var type = GetType(this);
-        
-        htmlWrapper.AddClass(this.ClassName||None);
-        htmlWrapper.SetStyle(this.Style || None);
 
+        htmlWrapper.AddClass(this.ClassName || None);
+        htmlWrapper.ReplaceStyle(this.Style || None);
+        
         for (var propName of MetaDataHelper.GetAllPropName(type).ToArray()) {
             var htmlAtrInfo = <MetaData.HtmlAtrInfo>MetaDataHelper.GetAtr(type, MetaData.HtmlAtrInfo, propName);
 
@@ -66,13 +82,14 @@
             }
 
             if (htmlAtrInfo.Type == MetaData.HtmlAtrType.HtmlAtr) {
-                htmlWrapper.AddAtr(propName.toLowerCase(), this.GetMemberValue(propName));
+                htmlWrapper.SetAtr(propName.toLowerCase(), this.GetMemberValue(propName));
             } else if (htmlAtrInfo.Type == MetaData.HtmlAtrType.StyleAtr) {
-                htmlWrapper.AddStyle(propName.toLowerCase(), this.GetMemberValue(propName));
+                htmlWrapper.SetStyle(propName.toLowerCase(), this.GetMemberValue(propName));
             }
         }
+
+        this.IncludeHtmlAtrInner(htmlWrapper);
 
         return htmlWrapper;
     }
 }
-

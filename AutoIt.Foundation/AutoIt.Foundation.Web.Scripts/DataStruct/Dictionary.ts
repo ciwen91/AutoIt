@@ -67,4 +67,9 @@ class Dictionary<TKey, TValue> {
     public ToArray(): Tuple<TKey, TValue>[] {
         return this._Data.concat([]);
     } 
+
+    //转换为枚举
+    public ToEnumerble(): linq.Enumerable<Tuple<TKey, TValue>> {
+        return $.Enumerable.From(this.ToArray());
+    }
 }
