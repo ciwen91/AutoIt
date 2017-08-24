@@ -3198,20 +3198,6 @@ var ValidateBox = (function (_super) {
     return ValidateBox;
 }(FormControl));
 ///<reference path="ValidateBox.ts"/>
-var Combox = (function (_super) {
-    __extends(Combox, _super);
-    function Combox() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.OnSelect = new DelegateTwo();
-        return _this;
-    }
-    Combox.prototype.GetData = function () {
-        return None;
-    };
-    Combox.prototype.SetData = function (data) {
-    };
-    return Combox;
-}(ValidateBox));
 var DateBox = (function (_super) {
     __extends(DateBox, _super);
     function DateBox() {
@@ -3221,6 +3207,7 @@ var DateBox = (function (_super) {
     }
     return DateBox;
 }(ValidateBox));
+///<reference path="ValidateBox.ts"/>
 var NoInputValidateBox = (function (_super) {
     __extends(NoInputValidateBox, _super);
     function NoInputValidateBox() {
@@ -3240,6 +3227,23 @@ var NumberBox = (function (_super) {
         return _this;
     }
     return NumberBox;
+}(ValidateBox));
+var SelectBox = (function (_super) {
+    __extends(SelectBox, _super);
+    function SelectBox() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.ValueField = "Value";
+        _this.TextField = "Text";
+        _this.Multiple = false;
+        _this.OnSelect = new DelegateTwo();
+        return _this;
+    }
+    SelectBox.prototype.GetData = function () {
+        return None;
+    };
+    SelectBox.prototype.SetData = function (data) {
+    };
+    return SelectBox;
 }(ValidateBox));
 var SliderBox = (function (_super) {
     __extends(SliderBox, _super);
@@ -3608,6 +3612,11 @@ var EditView = (function (_super) {
             control = new SwitchBox();
         }
         else if (meta.Type === "enum") {
+            var selectBox = new SelectBox();
+            control = selectBox;
+            setTimeout(function () {
+                selectBox.SetData(meta.Data);
+            }, 0);
         }
         control.ID = this.ID + "_" + meta.Name;
         for (var name in meta) {
@@ -3783,6 +3792,33 @@ SwitchBox.prototype.GetValue = function () {
 SwitchBox.prototype.SetValue = function (val) {
     DoEasyUIFun(this, val ? "check" : "uncheck");
 };
+SelectBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = this.Multiple ? "tagbox" : "combobox";
+};
+SelectBox.prototype.IncludeHtmlAtrInner = function (htmlWraper) {
+    ValidateBox.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+    AddEasyUIOption(htmlWraper, "hasDownArrow", true);
+    AddEasyUIOption(htmlWraper, "valueField", this.ValueField);
+    AddEasyUIOption(htmlWraper, "textField", this.TextField);
+    AddEasyUIOption(htmlWraper, "multiple", this.Multiple);
+};
+SelectBox.prototype.InitInner = function () {
+    var self = this;
+    DoEasyUIFun(self, None, {
+        onChange: function (newVal) {
+            self.OnChange.Do(self, newVal);
+        },
+        onSelect: function (item) {
+            self.OnSelect.Do(self, item);
+        }
+    });
+};
+SelectBox.prototype.GetData = function () {
+    return DoEasyUIFun(this, "getData");
+};
+SelectBox.prototype.SetData = function (data) {
+    DoEasyUIFun(this, "loadData", data);
+};
 /******************************CommonFunc******************************/
 function AddEasyUIOption(htmlWrapper, name, val) {
     if (!IsEmpty(val)) {
@@ -3811,14 +3847,20 @@ function DoEasyUIFun(control, funName) {
         return easyUIElm.apply(elm, args);
     }
     else if (HasEasyUIFunc(control, funName)) {
-        return easyUIElm.apply(elm, funName, args);
+        var callArgs = [funName].concat(args);
+        return easyUIElm.apply(elm, callArgs);
     }
     else {
         return None;
     }
 }
 function HasEasyUIFunc(control, funName) {
-    var type = control.TagObj.EasyUIType;
-    var func = $.fn[type].methods[funName];
-    return func ? true : false;
+    var classGroup = $('#' + control.ID).attr('class').split(' ');
+    var typeGroup = $.Enumerable.From(classGroup)
+        .Where(function (item) { return item.indexOf('-f') >= 0; })
+        .Select(function (item) { return item.substr(0, item.indexOf('-f')); })
+        .ToArray();
+    var exsit = $.Enumerable.From(typeGroup)
+        .Any(function (item) { return $.fn[item].methods[funName]; });
+    return exsit;
 }

@@ -75,7 +75,13 @@ class EditView extends View{
             control = new SwitchBox();
         }
         else if (meta.Type === "enum") {
+            var selectBox = new SelectBox();
+            control = selectBox;
 
+            setTimeout(function() {
+                    selectBox.SetData(meta.Data);
+                },
+                0);
         }
 
         control.ID = this.ID + "_" + meta.Name;

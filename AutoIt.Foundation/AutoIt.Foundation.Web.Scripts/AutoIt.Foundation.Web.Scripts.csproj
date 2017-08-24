@@ -780,7 +780,7 @@
     <TypeScriptCompile Include="UI\Layout\TabsLayout.ts" />
     <TypeScriptCompile Include="UI\Other\RawControl.ts" />
     <TypeScriptCompile Include="UI\Z\EasyUI.ts" />
-    <TypeScriptCompile Include="UI\EditBox\Combox.ts" />
+    <TypeScriptCompile Include="UI\EditBox\SelectBox.ts" />
     <TypeScriptCompile Include="UI\EditBox\DateBox.ts" />
     <TypeScriptCompile Include="UI\EditBox\NoInputValidateBox.ts" />
     <TypeScriptCompile Include="UI\EditBox\NumberBox.ts" />

@@ -1,3 +1,4 @@
-﻿class DateBox extends ValidateBox {
+﻿///<reference path="ValidateBox.ts"/>
+class DateBox extends ValidateBox {
     Mode: DateMode = DateMode.Date;
 }

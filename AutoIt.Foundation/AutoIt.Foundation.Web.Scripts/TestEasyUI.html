@@ -62,6 +62,46 @@
                 Title:"创建时间"
             },
             {
+                Name: "Source",
+                Type: "enum",
+                Title: "来源",
+                Multiple: true,
+                Data: [
+                    {
+                        Text: "百度CPD",
+                        Value:"Thrid_Baidu"
+                    },
+                    {
+                        Text: "本地",
+                        Value:"Local"
+                    },
+                    {
+                        Text: "九游",
+                        Value: "9YouCode"
+                    }
+                ]
+            },
+            {
+                Name: "Type",
+                Type: "enum",
+                Title: "类型",
+                Multiple: false,
+                Data: [
+                    {
+                        Text: "游戏",
+                        Value: "Game"
+                    },
+                    {
+                        Text: "应用",
+                        Value: "App"
+                    },
+                    {
+                        Text: "新闻",
+                        Value: "News"
+                    }
+                ]
+            },
+            {
                 Group: "限制条件",
                 Name: "Version",
                 Type: "string",

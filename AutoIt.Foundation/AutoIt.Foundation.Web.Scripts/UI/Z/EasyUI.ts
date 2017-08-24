@@ -182,6 +182,38 @@ SwitchBox.prototype.GetValue = function() {
 SwitchBox.prototype.SetValue = function(val) {
     DoEasyUIFun(this, val ? "check" : "uncheck");
 };
+
+SelectBox.prototype.SetTag = function (tagObj) {
+    tagObj.EasyUIType = this.Multiple ? "tagbox" : "combobox";
+};
+SelectBox.prototype.IncludeHtmlAtrInner=function(htmlWraper) {
+    ValidateBox.prototype.IncludeHtmlAtrInner.call(this, htmlWraper);
+
+    AddEasyUIOption(htmlWraper, "hasDownArrow", true);
+    AddEasyUIOption(htmlWraper, "valueField", this.ValueField);
+    AddEasyUIOption(htmlWraper, "textField", this.TextField);
+    AddEasyUIOption(htmlWraper, "multiple", this.Multiple);
+}
+SelectBox.prototype.InitInner= function() {
+    var self = this;
+
+    DoEasyUIFun(self,
+        None,
+        {
+            onChange: newVal => {
+                self.OnChange.Do(self, newVal);
+            },
+            onSelect:item => {
+                self.OnSelect.Do(self, item);
+            }
+        }); 
+}
+SelectBox.prototype.GetData=function() {
+    return DoEasyUIFun(this, "getData");
+}
+SelectBox.prototype.SetData=function(data) {
+    DoEasyUIFun(this, "loadData",data);
+}
 /******************************CommonFunc******************************/
 function AddEasyUIOption(htmlWrapper: HtmlWraper, name: string, val: any) {
     if (!IsEmpty(val)) {
@@ -209,17 +241,24 @@ function DoEasyUIFun(control:Control,funName:string,...args:any[]):any {
     if (IsEmpty(funName)) {
         return easyUIElm.apply(elm, args);
     } else if (HasEasyUIFunc(control, funName)) {
-        return easyUIElm.apply(elm, funName, args);
+        var callArgs = [funName].concat(args);
+        return easyUIElm.apply(elm, callArgs);
     } else {
         return None;
     }
 }
 
 function HasEasyUIFunc(control: Control, funName: string): boolean {
-    var type = control.TagObj.EasyUIType;
-    var func = $.fn[type].methods[funName];
+    var classGroup = $('#' + control.ID).attr('class').split(' ');
+    var typeGroup = $.Enumerable.From(classGroup)
+        .Where(item => item.indexOf('-f') >= 0)
+        .Select(item => item.substr(0, item.indexOf('-f')))
+        .ToArray();
 
-    return func ? true : false;
+    var exsit = $.Enumerable.From(typeGroup)
+        .Any(item => $.fn[item].methods[funName]);
+
+    return exsit;
 }
 
 
