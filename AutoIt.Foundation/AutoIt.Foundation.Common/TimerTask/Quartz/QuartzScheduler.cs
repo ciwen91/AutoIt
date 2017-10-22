@@ -60,9 +60,10 @@ namespace TimerTask
                 .Build();
 
             var trigger = BuildTrigger(taskInfo)
-                .WithCronSchedule(taskInfo.Cron);
+                .WithCronSchedule(taskInfo.Cron)
+                .Build();
 
-            _Scheduler.ScheduleJob(job, trigger.Build());
+            _Scheduler.ScheduleJob(job, trigger);
         }
 
         public void RemoveTask(string key, string group)
@@ -150,6 +151,7 @@ namespace TimerTask
         {
             var job = JobBuilder.Create<QuartzJob>()
                 .WithIdentity(taskInfo.Key, taskInfo.Group)
+                .WithDescription(taskInfo.Desc)
                 .SetJobData(new JobDataMap() {{"Action", taskInfo.Action}});
 
             return job;

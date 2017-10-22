@@ -22,7 +22,6 @@ namespace TimerTask
         public void AddTask(SimpleTimerTaskInfo taskInfo)
         {
             _QuartzScheduler.AddTask(taskInfo);
-            Console.WriteLine(JsonConvert.SerializeObject(_QuartzScheduler.GetTaskRunInfo()));
         }
 
         public void AddTask(CronTimerTaskInfo taskInfo)

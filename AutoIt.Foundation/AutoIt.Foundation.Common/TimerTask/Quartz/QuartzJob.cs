@@ -3,6 +3,9 @@ using Quartz;
 
 namespace TimerTask
 {
+    /// <summary>
+    /// DisallowConcurrentExecution,对于实例不并发执行任务
+    /// </summary>
     [DisallowConcurrentExecution]
     public class QuartzJob : IJob
     {
