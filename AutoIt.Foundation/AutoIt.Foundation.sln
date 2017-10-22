@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Test", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Web.Scripts", "AutoIt.Foundation.Web.Scripts\AutoIt.Foundation.Web.Scripts.csproj", "{A148C7C9-7388-48FD-8DFF-533B8D8DE9D8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{5A9461D7-CBDA-4609-92FA-6C0FA9E20975}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.StoreCenter", "AutoIt.Foundation.Store\AutoIt.Foundation.StoreCenter.csproj", "{551AE4AA-5028-4E39-B5E6-69BFA22007A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Aop", "AutoIt.Foundation.Aop\AutoIt.Foundation.Aop.csproj", "{09779467-22BF-40C2-BF41-15D26EF0E42E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +33,19 @@ Global
 		{A148C7C9-7388-48FD-8DFF-533B8D8DE9D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A148C7C9-7388-48FD-8DFF-533B8D8DE9D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A148C7C9-7388-48FD-8DFF-533B8D8DE9D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{551AE4AA-5028-4E39-B5E6-69BFA22007A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{551AE4AA-5028-4E39-B5E6-69BFA22007A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{551AE4AA-5028-4E39-B5E6-69BFA22007A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{551AE4AA-5028-4E39-B5E6-69BFA22007A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09779467-22BF-40C2-BF41-15D26EF0E42E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09779467-22BF-40C2-BF41-15D26EF0E42E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09779467-22BF-40C2-BF41-15D26EF0E42E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09779467-22BF-40C2-BF41-15D26EF0E42E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F2C3CCAA-130A-451A-8BCC-8FC9F5E07B7E} = {5A9461D7-CBDA-4609-92FA-6C0FA9E20975}
 	EndGlobalSection
 EndGlobal

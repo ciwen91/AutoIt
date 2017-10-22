@@ -8,6 +8,9 @@ using AutoIt.Foundation.Common.LangAnaly;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Xml.Linq;
+using Autofac;
+using Autofac.Extras.DynamicProxy;
+using AutoIt.Foundation.Aop;
 using AutoIt.Foundation.Common.ClassHelper;
 
 namespace AutoIt.Foundation.Test
@@ -16,8 +19,18 @@ namespace AutoIt.Foundation.Test
     {
         static void Main(string[] args)
         {
-            var group = new List<int>();
-            
+            var builder = new ContainerBuilder();
+            builder.Register(c=>new Call1Logger());
+            builder.RegisterType<Test>()
+                .EnableClassInterceptors()
+                .InterceptedBy(typeof(Call1Logger));
+
+            var container = builder.Build();
+
+            Console.WriteLine(container.Resolve<Test>().Add(1,2));
+
+            //var group = new List<int>();
+
             //            JsonConvert.DefaultSettings = () =>
             //            {
             //                var setting = new JsonSerializerSettings();
@@ -27,15 +40,15 @@ namespace AutoIt.Foundation.Test
             //            };
 
 
-            var manager1 = new PrintLangManager(@"Data\xml.egt")
-            {
-                ContentNameGroup = new List<string>() { "Word", "Text", "Content" }
-            };
-            manager1.Analy(@"
-<root a=""1"" b=""2"">
-  <page width=""400px"" height=""500px""> 
-   jj, kll, </page>
-</root>");
+            //            var manager1 = new PrintLangManager(@"Data\xml.egt")
+            //            {
+            //                ContentNameGroup = new List<string>() { "Word", "Text", "Content" }
+            //            };
+            //            manager1.Analy(@"
+            //<root a=""1"" b=""2"">
+            //  <page width=""400px"" height=""500px""> 
+            //   jj, kll, </page>
+            //</root>");
 
             //            var manager = new CalculateLangManager(@"D:\应用软件\GoldParser\Calculate.egt");
             //           var result= manager.GetValue(@"
