@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StoreCenter.Core
+namespace StoreCenter
 {
     public class ExpireInfo
     {

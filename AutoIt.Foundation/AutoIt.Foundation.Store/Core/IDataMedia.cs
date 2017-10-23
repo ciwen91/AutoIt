@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using StoreCenter.Core;
 
-namespace StoreCenter.Core
+namespace StoreCenter
 {
     public interface IDataMedia<T> where T:EntityBase
     {

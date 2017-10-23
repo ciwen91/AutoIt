@@ -1,7 +1,6 @@
 ﻿using System;
-using StoreCenter.Core;
 
-namespace StoreCenter.ProcCache
+namespace StoreCenter
 {
     public class ProcCacheFactory<T> : IDataMediaFactory<T> where T:EntityBase
     {

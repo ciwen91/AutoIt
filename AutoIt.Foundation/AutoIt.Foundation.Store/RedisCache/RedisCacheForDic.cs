@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using StoreCenter.Core;
 
 namespace StoreCenter
 {
@@ -11,12 +10,12 @@ namespace StoreCenter
 
         protected override IEnumerable<T> GetInner()
         {
-            return _Repository.GetAll<T>(StoreKey).Values;
+            return _Repository.Exist(StoreKey) ? _Repository.GetAll<T>(StoreKey).Values : null;
         }
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
-            return _Repository.GetItemGroup<T>(StoreKey, keyGroup).Values;
+            return _Repository.GetItemGroup<T>(StoreKey, keyGroup);
         }
 
         protected override void UpdateInner(IEnumerable<T> @group)
@@ -43,7 +42,7 @@ namespace StoreCenter
 
         protected override int CountInner()
         {
-            return _Repository.CountItem(StoreKey);
+            return _Repository.Exist(StoreKey) ? _Repository.CountItem(StoreKey) : -1;
         }
 
         #endregion

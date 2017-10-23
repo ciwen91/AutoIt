@@ -1,5 +1,4 @@
 ﻿using System;
-using StoreCenter.Core;
 
 namespace StoreCenter
 {

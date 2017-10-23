@@ -1,4 +1,4 @@
-﻿namespace StoreCenter.Core
+﻿namespace StoreCenter
 {
     public abstract class EntityBase
     {

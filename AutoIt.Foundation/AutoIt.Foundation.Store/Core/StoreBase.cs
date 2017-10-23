@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using TimerTask;
 
-namespace StoreCenter.Core
+namespace StoreCenter
 {
     public abstract class StoreBase<T> : IDataMedia<T> where T : EntityBase
     {

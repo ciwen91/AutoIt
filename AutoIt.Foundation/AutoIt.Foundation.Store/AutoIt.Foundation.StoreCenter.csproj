@@ -60,17 +60,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\EntityBase.cs" />
-    <Compile Include="Core\ExpireInfo.cs" />
+    <Compile Include="Model\EntityBase.cs" />
+    <Compile Include="Model\ExpireInfo.cs" />
     <Compile Include="Core\IDataMedia.cs" />
     <Compile Include="Core\IDataMediaFactory.cs" />
     <Compile Include="Core\IQueryableDataMedia.cs" />
     <Compile Include="Core\StoreBase.cs" />
     <Compile Include="Core\StoreCenter.cs" />
-    <Compile Include="Core\StoreShape.cs" />
-    <Compile Include="Model\FuncForChain.cs" />
-    <Compile Include="Model\IEnumerableHelper.cs" />
-    <Compile Include="Model\UserInfo.cs" />
+    <Compile Include="Model\StoreShape.cs" />
     <Compile Include="ProcCache\ProcCacheBase.cs" />
     <Compile Include="ProcCache\ProcCacheFactory.cs" />
     <Compile Include="ProcCache\ProcCacheForDic.cs" />

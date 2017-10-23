@@ -1,4 +1,4 @@
-﻿namespace StoreCenter.Core
+﻿namespace StoreCenter
 {
     public interface IDataMediaFactory<T> where T : EntityBase
     {

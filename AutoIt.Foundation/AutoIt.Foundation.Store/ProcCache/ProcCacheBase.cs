@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Caching;
-using StoreCenter.Core;
 
-namespace StoreCenter.ProcCache
+namespace StoreCenter
 {
     public abstract class ProcCacheBase<T> : StoreBase<T> where T : EntityBase
     {

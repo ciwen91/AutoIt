@@ -140,20 +140,24 @@ namespace StoreCenter
         {
             var val = _Db.HashGet(key, itemKey);
 
-
             return GetEntity<T>(val);
         }
-        public Dictionary<string, T> GetItemGroup<T>(string key, IEnumerable<string> itemKeyGroup)
+        public IEnumerable<T> GetItemGroup<T>(string key, IEnumerable<string> itemKeyGroup)
         {
             //支持排除返回dic而不是value list(管道)
             //var valueGroup = _Db.hash(key, GetValueGroup(itemKeyGroup));
             //var entityGroup = valueGroup.Select(item=>item.).SetValue(item => GetValue<T>(item))
             //    .ToList();
             ///ToDO:由于
-            var dic = itemKeyGroup
-                .ToDictionary(item => item, item => GetItem<T>(key, item));
+            //var dic = itemKeyGroup
+            //    .ToDictionary(item => item, item => GetItem<T>(key, item));
+            //return dic;
 
-            return dic;
+            var valueGroup = _Db.HashGet(key, itemKeyGroup.Select(item => (RedisValue) item).ToArray())
+                .Select(GetEntity<T>)
+                .ToList();
+
+            return valueGroup;
         }
         public RedisRepository SetItem<T>(string key, string itemKey, T value)
         {

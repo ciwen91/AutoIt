@@ -2,7 +2,7 @@
 using System.Linq;
 using StoreCenter.Core;
 
-namespace StoreCenter.ProcCache
+namespace StoreCenter
 {
     public class ProcCacheForDic<T> : ProcCacheBase<T> where T : EntityBase
     {
@@ -18,6 +18,8 @@ namespace StoreCenter.ProcCache
             var group = _Dic?.Where(item => keyGroup.Contains(item.Key))
                 .Select(item => item.Value)
                 .ToList();
+
+            group = group ?? new List<T>();
 
             return group;
         }
@@ -59,7 +61,7 @@ namespace StoreCenter.ProcCache
 
             if (dic == null)
             {
-                return null;
+                return new List<string>();
             }
             else
             {
@@ -73,7 +75,7 @@ namespace StoreCenter.ProcCache
         {
             var dic = _Dic;
 
-            return dic?.Count ?? 0;
+            return dic?.Count ?? -1;
         }
 
         #endregion
