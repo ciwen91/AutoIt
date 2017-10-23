@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StoreCenter.Core;
 
-namespace StoreCenter.Redis
+namespace StoreCenter
 {
     public class RedisCacheForKeyValue<T> : RedisCacheBase<T> where T : EntityBase
     {

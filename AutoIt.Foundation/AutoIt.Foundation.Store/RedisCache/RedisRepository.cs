@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
-namespace StoreCenter.Redis
+namespace StoreCenter
 {
     /// <summary>
     /// 在StackExchange.Redis中最重要的对象是ConnectionMultiplexer类， 它存在于StackExchange.Redis命名空间中。

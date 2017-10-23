@@ -1,7 +1,7 @@
 ﻿using System;
 using StoreCenter.Core;
 
-namespace StoreCenter.Redis
+namespace StoreCenter
 {
     public class RedisCacheFactory<T> : IDataMediaFactory<T> where T : EntityBase
     {

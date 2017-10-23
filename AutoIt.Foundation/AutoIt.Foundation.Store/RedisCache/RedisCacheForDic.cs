@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StoreCenter.Core;
 
-namespace StoreCenter.Redis
+namespace StoreCenter
 {
     public class RedisCacheForDic<T> :RedisCacheBase<T> where T : EntityBase
     {
@@ -23,12 +23,12 @@ namespace StoreCenter.Redis
         {
             var timeSpan = GetExpireTimeSpan();
 
+            _Repository.SetItemGroup(StoreKey, group.ToDictionary(item => item.Key_));
+
             if (timeSpan != null)
             {
                 _Repository.SetExpiry(StoreKey, timeSpan);
             }
-
-            _Repository.SetItemGroup(StoreKey, group.ToDictionary(item => item.Key_));
         }
 
         protected override void DeleteInner(IEnumerable<string> @group)

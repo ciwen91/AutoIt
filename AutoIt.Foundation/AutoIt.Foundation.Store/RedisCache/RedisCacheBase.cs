@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using StoreCenter.Core;
 
-namespace StoreCenter.Redis
+namespace StoreCenter
 {
     public abstract class RedisCacheBase<T> : StoreBase<T> where T : EntityBase
     {

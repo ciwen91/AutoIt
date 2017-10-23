@@ -76,7 +76,6 @@
     <Compile Include="ProcCache\ProcCacheForDic.cs" />
     <Compile Include="ProcCache\ProcCacheForKeyValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RedisCache\HashShape.cs" />
     <Compile Include="RedisCache\RedisCacheBase.cs" />
     <Compile Include="RedisCache\RedisCacheFactory.cs" />
     <Compile Include="RedisCache\RedisCacheForDic.cs" />
