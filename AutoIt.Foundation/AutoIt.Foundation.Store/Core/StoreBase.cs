@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using TimerTask;
@@ -21,6 +22,8 @@ namespace StoreCenter
 
         public bool IsToBuffer { get; set; }
 
+        public Action<IEnumerable<string>> OnChange; 
+
         public void Init()
         {
             TimerTaskScheduler.Default.AddTask(new SimpleTimerTaskInfo(() =>
@@ -34,6 +37,11 @@ namespace StoreCenter
 
                 IsToBuffer = true;
             }, 30));
+
+            NextMedia.OnChange += keyGroup =>
+            {
+                Delete(keyGroup);
+            };
         }
 
         #region  IDataMedia<T>
