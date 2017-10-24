@@ -8,39 +8,48 @@ namespace StoreCenter
 {
     public abstract class StoreBase<T> : IDataMedia<T> where T : EntityBase
     {
+        //基本信息
         public string StoreKey
         {
             get { return typeof(T).Name; }
         }
+
         public StoreShape Shape { get; set; }
         public StoreBase<T> NextMedia { get; set; }
 
+        //加载方式
+        private bool _HasGet { get; set; }
         public bool IsLoadAll { get; set; }
-        public bool HasGet { get; set; }     
-        public ExpireInfo ExpireInfo { get; set; }
+
+        //生命周期
+        public int? AbsluteExpires { get; set; }
+        public int? SlideExpires { get; set; }
+
+        //缓冲
+        private object _BufferLock = new object();
+        private bool _IsToBuffer { get; set; }
+        private int _BufferCount { get; set; }
+        public int? MaxBufferTime { get; set; }
+        public int? MaxBufferCount { get; set; }
         public StoreBase<T> BufferMedia { get; set; }
 
-        public bool IsToBuffer { get; set; }
-
-        public Action<IEnumerable<string>> OnChange; 
+        //数据变化事件(内部原因)
+        public Action<IEnumerable<string>> OnChange;
 
         public void Init()
         {
-            TimerTaskScheduler.Default.AddTask(new SimpleTimerTaskInfo(() =>
+            if (BufferMedia != null)
             {
-                IsToBuffer = false;
+                _IsToBuffer = BufferMedia != null;
 
-                var group=BufferMedia.Get();
-                BufferMedia.Delete(group);
+                TimerTaskScheduler.Default.AddTask(new SimpleTimerTaskInfo(FlushAll, MaxBufferTime??30));
+            }
 
-                Add(group);
-
-                IsToBuffer = true;
-            }, 30));
 
             NextMedia.OnChange += keyGroup =>
             {
-                Delete(keyGroup);
+                DeleteInner(keyGroup);
+                OnChange(keyGroup);
             };
         }
 
@@ -90,14 +99,20 @@ namespace StoreCenter
 
         public void Add(IEnumerable<T> group)
         {
-            if (IsToBuffer)
+            lock (_BufferLock)
             {
-                if (BufferMedia != null)
+                if (_IsToBuffer)
                 {
-                    BufferMedia.Add(group);
-                }
+                        BufferMedia.Add(group);
+                        _BufferCount++;
 
-                return;
+                        if (MaxBufferCount != null&&_BufferCount>=MaxBufferCount)
+                        {
+                            FlushAll();
+                        }
+
+                    return;
+                }
             }
 
             if (NextMedia != null)
@@ -139,6 +154,7 @@ namespace StoreCenter
             }
             else
             {
+                ///ToDo:Same Mode With Get
                 var cur = ExistInner(keyGroup);
                 var nextKeyGroup = keyGroup.Except(cur);
 
@@ -214,11 +230,39 @@ namespace StoreCenter
 
         #endregion
 
+        #region Others
+
+        public void FlushAll()
+        {
+            if (BufferMedia != null)
+            {
+                lock (_BufferLock)
+                {
+                    try
+                    {
+                        var group = BufferMedia.Get();
+
+                        _IsToBuffer = false;
+                        Add(group);
+
+                        BufferMedia.Delete(group);
+                        _BufferCount -= group.Count();
+                    }
+                    finally
+                    {
+                        _IsToBuffer = true;
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #region AOP
 
         public virtual void BeforeGet(IEnumerable<string> keyGroup)
         {
-            
+            _HasGet = true;
         }
 
         public virtual void BeforeUpdate(IEnumerable<T> group)
@@ -237,7 +281,7 @@ namespace StoreCenter
 
         public bool OnlyGetCurMedia
         {
-            get { return NextMedia == null || (IsLoadAll && HasGet); }
+            get { return NextMedia == null || (IsLoadAll && _HasGet); }
         }
 
         public string GetStoreKey(string itemKey)

@@ -49,9 +49,9 @@ namespace StoreCenter
         {
             base.BeforeGet(keyGroup);
 
-            if (ExpireInfo.SlideExpires != null)
+            if (SlideExpires != null)
             {
-                _Repository.SetExpiry(keyGroup, TimeSpan.FromSeconds(ExpireInfo.SlideExpires.Value));
+                _Repository.SetExpiry(keyGroup, TimeSpan.FromSeconds(SlideExpires.Value));
             }
         }
 

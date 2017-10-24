@@ -22,14 +22,14 @@ namespace StoreCenter
         {
             var cachePolicy = new CacheItemPolicy();
 
-            if (ExpireInfo.AbsluteExpires != null)
+            if (AbsluteExpires != null)
             {
-                cachePolicy.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(ExpireInfo.AbsluteExpires.Value);
+                cachePolicy.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(AbsluteExpires.Value);
             }
 
-            if (ExpireInfo.SlideExpires != null)
+            if (SlideExpires != null)
             {
-                cachePolicy.SlidingExpiration = TimeSpan.FromSeconds(ExpireInfo.SlideExpires.Value);
+                cachePolicy.SlidingExpiration = TimeSpan.FromSeconds(SlideExpires.Value);
             }
 
             return cachePolicy;

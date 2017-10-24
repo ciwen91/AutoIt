@@ -14,7 +14,7 @@ namespace StoreCenter
 
         protected TimeSpan? GetExpireTimeSpan()
         {
-            var expire = ExpireInfo.Expires;
+            var expire = AbsluteExpires >= SlideExpires ? AbsluteExpires : SlideExpires;
 
             return expire == null ? (TimeSpan?) null : TimeSpan.FromSeconds(expire.Value);
         }

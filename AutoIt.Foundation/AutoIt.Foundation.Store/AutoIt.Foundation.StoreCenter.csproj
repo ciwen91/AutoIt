@@ -61,7 +61,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\EntityBase.cs" />
-    <Compile Include="Model\ExpireInfo.cs" />
     <Compile Include="Core\IDataMedia.cs" />
     <Compile Include="Core\IDataMediaFactory.cs" />
     <Compile Include="Core\IQueryableDataMedia.cs" />

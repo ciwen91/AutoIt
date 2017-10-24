@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace TimerTask
 {
-   public abstract class TimerTaskInfo
+    public abstract class TimerTaskInfo
     {
-        public string Key { get; set; }
+        public string Key { get; set; } = Guid.NewGuid().ToString();
         public string Group { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }

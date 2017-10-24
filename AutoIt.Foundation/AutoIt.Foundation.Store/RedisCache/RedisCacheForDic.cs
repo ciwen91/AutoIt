@@ -51,7 +51,7 @@ namespace StoreCenter
 
         protected void BeforeGet()
         {
-            var slide = ExpireInfo.SlideExpires;
+            var slide = SlideExpires;
 
             if (slide != null)
             {
