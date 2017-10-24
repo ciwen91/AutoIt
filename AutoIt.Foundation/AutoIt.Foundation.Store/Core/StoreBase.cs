@@ -77,10 +77,11 @@ namespace StoreCenter
                 if (nextKeyGroup.Any())
                 {
                     var next= NextMedia.Get(nextKeyGroup);
-                    NextMedia.Add(next);
                     var merge= cur.ToList();
                     merge.AddRange(next);
                     cur = merge;
+
+                    AddInner(next);
                 }
 
                 return cur;
@@ -139,11 +140,11 @@ namespace StoreCenter
             else
             {
                 var cur = ExistInner(keyGroup);
-                keyGroup = keyGroup.Except(cur);
+                var nextKeyGroup = keyGroup.Except(cur);
 
-                if (keyGroup.Any())
+                if (nextKeyGroup.Any())
                 {
-                    var next = NextMedia.Exist(keyGroup);
+                    var next = NextMedia.Exist(nextKeyGroup);
                     var merge = cur.ToList();
                     merge.AddRange(next);
                     cur = merge;
@@ -197,15 +198,18 @@ namespace StoreCenter
         {
             Update(new List<T> { entity });
         }
-
         public void Delete(string key)
         {
             Delete(new List<string> { key });
         }
 
+        public void Delete(T entity)
+        {
+            Delete(new List<T>() {entity});
+        }
         public void Delete(IEnumerable<T> group)
         {
-            Delete(group.Select(item => item.Key_));
+            Delete(group.Select(GetStoreKey));
         }
 
         #endregion
