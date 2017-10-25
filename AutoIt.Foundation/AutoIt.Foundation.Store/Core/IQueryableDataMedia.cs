@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace StoreCenter
 {
-    public interface IQueryableDataMedia<T> : IDataMedia<T> where T : EntityBase
+    public interface IQueryableDataMedia<T> : IDataStore<T> where T : EntityBase
     {
         IQueryable<T> Set { get; }
         void Update(Expression<Func<T, bool>> whereExpress, Expression<Func<T, T>> updateExpress);

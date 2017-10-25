@@ -2,9 +2,9 @@
 
 namespace StoreCenter
 {
-    public class RedisCacheFactory<T> : IDataMediaFactory<T> where T : EntityBase
+    public class RedisCacheFactory<T> : IDataStoreFactory<T> where T : EntityBase
     {
-        public IDataMedia<T> Create(StoreShape shape)
+        public IDataStore<T> Create(StoreShape shape)
         {
             if (shape == StoreShape.Dic)
             {

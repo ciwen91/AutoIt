@@ -2,7 +2,7 @@
 
 namespace StoreCenter
 {
-    public interface IDataMedia<T> where T:EntityBase
+    public interface IDataStore<T> where T:EntityBase
     {
         IEnumerable<T> Get();
         IEnumerable<T> Get(IEnumerable<string> keyGroup);

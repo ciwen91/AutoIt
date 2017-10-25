@@ -6,7 +6,7 @@ using TimerTask;
 
 namespace StoreCenter
 {
-    public abstract class StoreBase<T> : IDataMedia<T> where T : EntityBase
+    public abstract class StoreBase<T> : IDataStore<T> where T : EntityBase
     {
         //基本信息
         public string StoreKey
