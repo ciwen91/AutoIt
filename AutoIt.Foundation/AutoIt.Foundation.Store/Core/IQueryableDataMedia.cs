@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace StoreCenter
 {
     public interface IQueryableDataMedia<T> : IDataMedia<T> where T : EntityBase
     {
-        IEnumerable<T> Get(IQueryable<T> query);
-        void Update(IQueryable<T> query);
-        void Delete(IQueryable<T> query);
-        int Count(IQueryable<T> query);
+        IQueryable<T> Set { get; }
+        void Update(Expression<Func<T, bool>> whereExpress, Expression<Func<T, T>> updateExpress);
+        void Delete(Expression<Func<T, bool>> whereExpress);
+        IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress);
+        int Count(Expression<Func<T, bool>> whereExpress);
     }
 }

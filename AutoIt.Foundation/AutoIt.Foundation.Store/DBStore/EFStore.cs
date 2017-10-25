@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using EntityFramework.Extensions;
 using StoreCenter;
 
 namespace AutoIt.Foundation.StoreCenter.DBStore
@@ -34,6 +35,7 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         public void Add(IEnumerable<T> group)
         {
+            ///Todo:Bulk Add
             _DbContext.Set<T>().AddRange(group);
             _DbContext.SaveChanges();
         }
@@ -50,15 +52,9 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         public void Delete(IEnumerable<string> keyGroup)
         {
-            foreach (var item in keyGroup)
-            {
-                var entity = Activator.CreateInstance<T>();
-                entity.Key_ = item;
-
-                _DbContext.Entry(entity).State = EntityState.Deleted;
-            }
-
-            _DbContext.SaveChanges();
+            _DbContext.Set<T>()
+                .Where(item => keyGroup.Contains(item.Key_))
+                .Delete();
         }
 
         public IEnumerable<string> Exist(IEnumerable<string> keyGroup)
@@ -81,28 +77,44 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         #region IQueryable<T>
 
-        public IEnumerable<T> Get(IQueryable<T> query)
+        public IQueryable<T> Set
         {
-            return query.ToList();
+            get { return _DbContext.Set<T>(); }
         }
 
-        public void Update(IQueryable<T> query)
+        public void Update(Expression<Func<T, bool>> whereExpress,Expression<Func<T,T>> updateExpress)
         {
-            throw new NotImplementedException();
+            _DbContext.Set<T>()
+                .Where(whereExpress)
+                .Update(updateExpress);
         }
 
-        public void Delete(IQueryable<T> query)
+        public void Delete(Expression<Func<T,bool>> whereExpress)
         {
-            throw new NotImplementedException();
+            _DbContext.Set<T>()
+                .Where(whereExpress)
+                .Delete();
         }
 
-        public int Count(IQueryable<T> query)
+        public IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress)
         {
-            return query.Count();
+            var group = _DbContext.Set<T>()
+                .Where(whereExpress)
+                .Select(item => item.Key_)
+                .ToList();
+
+            return group;
+        }
+
+        public int Count(Expression<Func<T, bool>> whereExpress)
+        {
+            var count= _DbContext.Set<T>()
+                .Where(whereExpress)
+                .Count();
+
+            return count;
         }
 
         #endregion
-
-
     }
 }
