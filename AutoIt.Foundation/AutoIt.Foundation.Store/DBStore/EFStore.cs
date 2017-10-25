@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Linq;
@@ -49,9 +50,15 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         public void Delete(IEnumerable<string> keyGroup)
         {
-           //_DbContext.Set<T>()
-           //     .Where(item => keyGroup.Contains(item.Key_))
-               
+            foreach (var item in keyGroup)
+            {
+                var entity = Activator.CreateInstance<T>();
+                entity.Key_ = item;
+
+                _DbContext.Entry(entity).State = EntityState.Deleted;
+            }
+
+            _DbContext.SaveChanges();
         }
 
         public IEnumerable<string> Exist(IEnumerable<string> keyGroup)
