@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using StoreCenter;
 
 namespace AutoIt.Foundation.StoreCenter.DBStore
 {
-    public class EFStore<T> : IQueryableDataMedia<T> where T : EntityBase
+    public class EFStore<T> : IQueryableDataStore<T> where T : EntityBase
     {
         protected DbContext _DbContext=new DbContext("");
 
@@ -80,6 +81,21 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
         public IQueryable<T> Set
         {
             get { return _DbContext.Set<T>(); }
+        }
+
+        public IEnumerable<T> Get<T>(IQueryable<T> query ,string where, string order = null)
+        {
+            if (!string.IsNullOrEmpty(where))
+            {
+                query = query.Where(where);
+            }
+
+            if (!string.IsNullOrEmpty(order))
+            {
+                query = query.OrderBy(order);
+            }
+
+            return query.ToList();
         }
 
         public void Update(Expression<Func<T, bool>> whereExpress,Expression<Func<T,T>> updateExpress)
