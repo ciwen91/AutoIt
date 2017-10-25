@@ -75,7 +75,9 @@
     <Compile Include="Core\StoreBase.cs" />
     <Compile Include="Core\StoreCenter.cs" />
     <Compile Include="Model\StoreConfig.cs" />
+    <Compile Include="Model\StoreConfigItem.cs" />
     <Compile Include="Model\StoreShape.cs" />
+    <Compile Include="Model\StoreType.cs" />
     <Compile Include="ProcCache\ProcCacheBase.cs" />
     <Compile Include="ProcCache\ProcCacheFactory.cs" />
     <Compile Include="ProcCache\ProcCacheForDic.cs" />

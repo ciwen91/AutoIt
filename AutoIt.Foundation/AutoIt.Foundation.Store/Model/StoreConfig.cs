@@ -8,6 +8,12 @@ namespace StoreCenter
 {
     public class StoreConfig
     {
+        //存储结构
+        public StoreShape Shape { get; set; }
+        //加载方式
+        public bool IsLoadAll { get; set; }
 
+        //存储煤质集合
+        public IEnumerable<StoreConfigItem> Group { get; set; }
     }
 }
