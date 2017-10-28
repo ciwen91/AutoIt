@@ -1,7 +1,8 @@
 ﻿namespace StoreCenter
 {
-    public interface IDataStoreFactory<T> where T : EntityBase
+    public interface IDataStoreFactory
     {
-        IDataStore<T> Create(StoreShape shape);
+        StoreType StoreType { get; }
+        StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase;
     }
 }

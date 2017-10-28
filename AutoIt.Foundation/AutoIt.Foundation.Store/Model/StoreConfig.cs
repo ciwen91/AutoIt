@@ -8,6 +8,8 @@ namespace StoreCenter
 {
     public class StoreConfig
     {
+        //数据类型
+        public Type DataType { get; set; }
         //存储结构
         public StoreShape Shape { get; set; }
         //加载方式

@@ -2,6 +2,9 @@
 {
     public class StoreConfigItem
     {
+        // 存储类型
+        public StoreType Type { get; set; }
+
         //生命周期
         public int? AbsluteExpires { get; set; }
         public int? SlideExpires { get; set; }

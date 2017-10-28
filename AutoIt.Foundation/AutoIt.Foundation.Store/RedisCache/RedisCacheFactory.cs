@@ -2,16 +2,21 @@
 
 namespace StoreCenter
 {
-    public class RedisCacheFactory<T> : IDataStoreFactory<T> where T : EntityBase
+    public class RedisCacheFactory : IDataStoreFactory
     {
-        public IDataStore<T> Create(StoreShape shape)
+        public StoreType StoreType
+        {
+            get { return StoreType.RedisCache; }
+        }
+
+        public StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase
         {
             if (shape == StoreShape.Dic)
             {
                 return new RedisCacheForDic<T>();
             }
             else
-            {  
+            {
                 return new RedisCacheForKeyValue<T>();
             }
         }

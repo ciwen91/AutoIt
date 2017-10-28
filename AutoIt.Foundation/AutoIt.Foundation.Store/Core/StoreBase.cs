@@ -61,15 +61,19 @@ namespace StoreCenter
 
             if (OnlyGetCurMedia)
             {
-                return GetInner();
+                var group = GetInner();
+
+                if (group != null)
+                {
+                    return group;
+                }
             }
-            else
-            {
-                var next = NextMedia.GetInner();
-                Add(next);
-                return next;
-            }
+
+            var next = NextMedia.GetInner();
+            Add(next);
+            return next;
         }
+
         public IEnumerable<T> Get(IEnumerable<string> keyGroup)
         {
             BeforeGet(keyGroup);
@@ -169,18 +173,22 @@ namespace StoreCenter
                 return cur;
             }
         }
+
         public int Count()
         {
             BeforeGet(null);
 
             if (OnlyGetCurMedia)
             {
-                return CountInner();
+                var count= CountInner();
+
+                if (count >= 0)
+                {
+                    return count;
+                }
             }
-            else
-            {
-                return NextMedia.Count();
-            }
+
+            return NextMedia.Count();
         }
 
         #endregion
@@ -279,6 +287,7 @@ namespace StoreCenter
 
         #region Common
 
+        ///ToDo:Rename
         public bool OnlyGetCurMedia
         {
             get { return NextMedia == null || (IsLoadAll && _HasGet); }

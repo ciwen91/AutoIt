@@ -83,7 +83,7 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
             get { return _DbContext.Set<T>(); }
         }
 
-        public IEnumerable<T> Get<T>(IQueryable<T> query ,string where, string order = null)
+        public IEnumerable<T> Get(IQueryable<T> query ,string where, string order = null)
         {
             if (!string.IsNullOrEmpty(where))
             {

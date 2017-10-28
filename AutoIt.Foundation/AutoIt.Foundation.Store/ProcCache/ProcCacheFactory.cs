@@ -2,9 +2,11 @@
 
 namespace StoreCenter
 {
-    public class ProcCacheFactory<T> : IDataStoreFactory<T> where T:EntityBase
+    public class ProcCacheFactory : IDataStoreFactory 
     {
-        public IDataStore<T> Create(StoreShape shape)
+        public StoreType StoreType { get { return StoreType.ProcCache; } }
+
+        public StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase
         {
             if (shape == StoreShape.Dic)
             {

@@ -67,13 +67,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\StoreCenter-T.cs" />
+    <Compile Include="Core\StoreCenter.cs" />
+    <Compile Include="Core\StoreFactory.cs" />
     <Compile Include="DBStore\EFStore.cs" />
     <Compile Include="Model\EntityBase.cs" />
     <Compile Include="Core\IDataStore.cs" />
     <Compile Include="Core\IDataStoreFactory.cs" />
     <Compile Include="Core\IQueryableDataStore.cs" />
     <Compile Include="Core\StoreBase.cs" />
-    <Compile Include="Core\StoreCenter.cs" />
     <Compile Include="Model\StoreConfig.cs" />
     <Compile Include="Model\StoreConfigItem.cs" />
     <Compile Include="Model\StoreShape.cs" />
