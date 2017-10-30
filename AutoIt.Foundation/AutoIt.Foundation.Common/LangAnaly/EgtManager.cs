@@ -26,7 +26,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
         public static EgtManager CreateFromFile(string filePath)
         {
-            using (Context contex = new Context())
+            using (Compiler.Common.Context contex = new Compiler.Common.Context())
             {
                 var manager = new EgtManager();
 

@@ -63,6 +63,7 @@
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
     <Compile Include="ClassHelper\StringHelper.cs" />
     <Compile Include="Context\Context.cs" />
+    <Compile Include="Context\Context_Old.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyValue.cs" />
     <Compile Include="DataStruct\KeyValue\Core\IKeyObjValue.cs" />
     <Compile Include="DataStruct\KeyValue\KeyValueForDicGroup.cs" />
