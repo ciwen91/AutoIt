@@ -9,45 +9,46 @@ using System.Threading.Tasks;
 namespace AutoIt.Foundation.Common.Context
 {
 
-    public class ContextData<T>
+    public class DependcyData<T>
     {
-        [ThreadStatic]
-        private static Stack<T> _DataGroup;
-
+        public string Key => this.GetHashCode().ToString();
         public static T Default { get; set; }
-
-        public static Func<object,string,T> GetDataFunc { get; set; }
-
-        public ContextData()
-        {
-            
-        }
+        public static GetDataDelegate GetDataFunc { get; set; }
 
         public T GetData(object tag, string region)
         {
-            var typeDft= default(T);
-            var val = typeDft;
+            var val = default(T);
+            bool hasVal = false;
 
-            val = GetDataFunc(tag, region);
+            #region CallContext
 
-            if (!val.Equals(typeDft))
+            var contextData = (Stack<T>)CallContext.GetData(Key);
+
+            if (contextData != null && contextData.Any())
             {
+                val = contextData.Peek();
                 return val;
             }
 
-            var contextData = CallContext.GetData(tag.GetHashCode().ToString());
+            #endregion
 
-            if (contextData != null)
+            #region GetDataFunc
+
+            if (GetDataFunc != null)
             {
-                val = ((Stack<T>) contextData).Peek();
+                val = GetDataFunc(tag, region, out hasVal);
+
+                if (hasVal)
+                {
+                    return val;
+                }
             }
 
-            if (!val.Equals(typeDft))
-            {
-                return val;
-            }
+            #endregion
 
             return Default;
         }
+      
+        public delegate T GetDataDelegate(object tag, string region, out bool hasValue);
     }
 }
