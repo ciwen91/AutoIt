@@ -15,7 +15,7 @@ namespace AutoIt.Foundation.Common.Context
         public static T Default { get; set; }
         public static GetDataDelegate GetDataFunc { get; set; }
 
-        public T GetData(object tag, string region)
+        public T GetData(object tag=null, string region=null)
         {
             var val = default(T);
             bool hasVal = false;
