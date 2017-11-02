@@ -6,14 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AutoIt.Foundation.Common.Context
+namespace AutoIt.Foundation.Common
 {
 
     public class DependcyData<T>
     {
         public string Key => this.GetHashCode().ToString();
-        public static T Default { get; set; }
-        public static GetDataDelegate GetDataFunc { get; set; }
+        public  T Default { get; set; }
+        public  GetDataDelegate GetDataFunc { get; set; }
 
         public T GetData(object tag=null, string region=null)
         {
@@ -50,5 +50,44 @@ namespace AutoIt.Foundation.Common.Context
         }
       
         public delegate T GetDataDelegate(object tag, string region, out bool hasValue);
+    }
+
+    public class Context:IDisposable
+    {
+        private Stack<Dictionary<string, object>> _Stack;
+        private Dictionary<string,object> _Dic=new Dictionary<string, object>();
+        public Context()
+        {
+  
+           var obj= CallContext.GetData("_Context");
+
+            if (obj == null)
+            {
+                obj = new Stack<Dictionary<string, object>>();
+                CallContext.SetData("_Context", obj);
+            }
+
+            _Stack.Push(_Dic);
+        }
+
+        public T GetValue<T>(string key,out bool exists)
+        {
+             
+
+            exists = false;
+
+            return default(T);
+
+        }
+
+        public void SetValue<T>(string key,T value)
+        {
+            _Dic[key] = value;
+        }
+
+        public void Dispose()
+        {
+            _Stack.Pop();
+        }
     }
 }
