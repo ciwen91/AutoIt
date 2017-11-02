@@ -17,8 +17,8 @@ namespace AutoIt.Foundation.Common.Test
 
         static DepencyDataTest()
         {
-            _DepencyData1.Default = 10;
-            _DepencyData2.Default = 100;
+            _DepencyData1.Default = 1;
+            _DepencyData2.Default = 2;
 
             _DepencyData1.GetDataFunc = (object tag,string region,out bool hasValue)=>
             {
@@ -28,11 +28,11 @@ namespace AutoIt.Foundation.Common.Test
                 {
                     if (region != null && region == "中国")
                     {
-                        return _DepencyData1.Default*3;
+                        return 100;
                     }
                     else
                     {
-                        return _DepencyData1.Default*2;
+                        return 10;
                     }
                 }
 
@@ -46,21 +46,38 @@ namespace AutoIt.Foundation.Common.Test
         [Fact]
         public void Test()
         {
-           WriteLine(_DepencyData1.GetData());
-           WriteLine(_DepencyData1.GetData("张三"));
-           WriteLine(_DepencyData1.GetData("张三","中国"));
+            Assert.Equal(1,_DepencyData1.GetData());
+            Assert.Equal(10, _DepencyData1.GetData("张三"));
+            Assert.Equal(100, _DepencyData1.GetData("张三", "中国"));
 
-           WriteLine("-------------------------");
-
-            WriteLine(_DepencyData2.GetData());
-            WriteLine(_DepencyData2.GetData("张三"));
-            WriteLine(_DepencyData2.GetData("张三", "中国"));
+            Assert.Equal(2,_DepencyData2.GetData());
+            Assert.Equal(2, _DepencyData2.GetData("张三"));
+            Assert.Equal(2, _DepencyData2.GetData("张三", "中国"));
 
             using (var context = new Context())
             {
-                context.Set<T>("", value);
+                Context.SetValue(_DepencyData1, 10000);
 
+                Assert.Equal(10000,_DepencyData1.GetData("张三", "中国"));
+                Assert.Equal(2, _DepencyData2.GetData("张三", "中国"));
+
+                using (var context2=new Context())
+                {
+                    Assert.Equal(10000, _DepencyData1.GetData("张三", "中国"));
+                    Assert.Equal(2, _DepencyData2.GetData("张三", "中国"));
+
+                    Context.SetValue(_DepencyData1,20000);
+
+                    Assert.Equal(20000, _DepencyData1.GetData("张三", "中国"));
+                    Assert.Equal(2, _DepencyData2.GetData("张三", "中国"));
+                }
+
+                Assert.Equal(10000,_DepencyData1.GetData("张三", "中国"));
+                Assert.Equal(2,_DepencyData2.GetData("张三", "中国"));
             }
+
+            Assert.Equal(100,_DepencyData1.GetData("张三", "中国"));
+            Assert.Equal(2,_DepencyData2.GetData("张三", "中国"));
         }
     }
 }

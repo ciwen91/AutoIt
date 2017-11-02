@@ -8,81 +8,55 @@ using System.Threading.Tasks;
 
 namespace AutoIt.Foundation.Common
 {
-
-    public class DependcyData<T>
-    {
-        public string Key => this.GetHashCode().ToString();
-        public  T Default { get; set; }
-        public  GetDataDelegate GetDataFunc { get; set; }
-
-        public T GetData(object tag=null, string region=null)
-        {
-            var val = default(T);
-            bool hasVal = false;
-
-            #region CallContext
-
-            var contextData = (Stack<T>)CallContext.GetData(Key);
-
-            if (contextData != null && contextData.Any())
-            {
-                val = contextData.Peek();
-                return val;
-            }
-
-            #endregion
-
-            #region GetDataFunc
-
-            if (GetDataFunc != null)
-            {
-                val = GetDataFunc(tag, region, out hasVal);
-
-                if (hasVal)
-                {
-                    return val;
-                }
-            }
-
-            #endregion
-
-            return Default;
-        }
-      
-        public delegate T GetDataDelegate(object tag, string region, out bool hasValue);
-    }
-
     public class Context:IDisposable
     {
-        private Stack<Dictionary<string, object>> _Stack;
-        private Dictionary<string,object> _Dic=new Dictionary<string, object>();
+        private const string _Key = "_Context";
+
+        private static Stack<Dictionary<string, object>> _Stack => (Stack<Dictionary<string, object>>) CallContext.GetData(_Key);
+
+        private static Dictionary<string, object> _Dic => _Stack != null && _Stack.Any() ? _Stack.Peek() : null;
+
         public Context()
         {
-  
-           var obj= CallContext.GetData("_Context");
+            var stack = _Stack;
 
-            if (obj == null)
+            if (stack == null)
             {
-                obj = new Stack<Dictionary<string, object>>();
-                CallContext.SetData("_Context", obj);
+                var obj = new Stack<Dictionary<string, object>>();
+                CallContext.SetData(_Key, obj);
+                stack = obj;
             }
 
-            _Stack.Push(_Dic);
+            var dic=new Dictionary<string,object>();
+            stack.Push(dic);
         }
 
-        public T GetValue<T>(string key,out bool exists)
+        public static T GetValue<T>(string key,out bool exists)
         {
-             
+           var dic= _Stack?.FirstOrDefault(item => item.ContainsKey(key));
+
+            if (dic != null)
+            {
+                exists = true;
+                return (T)dic[key];
+            }
 
             exists = false;
 
             return default(T);
-
         }
 
-        public void SetValue<T>(string key,T value)
+     
+        public static void SetValue<T>(string key,T value)
         {
-            _Dic[key] = value;
+            if (_Dic != null)
+            {
+                _Dic[key] = value;
+            }
+        }
+        public static void SetValue<T>(IKey iKey, T value)
+        {
+            SetValue(iKey.Key, value);
         }
 
         public void Dispose()
