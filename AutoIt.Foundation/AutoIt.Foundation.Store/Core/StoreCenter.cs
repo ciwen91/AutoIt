@@ -17,7 +17,7 @@ namespace StoreCenter
             {
                 var dftConfig = GetDftConfig(typeof(T));
                 var factory = new StoreFactory();
-                var dftStore = factory.Create(dftConfig);
+                var dftStore = factory.Create2(dftConfig);
                 _StoreDic.Add(dftConfig.DataType, dftStore);
             }
 
@@ -30,7 +30,7 @@ namespace StoreCenter
         {
             var factory = new StoreFactory();
 
-            var store = factory.Create(config);
+            var store = factory.Create2(config);
             _StoreDic[config.DataType] = store;
         }
 

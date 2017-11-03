@@ -9,14 +9,17 @@ namespace AutoIt.Foundation.StoreCenter.Core
 {
    public class StoreFactory
    {
-       public IEnumerable<IDataStoreFactory> FactoryGroup = new List<IDataStoreFactory>();
+       public IEnumerable<IDataStoreFactory> FactoryGroup = new List<IDataStoreFactory>()
+       {
+           new RedisCacheFactory()
+       };
 
-       public object Create(StoreConfig config)
+       public object Create2(StoreConfig config)
        {
            var store = typeof(StoreFactory)
                .GetMethod(nameof(Create))
                .MakeGenericMethod(new Type[] {config.DataType})
-               .Invoke(null, new object[] {config});
+               .Invoke(this, new object[] {config});
 
            return store;
        }

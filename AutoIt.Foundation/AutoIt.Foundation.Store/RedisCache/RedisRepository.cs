@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using AutoIt.Foundation.Common;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -14,36 +15,35 @@ namespace StoreCenter
     /// </summary>
     public class RedisRepository
     {
-        protected readonly static string ConStr = ConfigurationManager.AppSettings["redisConfig"];
+        public  static DependcyData<string> ConStr = new DependcyData<string>();
 
-        ///ToDO:应支持多个链接
         protected static object _Locker = new object();
-        protected static ConnectionMultiplexer _ConnectorInstance = null;       
-        protected static ConnectionMultiplexer ConnectorInstance
-        {
-            get
-            {
-                if (_ConnectorInstance == null || !_ConnectorInstance.IsConnected)
-                {
-                    lock (_Locker)
-                    {
-                        if (_ConnectorInstance == null || !_ConnectorInstance.IsConnected)
-                        {
-                            _ConnectorInstance = ConnectionMultiplexer.Connect(ConStr);
-                        }
-                    }
-                }
-
-                return _ConnectorInstance;
-            }
-        }
+        protected static  Dictionary<string, ConnectionMultiplexer> _ConnectorInstance = new Dictionary<string, ConnectionMultiplexer>();       
 
         private ConnectionMultiplexer _Connecter;
         private IDatabase _Db;
 
         public RedisRepository()
         {
-            this._Connecter = ConnectorInstance;
+            var conStr=ConStr.GetData();
+
+            if (!_ConnectorInstance.ContainsKey(conStr))
+            {
+                lock (_Locker)
+                {
+                    if (!_ConnectorInstance.ContainsKey(conStr))
+                    {
+                        var connector = ConnectionMultiplexer.Connect(conStr);
+                        _ConnectorInstance.Add(conStr, connector);
+                    }
+                }
+            }
+
+            /*
+             * !_ConnectorInstance.IsConnected
+             */
+
+            this._Connecter = _ConnectorInstance[conStr];
             this._Db = _Connecter.GetDatabase();
         }
 

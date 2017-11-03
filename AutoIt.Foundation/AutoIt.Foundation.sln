@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Aop", "Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Common.Test", "AutoIt.Foundation.Common.Test\AutoIt.Foundation.Common.Test.csproj", "{D41C633A-0F8C-402E-89D9-954473DEDE08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Common.StoreCenter.Test", "AutoIt.Foundation.Common.StoreCenter.Test\AutoIt.Foundation.Common.StoreCenter.Test.csproj", "{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{D41C633A-0F8C-402E-89D9-954473DEDE08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D41C633A-0F8C-402E-89D9-954473DEDE08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D41C633A-0F8C-402E-89D9-954473DEDE08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,5 +60,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F2C3CCAA-130A-451A-8BCC-8FC9F5E07B7E} = {5A9461D7-CBDA-4609-92FA-6C0FA9E20975}
 		{D41C633A-0F8C-402E-89D9-954473DEDE08} = {5A9461D7-CBDA-4609-92FA-6C0FA9E20975}
+		{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0} = {5A9461D7-CBDA-4609-92FA-6C0FA9E20975}
 	EndGlobalSection
 EndGlobal
