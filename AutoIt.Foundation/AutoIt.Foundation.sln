@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Aop", "Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Common.Test", "AutoIt.Foundation.Common.Test\AutoIt.Foundation.Common.Test.csproj", "{D41C633A-0F8C-402E-89D9-954473DEDE08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Common.StoreCenter.Test", "AutoIt.Foundation.Common.StoreCenter.Test\AutoIt.Foundation.Common.StoreCenter.Test.csproj", "{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Store.Test", "AutoIt.Foundation.Common.StoreCenter.Test\AutoIt.Foundation.Store.Test.csproj", "{0BB3BA8F-4DEF-47D4-9D40-23F76F9095C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

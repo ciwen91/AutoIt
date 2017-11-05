@@ -116,5 +116,44 @@ namespace AutoIt.Foundation.Store
         }
 
         #endregion
+
+        #region ExtMethod For IDataStore<T>
+
+        public T Get(string key)
+        {
+            ///ToDo:集合和单个实体的数据处理能不能统一?
+            return Get(new List<string> {key}).FirstOrDefault();
+        }
+
+        public void Add(T entity)
+        {
+            Add(new List<T> {entity});
+        }
+
+        public void Update(T entity)
+        {
+            Update(new List<T> {entity});
+        }
+
+        public void Delete(string key)
+        {
+            Delete(new List<string> {key});
+        }
+
+        #endregion
+
+        #region Others
+
+        public void Delete(IEnumerable<T> group)
+        {
+            Delete(group.Select(item => item.Key_));
+        }
+
+        public void Delete(T entity)
+        {
+            Delete(new List<T>() { entity });
+        }
+
+        #endregion
     }
 }
