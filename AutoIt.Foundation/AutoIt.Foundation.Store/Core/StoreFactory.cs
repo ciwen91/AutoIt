@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoIt.Foundation.StoreCenter.DBStore;
 using StoreCenter;
 
 namespace AutoIt.Foundation.StoreCenter.Core
@@ -11,7 +12,8 @@ namespace AutoIt.Foundation.StoreCenter.Core
    {
        public IEnumerable<IDataStoreFactory> FactoryGroup = new List<IDataStoreFactory>()
        {
-           new RedisCacheFactory()
+           new RedisCacheFactory(),
+           new DBStoreFactory() 
        };
 
        public object Create2(StoreConfig config)

@@ -70,6 +70,10 @@
     <Compile Include="Core\StoreCenter-T.cs" />
     <Compile Include="Core\StoreCenter.cs" />
     <Compile Include="Core\StoreFactory.cs" />
+    <Compile Include="DBStore\DBStoreFactory.cs" />
+    <Compile Include="DBStore\EFConfiguration.cs" />
+    <Compile Include="DBStore\EFContext.cs" />
+    <Compile Include="DBStore\EFRepository.cs" />
     <Compile Include="DBStore\EFStore.cs" />
     <Compile Include="Model\EntityBase.cs" />
     <Compile Include="Core\IDataStore.cs" />

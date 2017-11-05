@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,64 +16,85 @@ using StoreCenter;
 
 namespace AutoIt.Foundation.StoreCenter.DBStore
 {
-    public class EFStore<T> : IQueryableDataStore<T> where T : EntityBase
+    public class EFStore<T>: StoreBase<T>,IQueryableDataStore<T> where T : EntityBase
     {
-        protected DbContext _DbContext=new DbContext("");
+        protected EFRepository _Repository=new EFRepository();
 
         #region IDataMedia<T>
 
-        public IEnumerable<T> Get()
+        protected override IEnumerable<T> GetInner()
         {
-            var group = _DbContext.Set<T>().ToList();
-            return group;
-        }
-
-        public IEnumerable<T> Get(IEnumerable<string> keyGroup)
-        {
-            var group = _DbContext.Set<T>()
-                .Where(item => keyGroup.Contains(item.Key_))
-                .ToList();
-            return group;
-        }
-
-        public void Add(IEnumerable<T> group)
-        {
-            ///Todo:Bulk Add
-            _DbContext.Set<T>().AddRange(group);
-            _DbContext.SaveChanges();
-        }
-
-        public void Update(IEnumerable<T> @group)
-        {
-            foreach (var item in group)
+            using (var context=_Repository.NewContext)
             {
-                _DbContext.Entry(item).State = EntityState.Modified;
+                var group = context.Set<T>().ToList();
+                return group;
             }
-            
-            _DbContext.SaveChanges();
         }
 
-        public void Delete(IEnumerable<string> keyGroup)
+        protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
-            _DbContext.Set<T>()
-                .Where(item => keyGroup.Contains(item.Key_))
-                .Delete();
+            using (var context = _Repository.NewContext)
+            {
+                var group = context.Set<T>()
+                    .Where(item => keyGroup.Contains(item.Key_))
+                    .ToList();
+                return group;
+            }
         }
 
-        public IEnumerable<string> Exist(IEnumerable<string> keyGroup)
+        protected override void AddInner(IEnumerable<T> group)
         {
-            var group = _DbContext.Set<T>()
-                .Where(item => keyGroup.Contains(item.Key_))
-                .Select(item => item.Key_)
-                .ToList();
-
-            return group;
+            using (var context = _Repository.NewContext)
+            {
+                ///Todo:Bulk Add
+                context.Set<T>().AddRange(group);
+                context.SaveChanges();
+            }
         }
 
-        public int Count()
+        protected override void UpdateInner(IEnumerable<T> @group)
         {
-            var count = _DbContext.Set<T>().Count();
-            return count;
+            using (var context = _Repository.NewContext)
+            {
+                foreach (var item in group)
+                {
+                    context.Entry(item).State = EntityState.Modified;
+                }
+
+                context.SaveChanges();
+            }
+        }
+
+        protected override void DeleteInner(IEnumerable<string> keyGroup)
+        {
+            using (var context = _Repository.NewContext)
+            {
+                context.Set<T>()
+                    .Where(item => keyGroup.Contains(item.Key_))
+                    .Delete();
+            }
+        }
+
+        protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
+        {
+            using (var context = _Repository.NewContext)
+            {
+                var group = context.Set<T>()
+                    .Where(item => keyGroup.Contains(item.Key_))
+                    .Select(item => item.Key_)
+                    .ToList();
+
+                return group;
+            }
+        }
+
+        protected override int CountInner()
+        {
+            using (var context = _Repository.NewContext)
+            {
+                var count = context.Set<T>().Count();
+                return count;
+            }
         }
 
         #endregion
@@ -80,7 +103,7 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         public IQueryable<T> Set
         {
-            get { return _DbContext.Set<T>(); }
+            get { return _Repository.NewContext.Set<T>(); }
         }
 
         public IEnumerable<T> Get(IQueryable<T> query ,string where, string order = null)
@@ -100,35 +123,47 @@ namespace AutoIt.Foundation.StoreCenter.DBStore
 
         public void Update(Expression<Func<T, bool>> whereExpress,Expression<Func<T,T>> updateExpress)
         {
-            _DbContext.Set<T>()
-                .Where(whereExpress)
-                .Update(updateExpress);
+            using (var context = _Repository.NewContext)
+            {
+                context.Set<T>()
+                    .Where(whereExpress)
+                    .Update(updateExpress);
+            }
         }
 
-        public void Delete(Expression<Func<T,bool>> whereExpress)
+        public void Delete(Expression<Func<T, bool>> whereExpress)
         {
-            _DbContext.Set<T>()
-                .Where(whereExpress)
-                .Delete();
+            using (var context = _Repository.NewContext)
+            {
+                context.Set<T>()
+                    .Where(whereExpress)
+                    .Delete();
+            }
         }
 
         public IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress)
         {
-            var group = _DbContext.Set<T>()
-                .Where(whereExpress)
-                .Select(item => item.Key_)
-                .ToList();
+            using (var context = _Repository.NewContext)
+            {
+                var group = context.Set<T>()
+                    .Where(whereExpress)
+                    .Select(item => item.Key_)
+                    .ToList();
 
-            return group;
+                return group;
+            }
         }
 
         public int Count(Expression<Func<T, bool>> whereExpress)
         {
-            var count= _DbContext.Set<T>()
+            using (var context=_Repository.NewContext)
+            {
+                var count = context.Set<T>()
                 .Where(whereExpress)
                 .Count();
 
-            return count;
+                return count;
+            }
         }
 
         #endregion

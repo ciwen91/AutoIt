@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using AutoIt.Foundation.Common.LangAnaly;
@@ -19,15 +20,32 @@ namespace AutoIt.Foundation.Test
     {
         static void Main(string[] args)
         {
-            var builder = new ContainerBuilder();
-            builder.Register(c=>new Call1Logger());
-            builder.RegisterType<Test>()
-                .EnableClassInterceptors()
-                .InterceptedBy(typeof(Call1Logger));
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.GetTypes().Where(t => typeof(Test).IsAssignableFrom(t)))
+                    .ToArray();
 
-            var container = builder.Build();
+            foreach (var item in types)
+            {
+                Console.WriteLine(item.Name);
+            }
+           
 
-            Console.WriteLine(container.Resolve<Test>().Add(1,2));
+            //var builder = new ContainerBuilder();
+            ////builder.Register(c=>new Call1Logger());
+            ////builder.RegisterType<Test>()
+            ////    .EnableClassInterceptors()
+            ////    .InterceptedBy(typeof(Call1Logger));
+
+            //builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+            //    .Where(item => item.IsSubclassOf(typeof(Test)))
+            //    .As(typeof(Test));
+
+
+            //var container = builder.Build();
+
+            //container.
+
+            //Console.WriteLine(container.Resolve<Test>().Add(1,2));
 
             //var group = new List<int>();
 
