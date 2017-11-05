@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using AutoIt.Foundation.StoreCenter.DBStore;
+using AutoIt.Foundation.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoreCenter;
 using Xunit;
 
 namespace AutoIt.Foundation.Common
@@ -19,7 +18,7 @@ namespace AutoIt.Foundation.Common
         [Fact]
         public void TestMethod1()
         {
-            global::StoreCenter.StoreCenter.SetConfig(new StoreConfig()
+            StoreCenter.SetConfig(new StoreConfig()
             {
                 DataType = typeof(Student),
                 Group = new List<StoreConfigItem>()

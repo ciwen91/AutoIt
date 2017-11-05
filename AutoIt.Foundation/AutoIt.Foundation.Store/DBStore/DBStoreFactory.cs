@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StoreCenter;
-
-namespace AutoIt.Foundation.StoreCenter.DBStore
+﻿namespace AutoIt.Foundation.Store
 {
     public class DBStoreFactory : IDataStoreFactory
     {

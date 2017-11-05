@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public interface IDataStore<T> where T:EntityBase
     {

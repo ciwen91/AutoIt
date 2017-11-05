@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public interface IQueryableDataStore<T> : IDataStore<T> where T : EntityBase
     {

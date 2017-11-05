@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public abstract class EntityBase
     {

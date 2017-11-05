@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public class StoreCenter<T> : StoreCenter, IQueryableDataStore<T> where T : EntityBase
     {

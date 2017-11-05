@@ -2,7 +2,7 @@
 using System.Data.Entity.Infrastructure.DependencyResolution;
 using AutoIt.Foundation.Common;
 
-namespace AutoIt.Foundation.StoreCenter.DBStore
+namespace AutoIt.Foundation.Store
 {
     public  class EFRepository
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoIt.Foundation.Common;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public abstract class StoreBase<T> : IDataStore<T> where T : EntityBase
     {

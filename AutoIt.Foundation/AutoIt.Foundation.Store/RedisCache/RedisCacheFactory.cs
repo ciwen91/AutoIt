@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public class RedisCacheFactory : IDataStoreFactory
     {

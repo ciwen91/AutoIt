@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Data.Entity;
 using AutoIt.Foundation.Common;
-using StoreCenter;
 
-namespace AutoIt.Foundation.StoreCenter.DBStore
+namespace AutoIt.Foundation.Store
 {
     public class EFContext : DbContext
     {

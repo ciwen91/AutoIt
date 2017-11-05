@@ -7,8 +7,8 @@
     <ProjectGuid>{551AE4AA-5028-4E39-B5E6-69BFA22007A3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AutoIt.Foundation.StoreCenter</RootNamespace>
-    <AssemblyName>AutoIt.Foundation.StoreCenter</AssemblyName>
+    <RootNamespace>AutoIt.Foundation.Store</RootNamespace>
+    <AssemblyName>AutoIt.Foundation.Store</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

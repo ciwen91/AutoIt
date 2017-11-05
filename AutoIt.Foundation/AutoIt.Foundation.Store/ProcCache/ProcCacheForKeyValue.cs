@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public class ProcCacheForKeyValue<T> : ProcCacheBase<T> where T : EntityBase
     {

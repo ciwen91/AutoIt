@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Caching;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public abstract class ProcCacheBase<T> : StoreBase<T> where T : EntityBase
     {

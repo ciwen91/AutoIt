@@ -1,20 +1,14 @@
 ﻿
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using EntityFramework.Extensions;
-using StoreCenter;
 
-namespace AutoIt.Foundation.StoreCenter.DBStore
+namespace AutoIt.Foundation.Store
 {
     public class EFStore<T>: StoreBase<T>,IQueryableDataStore<T> where T : EntityBase
     {

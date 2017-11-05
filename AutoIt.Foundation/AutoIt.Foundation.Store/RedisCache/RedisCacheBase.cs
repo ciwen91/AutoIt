@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public abstract class RedisCacheBase<T> : StoreBase<T> where T : EntityBase
     {

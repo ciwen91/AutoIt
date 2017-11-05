@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public class ProcCacheForDic<T> : ProcCacheBase<T> where T : EntityBase
     {

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoIt.Foundation.StoreCenter.Core;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public abstract class StoreCenter
     {

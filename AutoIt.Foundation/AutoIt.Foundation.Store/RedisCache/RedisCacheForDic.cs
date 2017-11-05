@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace StoreCenter
+namespace AutoIt.Foundation.Store
 {
     public class RedisCacheForDic<T> :RedisCacheBase<T> where T : EntityBase
     {

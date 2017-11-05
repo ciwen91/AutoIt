@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoIt.Foundation.StoreCenter.DBStore;
-using StoreCenter;
 
-namespace AutoIt.Foundation.StoreCenter.Core
+namespace AutoIt.Foundation.Store
 {
-   public class StoreFactory
+    public class StoreFactory
    {
        public IEnumerable<IDataStoreFactory> FactoryGroup = new List<IDataStoreFactory>()
        {
