@@ -1,7 +1,7 @@
 ﻿using System;
 using Common.Logging.Configuration;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public class CronTimerTaskInfo : TimerTaskInfo
     {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Quartz;
 using Quartz.Listener;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public class SchedulerListener : SchedulerListenerSupport
     {

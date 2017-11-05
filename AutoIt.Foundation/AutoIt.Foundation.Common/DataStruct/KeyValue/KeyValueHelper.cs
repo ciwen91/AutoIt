@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AutoIt.Foundation.Common.DataStruct.KeyValue
+namespace AutoIt.Foundation.Common
 {
     public static class KeyValueHelper
     {

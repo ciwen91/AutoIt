@@ -7,7 +7,7 @@ using Common.Logging.Configuration;
 using Quartz;
 using Quartz.Impl;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public class QuartzScheduler:ITimerTaskScheduler
     {

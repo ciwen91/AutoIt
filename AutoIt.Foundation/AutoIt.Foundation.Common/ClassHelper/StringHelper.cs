@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using AutoIt.Foundation.Common.DataStruct;
+﻿using System.Text.RegularExpressions;
 
-namespace AutoIt.Foundation.Common.ClassHelper
+namespace AutoIt.Foundation.Common
 {
-   public static class StringHelper
+    public static class StringHelper
     {
         public static LinePoint NextPoint(this string str, int count, LinePoint startPoint)
         {

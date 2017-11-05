@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq.Expressions;
 
-namespace AutoIt.Foundation.Common.Expression
+namespace AutoIt.Foundation.Common
 {
     public abstract class ExpressionVisitor
     {

@@ -7,14 +7,18 @@ using Xunit;
 
 namespace AutoIt.Foundation.Common
 {
-    public class UnitTest1
+    public class BaseTest
     {
+        static BaseTest()
+        {
+            RedisRepository.ConStr.Default = "127.0.0.1:6379,password=adminzxly";
+            EFRepository.ConStr.Default =
+                "Data Source = 127.0.0.1;Initial Catalog = Test;User Id = sa;Password = 1qaz7410;";
+        }
+
         [Fact]
         public void TestMethod1()
         {
-            RedisRepository.ConStr.Default = "127.0.0.1:6379,password=adminzxly";
-            EFRepository.ConStr.Default = "Data Source = 127.0.0.1;Initial Catalog = Test;User Id = sa;Password = 1qaz7410;";
-
             global::StoreCenter.StoreCenter.SetConfig(new StoreConfig()
             {
                 DataType = typeof(Student),

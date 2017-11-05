@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoIt.Foundation.Common.ClassHelper
+namespace AutoIt.Foundation.Common
 {
    public static class AssemblyHelper
     {

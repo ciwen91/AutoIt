@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoIt.Foundation.Common.DataStruct
+namespace AutoIt.Foundation.Common
 {
     public struct Point
     {

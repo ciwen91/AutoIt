@@ -84,9 +84,9 @@
       <Project>{aa5a1883-4eb2-48f0-86a3-376dadc19b56}</Project>
       <Name>AutoIt.Foundation.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AutoIt.Foundation.Store\AutoIt.Foundation.StoreCenter.csproj">
+    <ProjectReference Include="..\AutoIt.Foundation.Store\AutoIt.Foundation.Store.csproj">
       <Project>{551ae4aa-5028-4e39-b5e6-69bfa22007a3}</Project>
-      <Name>AutoIt.Foundation.StoreCenter</Name>
+      <Name>AutoIt.Foundation.Store</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

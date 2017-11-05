@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoIt.Foundation.Common.LangAnaly.Model
+namespace AutoIt.Foundation.Common.LangAnaly
 {
     public abstract class SymbolInfoBase
     {

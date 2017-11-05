@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data.Entity;
-using AutoIt.Foundation.Common.ClassHelper;
+using AutoIt.Foundation.Common;
 using StoreCenter;
 
 namespace AutoIt.Foundation.StoreCenter.DBStore

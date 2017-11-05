@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoIt.Foundation.Common.DataStruct;
-using AutoIt.Foundation.Common.DataStruct.KeyValue;
 
-namespace Compiler.Common
+namespace AutoIt.Foundation.Common
 {
     /// <summary>
     /// 上下文相关类
     /// </summary>
-    public class Context : IDisposable
+    public class Context_Old : IDisposable
     {
         [ThreadStatic] private static Stack<ObjDictionary> _StackDic;
 
@@ -23,7 +15,7 @@ namespace Compiler.Common
             get { return _StackDic != null ? _StackDic.ToKeyObjValue() : null; }
         }
 
-        public Context()
+        public Context_Old()
         {
             if (_StackDic == null)
             {

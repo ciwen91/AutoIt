@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AutoIt.Foundation.Common.DataStruct
+namespace AutoIt.Foundation.Common
 {
     public interface IKeyObjValue : IKeyValue<Tuple<Type, string>, object>
     {

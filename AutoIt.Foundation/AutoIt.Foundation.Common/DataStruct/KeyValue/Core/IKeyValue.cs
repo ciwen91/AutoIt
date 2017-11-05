@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AutoIt.Foundation.Common.DataStruct
+namespace AutoIt.Foundation.Common
 {
     public interface IKeyValue<TKey, TValue>
     {

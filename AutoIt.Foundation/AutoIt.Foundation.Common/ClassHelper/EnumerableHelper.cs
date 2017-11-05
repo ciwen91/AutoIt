@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace AutoIt.Foundation.Common.ClassHelper
+namespace AutoIt.Foundation.Common
 {
    public static class EnumerableHelper
     {

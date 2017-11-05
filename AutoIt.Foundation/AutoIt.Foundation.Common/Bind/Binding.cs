@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using AutoIt.Foundation.Common.DataStruct.KeyValue;
-using Compiler.Common;
 
-namespace AutoIt.Foundation.Common.Bind
+namespace AutoIt.Foundation.Common
 {
     /// <summary>
     /// 绑定
@@ -20,7 +18,7 @@ namespace AutoIt.Foundation.Common.Bind
         public static void Bind<T>(Expression<Func<T>> target, Expression<Func<T>> source)
         {
             //将绑定信息添加到上下文中
-            var group =Compiler.Common.Context.Current.GetOrSet(new List<BindInfo>());
+            var group = Context_Old.Current.GetOrSet(new List<BindInfo>());
             group.Add(new BindInfo(target, source));
         }
 
@@ -30,7 +28,7 @@ namespace AutoIt.Foundation.Common.Bind
         public static void Update()
         {
             //从上下文中获取绑定信息
-            var group = Compiler.Common.Context.Current.Get<List<BindInfo>>();
+            var group = Context_Old.Current.Get<List<BindInfo>>();
 
             //更新绑定目标
             if (group != null)

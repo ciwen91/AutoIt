@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using AutoIt.Foundation.Common.ClassHelper;
-using AutoIt.Foundation.Common.DataStruct;
-using AutoIt.Foundation.Common.LangAnaly.Model;
-using Newtonsoft.Json;
+﻿using System.Collections.Generic;
 
 namespace AutoIt.Foundation.Common.LangAnaly
 {
-   public abstract class LangManagerBase
+    public abstract class LangManagerBase
    {
        private EgtManager _EgtManager;
        protected GramerInfo _ResultGramerInfo;

@@ -1,6 +1,6 @@
 using System;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public class QuaraSchedulerInfo
     {

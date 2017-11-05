@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public  class TimerTaskScheduler:ITimerTaskScheduler
     {

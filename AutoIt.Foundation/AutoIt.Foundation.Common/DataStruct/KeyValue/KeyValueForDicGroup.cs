@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AutoIt.Foundation.Common.DataStruct.KeyValue
+namespace AutoIt.Foundation.Common
 {
     public class KeyValueForDicGroup<TKey,TValue>:IKeyValue<TKey,TValue>
     {

@@ -1,18 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using AutoIt.Foundation.Common.LangAnaly;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System.Xml.Linq;
 using Autofac;
-using Autofac.Extras.DynamicProxy;
-using AutoIt.Foundation.Aop;
-using AutoIt.Foundation.Common.ClassHelper;
 
 namespace AutoIt.Foundation.Test
 {

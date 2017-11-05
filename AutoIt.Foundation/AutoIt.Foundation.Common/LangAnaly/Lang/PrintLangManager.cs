@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using AutoIt.Foundation.Common.LangAnaly.Model;
 
 namespace AutoIt.Foundation.Common.LangAnaly
 {

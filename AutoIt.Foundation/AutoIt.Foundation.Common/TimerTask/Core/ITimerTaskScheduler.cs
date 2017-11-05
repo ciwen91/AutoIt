@@ -1,4 +1,4 @@
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public interface ITimerTaskScheduler
     {

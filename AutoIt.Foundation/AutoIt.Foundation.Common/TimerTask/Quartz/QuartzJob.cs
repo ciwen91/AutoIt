@@ -1,7 +1,7 @@
 using System;
 using Quartz;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     /// <summary>
     /// DisallowConcurrentExecution,对于实例不并发执行任务

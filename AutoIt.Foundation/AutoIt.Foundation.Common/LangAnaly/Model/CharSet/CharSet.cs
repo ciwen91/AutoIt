@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AutoIt.Foundation.Common.LangAnaly.Model
+namespace AutoIt.Foundation.Common.LangAnaly
 {
     public class CharSet:EgtEntityBase
     {

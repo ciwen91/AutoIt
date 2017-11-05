@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Web.Scrip
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{5A9461D7-CBDA-4609-92FA-6C0FA9E20975}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.StoreCenter", "AutoIt.Foundation.Store\AutoIt.Foundation.StoreCenter.csproj", "{551AE4AA-5028-4E39-B5E6-69BFA22007A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Store", "AutoIt.Foundation.Store\AutoIt.Foundation.Store.csproj", "{551AE4AA-5028-4E39-B5E6-69BFA22007A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoIt.Foundation.Aop", "AutoIt.Foundation.Aop\AutoIt.Foundation.Aop.csproj", "{09779467-22BF-40C2-BF41-15D26EF0E42E}"
 EndProject

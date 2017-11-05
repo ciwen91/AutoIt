@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TimerTask
+namespace AutoIt.Foundation.Common
 {
     public abstract class TimerTaskInfo
     {

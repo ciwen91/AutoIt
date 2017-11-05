@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace AutoIt.Foundation.Common.ClassHelper
+namespace AutoIt.Foundation.Common
 {
     public static class MemberInfoHelper
     {

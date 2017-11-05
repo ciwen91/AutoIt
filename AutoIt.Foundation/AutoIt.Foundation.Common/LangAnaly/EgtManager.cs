@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using AutoIt.Foundation.Common.Bind;
-using AutoIt.Foundation.Common.ClassHelper;
-using AutoIt.Foundation.Common.LangAnaly.Model;
-using Compiler.Common;
-using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Common.LangAnaly
 {
@@ -26,7 +19,7 @@ namespace AutoIt.Foundation.Common.LangAnaly
 
         public static EgtManager CreateFromFile(string filePath)
         {
-            using (Compiler.Common.Context contex = new Compiler.Common.Context())
+            using (Context_Old contex = new Context_Old())
             {
                 var manager = new EgtManager();
 

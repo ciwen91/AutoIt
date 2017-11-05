@@ -1,6 +1,4 @@
-﻿using AutoIt.Foundation.Common.Expression;
-
-namespace AutoIt.Foundation.Common.Bind
+﻿namespace AutoIt.Foundation.Common
 {
     /// <summary>
     /// 绑定信息

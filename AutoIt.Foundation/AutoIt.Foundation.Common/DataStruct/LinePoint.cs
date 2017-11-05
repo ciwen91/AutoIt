@@ -1,4 +1,4 @@
-﻿namespace AutoIt.Foundation.Common.DataStruct
+﻿namespace AutoIt.Foundation.Common
 {
     public struct LinePoint
     {

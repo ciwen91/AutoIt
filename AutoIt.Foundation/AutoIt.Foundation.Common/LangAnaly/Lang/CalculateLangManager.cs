@@ -1,5 +1,3 @@
-using AutoIt.Foundation.Common.LangAnaly.Model;
-
 namespace AutoIt.Foundation.Common.LangAnaly
 {
     public class CalculateLangManager : LangManagerBase

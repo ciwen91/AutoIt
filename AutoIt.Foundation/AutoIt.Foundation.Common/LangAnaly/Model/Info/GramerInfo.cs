@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace AutoIt.Foundation.Common.LangAnaly.Model
+namespace AutoIt.Foundation.Common.LangAnaly
 {
     public class GramerInfo : SymbolInfoBase
     {

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using AutoIt.Foundation.Common.ClassHelper;
 
-namespace AutoIt.Foundation.Common.Expression
+namespace AutoIt.Foundation.Common
 {
     public class MemberVisitor : ExpressionVisitor
     {
