@@ -77,7 +77,7 @@ namespace AutoIt.Foundation.Store.Test
                 {
                     new List<Student>()
                     {
-                        new Student() {Name = "a"}
+                        new Student() {Name = "a",CreateTime = DateTime.Parse("2017/11/6 12:53:32")}
                     }
                 };
 
