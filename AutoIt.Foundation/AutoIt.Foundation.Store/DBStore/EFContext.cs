@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 using AutoIt.Foundation.Common;
 
 namespace AutoIt.Foundation.Store
@@ -24,6 +25,8 @@ namespace AutoIt.Foundation.Store
             }
 
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
         }
     }
 }

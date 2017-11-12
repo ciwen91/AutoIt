@@ -15,6 +15,8 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             return _Repository.GetGroup<T>(keyGroup);
         }
 
@@ -28,11 +30,15 @@ namespace AutoIt.Foundation.Store
 
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             _Repository.RemoveGroup(keyGroup);
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             return _Repository.ExistGroup(keyGroup);
         }
 
@@ -51,6 +57,7 @@ namespace AutoIt.Foundation.Store
 
             if (SlideExpires != null)
             {
+                keyGroup = keyGroup.Select(GetStoreKey);
                 _Repository.SetExpiry(keyGroup, TimeSpan.FromSeconds(SlideExpires.Value));
             }
         }

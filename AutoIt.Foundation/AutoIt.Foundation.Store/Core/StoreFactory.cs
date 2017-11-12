@@ -8,6 +8,7 @@ namespace AutoIt.Foundation.Store
    {
        public IEnumerable<IDataStoreFactory> FactoryGroup = new List<IDataStoreFactory>()
        {
+           new ProcCacheFactory(),
            new RedisCacheFactory(),
            new DBStoreFactory() 
        };

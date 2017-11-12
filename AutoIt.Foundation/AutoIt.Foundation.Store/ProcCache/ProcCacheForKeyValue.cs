@@ -16,6 +16,8 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             var group = keyGroup.Select(GetValue<T>)
                     .Where(item => item != null)
                     .ToList();
@@ -36,6 +38,8 @@ namespace AutoIt.Foundation.Store
 
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             foreach (var item in keyGroup)
             {
                 _Repository.Remove(item);
@@ -44,6 +48,8 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
         {
+            keyGroup = keyGroup.Select(GetStoreKey);
+
             var result = keyGroup.Where(item => _Repository.Contains(item))
                   .ToList();
 

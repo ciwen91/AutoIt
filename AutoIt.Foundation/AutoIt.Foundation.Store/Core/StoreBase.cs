@@ -62,10 +62,7 @@ namespace AutoIt.Foundation.Store
             {
                 var group = GetInner();
 
-                if (group != null)
-                {
-                    return group;
-                }
+                return group;
             }
 
             var next = NextMedia.GetInner();
@@ -179,12 +176,9 @@ namespace AutoIt.Foundation.Store
 
             if (OnlyGetCurMedia)
             {
-                var count= CountInner();
+                var count = CountInner();
 
-                if (count >= 0)
-                {
-                    return count;
-                }
+                return count;
             }
 
             return NextMedia.Count();

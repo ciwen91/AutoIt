@@ -80,6 +80,8 @@
     <Compile Include="Core\IDataStoreFactory.cs" />
     <Compile Include="Core\IQueryableDataStore.cs" />
     <Compile Include="Core\StoreBase.cs" />
+    <Compile Include="Model\EntityWithIDBase.cs" />
+    <Compile Include="Model\EntityWithKeyBase.cs" />
     <Compile Include="Model\StoreConfig.cs" />
     <Compile Include="Model\StoreConfigItem.cs" />
     <Compile Include="Model\StoreShape.cs" />

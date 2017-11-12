@@ -28,7 +28,5 @@ namespace AutoIt.Foundation.Common
         {
             return string.Join(seperator, group.Select(castFunc));
         }
-
-
     }
 }

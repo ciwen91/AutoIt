@@ -6,6 +6,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Linq.Expressions;
+using System.Text;
+using AutoIt.Foundation.Common;
 using EntityFramework.Extensions;
 
 namespace AutoIt.Foundation.Store
@@ -27,10 +29,12 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
+            var whereStr = GetWhereStr(keyGroup);
+
             using (var context = _Repository.NewContext)
             {
                 var group = context.Set<T>()
-                    .Where(item => keyGroup.Contains(item.Key_))
+                    .Where(whereStr)
                     .ToList();
                 return group;
             }
@@ -61,21 +65,26 @@ namespace AutoIt.Foundation.Store
 
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
+            var whereStr = GetWhereStr(keyGroup);
+
             using (var context = _Repository.NewContext)
             {
                 context.Set<T>()
-                    .Where(item => keyGroup.Contains(item.Key_))
+                    .Where(whereStr)
                     .Delete();
             }
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
         {
+            var whereStr = GetWhereStr(keyGroup);
+            var selectStr = GetSelectStr();
+
             using (var context = _Repository.NewContext)
             {
-                var group = context.Set<T>()
-                    .Where(item => keyGroup.Contains(item.Key_))
-                    .Select(item => item.Key_)
+                var group = ((IQueryable<string>) context.Set<T>()
+                        .Where(whereStr)
+                        .Select(selectStr))
                     .ToList();
 
                 return group;
@@ -137,11 +146,13 @@ namespace AutoIt.Foundation.Store
 
         public IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress)
         {
+            var selectStr = GetSelectStr();
+
             using (var context = _Repository.NewContext)
             {
-                var group = context.Set<T>()
-                    .Where(whereExpress)
-                    .Select(item => item.Key_)
+                var group = ((IQueryable<string>) context.Set<T>()
+                        .Where(whereExpress)
+                        .Select(selectStr))
                     .ToList();
 
                 return group;
@@ -157,6 +168,56 @@ namespace AutoIt.Foundation.Store
                 .Count();
 
                 return count;
+            }
+        }
+
+        #endregion
+
+        #region Dynamic 
+
+        public string GetSelectStr()
+        {
+            var keyNameGroup = EntityBase.GetKeyNameGroup(typeof(T));
+
+            var selectStr = keyNameGroup.JoinStr("+ '$' +");
+            selectStr =selectStr+ ".ToString()";
+
+            return selectStr;
+        }
+
+        public string GetWhereStr(IEnumerable<string> keyGroup)
+        {
+            var group = keyGroup.Select(GetWhereStr)
+                .ToList();
+
+            if (group.Count > 1)
+            {
+                group = group.Select(item => $"({item})")
+                    .ToList();
+            }
+
+            var whereStr = group.JoinStr("OR");
+
+            return whereStr;
+        }
+
+        public string GetWhereStr(string key)
+        {
+            var whereStr = EntityBase.GetKeyNameValueDic(typeof(T), key)
+                .Select(item => $"{item.Key}={item.Value}")//??? \"
+                .JoinStr(" AND ");
+
+            return whereStr;
+        }
+
+        #endregion
+
+        #region Others
+        public void Truncate()
+        {
+            using (var context=_Repository.NewContext)
+            {
+                context.Database.ExecuteSqlCommand($"Truncate Table {typeof(T).Name}");
             }
         }
 

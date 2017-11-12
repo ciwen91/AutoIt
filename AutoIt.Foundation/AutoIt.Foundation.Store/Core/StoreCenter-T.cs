@@ -140,6 +140,13 @@ namespace AutoIt.Foundation.Store
             Delete(new List<string> {key});
         }
 
+        public bool Exist(string key)
+        {
+            var group = Exist(new List<string>() {key});
+
+            return group.Any();
+        }
+
         #endregion
 
         #region Others

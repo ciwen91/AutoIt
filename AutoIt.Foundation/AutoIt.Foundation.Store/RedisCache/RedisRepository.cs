@@ -57,7 +57,7 @@ namespace AutoIt.Foundation.Store
         }
         public IEnumerable<T> GetGroup<T>(IEnumerable<string> keyGroup)
         {
-            var redisValGroup = _Db.StringGet(keyGroup.Cast<RedisKey>().ToArray());
+            var redisValGroup = _Db.StringGet(keyGroup.Select(item => (RedisKey)item).ToArray());
 
             return redisValGroup.Select(GetEntity<T>)
                 .ToList();
@@ -97,7 +97,7 @@ namespace AutoIt.Foundation.Store
         }
         public RedisRepository RemoveGroup(IEnumerable<string> keyGroup)
         {
-            _Db.KeyDelete(keyGroup.Cast<RedisKey>().ToArray());
+            _Db.KeyDelete(keyGroup.Select(item => (RedisKey)item).ToArray());
 
             return this;
         }
@@ -182,7 +182,7 @@ namespace AutoIt.Foundation.Store
         }
         public RedisRepository RemoveItemGroup(string key, IEnumerable<string> itemKeyGroup)
         {
-            _Db.HashDelete(key, itemKeyGroup.Cast<RedisValue>().ToArray());
+            _Db.HashDelete(key, itemKeyGroup.Select(item=>(RedisValue)item).ToArray());
 
             return this;
         }
