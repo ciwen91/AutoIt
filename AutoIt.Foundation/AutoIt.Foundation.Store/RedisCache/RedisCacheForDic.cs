@@ -49,7 +49,7 @@ namespace AutoIt.Foundation.Store
 
         #region AOP
 
-        protected void BeforeGet()
+        public override void BeforeGet(IEnumerable<string> keyGroup)
         {
             var slide = SlideExpires;
 

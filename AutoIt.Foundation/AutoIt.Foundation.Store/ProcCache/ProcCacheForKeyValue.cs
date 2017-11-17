@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
+using AutoIt.Foundation.Common;
+using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Store
 {
@@ -32,6 +34,7 @@ namespace AutoIt.Foundation.Store
                 var policy = GetCachePolicy();
                 var key = GetStoreKey(item);
 
+                LogHelper.WriteLine(JsonConvert.SerializeObject(policy));
                 _Repository.Set(key, item, policy);
             }
         }

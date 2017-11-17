@@ -15,7 +15,7 @@ namespace AutoIt.Foundation.Store
 
         protected TValue GetValue<TValue>(string key)
         {
-            return _Repository.Contains(key) ? (TValue)_Repository[key] : default(TValue);
+            return _Repository.Contains(key) ? (TValue)_Repository.Get(key) : default(TValue);
         }
 
         protected CacheItemPolicy GetCachePolicy()

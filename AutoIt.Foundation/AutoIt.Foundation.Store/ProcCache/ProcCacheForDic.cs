@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoIt.Foundation.Common;
+using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Store
 {
@@ -30,8 +32,9 @@ namespace AutoIt.Foundation.Store
             if (_Dic == null)
             {
                 dic = new Dictionary<string, T>();
-
                 var policy = GetCachePolicy();
+
+                LogHelper.WriteLine(JsonConvert.SerializeObject(policy));
                 _Repository.Set(StoreKey, dic, policy);
             }
 

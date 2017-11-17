@@ -1,4 +1,7 @@
-﻿using Xunit.Abstractions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using AutoIt.Foundation.Common;
+using Xunit.Abstractions;
 
 namespace AutoIt.Foundation.Store.Test
 {
@@ -9,11 +12,22 @@ namespace AutoIt.Foundation.Store.Test
         public TestBase(ITestOutputHelper output)
         {
             _Output = output;
+            LogHelper.WriteLineAction = str => output.WriteLine(str);
         }
 
-        protected void WriteLine(object obj)
+        ~TestBase()
         {
-            _Output.WriteLine(obj.ToString());
+            _Output = null;
+            LogHelper.WriteLineAction = null;
+        }
+
+        protected static List<CaseInfoBase> _CaseGroup=new List<CaseInfoBase>();
+       
+        public static T GetCaseInfo<T>(string caseName) where T : CaseInfoBase
+        {
+            var caseInfo = (T) _CaseGroup.First(item => item.CaseName == caseName);
+
+            return caseInfo;
         }
     }
 }

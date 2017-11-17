@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Runtime.InteropServices;
+using System.Threading;
 using AutoIt.Foundation.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
@@ -15,71 +18,72 @@ namespace AutoIt.Foundation.Store.Test
         private StoreCenter<Student> _StoreCenter;
         private List<Student> _DataGroup = new List<Student>();
 
+        static StoreTest()
+        {
+            var storeTypeGroup = Enum.GetNames(typeof(StoreType));
+            var storeShapeGroup = Enum.GetNames(typeof(StoreShape));
 
+            //单个存储测试
+            foreach (var typeItem in storeTypeGroup)
+            {
+                foreach (var shapeItem in storeShapeGroup)
+                {
+                    _CaseGroup.Add(new CaseInfo($"{typeItem}.{shapeItem}",
+                        (StoreShape)Enum.Parse(typeof(StoreShape), shapeItem), new List<StoreConfigItem>()
+                        {
+                            new StoreConfigItem()
+                            {
+                                Type = (StoreType) Enum.Parse(typeof(StoreType), typeItem)
+                            }
+                        }));
+                }
+            }
+        }
 
         public StoreTest(ITestOutputHelper output):base(output)
         {
 
         }
 
-        private void Init(string caseName)
+        private void Init(string caseName,Action<StoreConfig> action=null )
         {
+            #region InitConfig
+
             RedisRepository.ConStr.Default = "127.0.0.1:6379,password=adminzxly,allowAdmin = true";
             EFRepository.ConStr.Default =
                 "Data Source = 127.0.0.1;Initial Catalog = Test;User Id = sa;Password = 1qaz7410;";
 
             new EFStore<Student>().Truncate();
             new RedisRepository().FlushAll();
+            MemoryCache.Default.ToList().ForEach(item => MemoryCache.Default.Remove(item.Key));
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
 
             var storeConfig = new StoreConfig()
             {
                 DataType = typeof(Student),
-                Shape = caseName.EndsWith(".KeyValue") ? StoreShape.KeyValue : StoreShape.Dic,
-                IsLoadAll = true
+                Shape = caseInfo.Shape,
+                Group = JsonConvert.DeserializeObject<List<StoreConfigItem>>(JsonConvert.SerializeObject(caseInfo.ItemGroup))
             };
-           
-            if (caseName.StartsWith("Redis."))
+
+            if (action != null)
             {
-                storeConfig.Group = new List<StoreConfigItem>()
-                {
-                    new StoreConfigItem()
-                    {
-                        Type = StoreType.RedisCache,                       
-                       AbsluteExpires = 1000
-                    }
-                };
-            }
-            else if (caseName.StartsWith("ProcCache."))
-            {
-                storeConfig.Group = new List<StoreConfigItem>()
-                {
-                    new StoreConfigItem()
-                    {
-                        Type = StoreType.ProcCache,
-                        AbsluteExpires = 1000
-                    }
-                };
-            }
-            else 
-            {
-                storeConfig.Group = new List<StoreConfigItem>()
-                {
-                    new StoreConfigItem()
-                    {
-                        Type = StoreType.DBStore
-                    }
-                };
+                action(storeConfig);
             }
 
             StoreCenter.SetConfig(storeConfig);
 
-            _StoreCenter=new StoreCenter<Student>();
+            #endregion
+
+            #region InitData
+
+            _StoreCenter = new StoreCenter<Student>();
 
             for (var i = 0; i < 10; i++)
             {
                 var entity = new Student()
                 {
-                    ID = i+1,
+                    ID = i + 1,
                     Name = "张三" + i
                 };
 
@@ -87,45 +91,29 @@ namespace AutoIt.Foundation.Store.Test
             }
 
             _StoreCenter.Add(_DataGroup);
+
+            #endregion
         }
 
-        #region Data
-
-        public static IEnumerable<object[]> MemberData => new List<object[]>()
+        public static IEnumerable<object[]> TestData
         {
-            new object[] {"ProcCache.KeyValue"},
-            new object[] {"ProcCache.Dic"},
-            new object[] {"Redis.KeyValue"},
-            new object[] {"Redis.Dic"},
-            new object[] { "DBStore.KeyValue" },
-            new object[] { "DBStore.Dic" }
-        };
-
-        #endregion
-
-        public StoreShape GetShape(string caseName)
-        {
-            if (caseName.EndsWith("KeyValue")&&!caseName.StartsWith("DBStore"))
-            {
-                return StoreShape.KeyValue;
-            }
-            else
-            {
-                return StoreShape.Dic;
-            }
+            get { return _CaseGroup.Select(item => new object[] { item.CaseName }); }
         }
+
 
         #region IDataStore<Student> 
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void GetAll(string caseName)
         {
             Init(caseName);
 
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
             var group = _StoreCenter.Get();
 
-            if (GetShape(caseName) == StoreShape.Dic)
+            if (caseInfo.Shape == StoreShape.Dic || caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
             {
                 Assert.Equal(_DataGroup.Count, group.Count());
             }
@@ -133,11 +121,11 @@ namespace AutoIt.Foundation.Store.Test
             {
                 Assert.Equal(null, group);
             }
-        
+
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Get(string caseName)
         {
             Init(caseName);
@@ -150,7 +138,7 @@ namespace AutoIt.Foundation.Store.Test
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Add(string caseName)
         {
             Init(caseName);
@@ -167,7 +155,7 @@ namespace AutoIt.Foundation.Store.Test
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Update(string caseName)
         {
             Init(caseName);
@@ -180,7 +168,7 @@ namespace AutoIt.Foundation.Store.Test
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Delete(string caseName)
         {
             Init(caseName);
@@ -193,7 +181,7 @@ namespace AutoIt.Foundation.Store.Test
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Exist(string caseName)
         {
             Init(caseName);
@@ -204,12 +192,14 @@ namespace AutoIt.Foundation.Store.Test
         }
 
         [Theory]
-        [MemberData("MemberData")]
+        [MemberData("TestData")]
         public void Count(string caseName)
         {
             Init(caseName);
 
-            if (GetShape(caseName) == StoreShape.Dic)
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            if (caseInfo.Shape == StoreShape.Dic || caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
             {
                 Assert.Equal(_DataGroup.Count(), _StoreCenter.Count());
             }
@@ -221,5 +211,72 @@ namespace AutoIt.Foundation.Store.Test
 
         #endregion
 
+        #region Cache
+
+        [Theory]
+        [MemberData("TestData")]
+        public void TestAbsluteCache(string caseName)
+        {
+            Init(caseName, config => config.Group.ToList().ForEach(sItem => sItem.AbsluteExpires = 1));
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            Thread.Sleep(600);
+
+            Assert.Equal(_DataGroup.First().Name, _StoreCenter.Get("1").Name);
+
+            Thread.Sleep(600);
+
+            if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
+            {
+                Assert.Equal(_DataGroup.First().Name, _StoreCenter.Get("1").Name);
+            }
+            else
+            {
+                Assert.Equal(null, _StoreCenter.Get("1"));
+            }
+        }
+
+        [Theory]
+        [MemberData("TestData")]
+        public void TestSlideCache(string caseName)
+        {
+            Init(caseName, config => config.Group.ToList().ForEach(sItem => sItem.SlideExpires = 2));
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            Thread.Sleep(1300);
+
+            Assert.Equal(_DataGroup.First().Name, _StoreCenter.Get("1").Name);
+
+            Thread.Sleep(1300);
+
+            Assert.Equal(_DataGroup.First().Name, _StoreCenter.Get("1").Name);
+
+            Thread.Sleep(2600);
+
+            if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
+            {
+                Assert.Equal(_DataGroup.First().Name, _StoreCenter.Get("1").Name);
+            }
+            else
+            {
+                Assert.Equal(null, _StoreCenter.Get("1"));
+            }
+        }
+
+        #endregion
+
+        public class CaseInfo:CaseInfoBase
+        {
+            public StoreShape Shape { get; set; }
+            public List<StoreConfigItem> ItemGroup { get; set; }=new List<StoreConfigItem>();
+
+            public CaseInfo(string caseName, StoreShape shape, List<StoreConfigItem> itemGroup) : base(caseName)
+            {
+                this.Shape = shape;
+                this.ItemGroup = itemGroup;
+            }
+        }
     }
 }

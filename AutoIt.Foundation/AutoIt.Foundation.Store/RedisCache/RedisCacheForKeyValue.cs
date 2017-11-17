@@ -55,7 +55,7 @@ namespace AutoIt.Foundation.Store
         {
             base.BeforeGet(keyGroup);
 
-            if (SlideExpires != null)
+            if (SlideExpires != null&&keyGroup!=null)
             {
                 keyGroup = keyGroup.Select(GetStoreKey);
                 _Repository.SetExpiry(keyGroup, TimeSpan.FromSeconds(SlideExpires.Value));

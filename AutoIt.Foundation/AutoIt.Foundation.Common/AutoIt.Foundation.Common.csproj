@@ -102,6 +102,7 @@
     <Compile Include="LangAnaly\Model\Info\TokenInfo.cs" />
     <Compile Include="LangAnaly\TokenReader.cs" />
     <Compile Include="LangAnaly\Model\Info\TokenInfoState.cs" />
+    <Compile Include="Log\LogHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimerTask\Core\ITimerTaskScheduler.cs" />
     <Compile Include="TimerTask\Core\Model\CronTimerTaskInfo.cs" />
