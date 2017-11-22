@@ -7,8 +7,8 @@ namespace AutoIt.Foundation.Store
 {
     public interface IQueryableDataStore<T> : IDataStore<T> where T : EntityBase
     {
-        IQueryable<T> Set { get; }
-        IEnumerable<T> Get(IQueryable<T> query, string where, string order = null);
+        IEnumerable<T> Query(string where, string order = null);
+        IEnumerable<T> Query(int pageNum, int pageSize, string where = null, string order = null);
         void Update(Expression<Func<T, bool>> whereExpress, Expression<Func<T, T>> updateExpress);
         void Delete(Expression<Func<T, bool>> whereExpress);
         IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress);

@@ -10,10 +10,14 @@ namespace AutoIt.Foundation.Common
   public static class LogHelper
   {
       public static Action<string> WriteLineAction;
+      public static bool Enable { get; set; }
 
-        public static void WriteLine(string str)
-        {
-            WriteLineAction?.Invoke(str);
-        }
-    }
+      public static void WriteLine(string str)
+      {
+          if (Enable)
+          {
+              WriteLineAction?.Invoke(str);
+          }
+      }
+  }
 }

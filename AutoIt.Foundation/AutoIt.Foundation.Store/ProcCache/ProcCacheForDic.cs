@@ -34,7 +34,6 @@ namespace AutoIt.Foundation.Store
                 dic = new Dictionary<string, T>();
                 var policy = GetCachePolicy();
 
-                LogHelper.WriteLine(JsonConvert.SerializeObject(policy));
                 _Repository.Set(StoreKey, dic, policy);
             }
 

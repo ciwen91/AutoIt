@@ -104,24 +104,46 @@ namespace AutoIt.Foundation.Store
 
         #region IQueryable<T>
 
-        public IQueryable<T> Set
+        public IEnumerable<T> Query(string @where=null, string order = null)
         {
-            get { return _Repository.NewContext.Set<T>(); }
+            using (var context=_Repository.NewContext)
+            {
+                var group =(IQueryable<T>) context.Set<T>();
+
+                if (!string.IsNullOrEmpty(where))
+                {
+                   group=group.Where(where);
+                }
+
+                if (!string.IsNullOrEmpty(order))
+                {
+                    group = group.OrderBy(order);
+                }
+
+                return group.ToList();
+            }
         }
 
-        public IEnumerable<T> Get(IQueryable<T> query ,string where, string order = null)
+        public IEnumerable<T> Query(int pageNum, int pageSize, string @where, string order = null)
         {
-            if (!string.IsNullOrEmpty(where))
+            using (var context = _Repository.NewContext)
             {
-                query = query.Where(where);
-            }
+                var group = (IQueryable<T>)context.Set<T>();
 
-            if (!string.IsNullOrEmpty(order))
-            {
-                query = query.OrderBy(order);
-            }
+                if (!string.IsNullOrEmpty(where))
+                {
+                    group = group.Where(where);
+                }
 
-            return query.ToList();
+                if (!string.IsNullOrEmpty(order))
+                {
+                    group = group.OrderBy(order);
+                }
+
+                group = group.Skip((pageNum - 1)*pageSize).Take(pageSize);
+           
+                return group.ToList();
+            }
         }
 
         public void Update(Expression<Func<T, bool>> whereExpress,Expression<Func<T,T>> updateExpress)

@@ -20,6 +20,8 @@ namespace AutoIt.Foundation.Store
                 var conStr = ConStr.GetData();
                 var context= new EFContext(conStr);
 
+                context.Database.Log = LogHelper.WriteLine;
+
                 return context;
             }
         }

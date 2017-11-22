@@ -34,7 +34,6 @@ namespace AutoIt.Foundation.Store
                 var policy = GetCachePolicy();
                 var key = GetStoreKey(item);
 
-                LogHelper.WriteLine(JsonConvert.SerializeObject(policy));
                 _Repository.Set(key, item, policy);
             }
         }

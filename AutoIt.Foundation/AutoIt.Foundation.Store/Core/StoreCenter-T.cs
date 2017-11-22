@@ -75,44 +75,59 @@ namespace AutoIt.Foundation.Store
 
         #region IQueryableDataStore<T>
 
-        public IQueryable<T> Set
+        private IQueryableDataStore<T> QueryStore
         {
-            get { return _IQueryStore.Set; }
+            get
+            {
+                StoreBase<T> store = _Store;
+
+                while (store!=null)
+                {
+                    if (store is IQueryableDataStore<T>)
+                    {
+                        break;
+                    }
+
+                    store = store.NextMedia;
+                }
+
+                if (store == null)
+                {
+                    throw new Exception($"{typeof(T).FullName}没有配置IQueryableDataStore类型的容器！");
+                }
+
+                return (IQueryableDataStore<T>)store;
+            }
         }
 
-        public IEnumerable<T> Get(IQueryable<T> query, string @where, string order = null)
+        public IEnumerable<T> Query(string @where=null, string order = null)
         {
-            var store = _IQueryStore;
+            return QueryStore.Query(where, order);
+        }
 
-            return store.Get(query, where, order);
+        public IEnumerable<T> Query( int pageNum, int pageSize, string @where=null, string order = null)
+        {
+            return QueryStore.Query(pageNum, pageSize, where, order);
         }
 
         public void Update(Expression<Func<T, bool>> whereExpress, Expression<Func<T, T>> updateExpress)
         {
-            var store = _IQueryStore;
-
-            store.Update(whereExpress, updateExpress);
+            QueryStore.Update(whereExpress, updateExpress);
         }
 
         public void Delete(Expression<Func<T, bool>> whereExpress)
         {
-            var store = _IQueryStore;
-
-            store.Delete(whereExpress);
+            QueryStore.Delete(whereExpress);
         }
 
         public IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress)
         {
-            var store = _IQueryStore;
-
-            return store.Exist(whereExpress);
+            return QueryStore.Exist(whereExpress);
         }
 
         public int Count(Expression<Func<T, bool>> whereExpress)
         {
-            var store = _IQueryStore;
-
-            return store.Count(whereExpress);
+            return QueryStore.Count(whereExpress);
         }
 
         #endregion
