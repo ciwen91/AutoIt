@@ -302,6 +302,75 @@ namespace AutoIt.Foundation.Store.Test
             }
         }
 
+        [Theory]
+        [MemberData("TestData")]
+        public void QueryDelete(string caseName)
+        {
+            InitCase(caseName);
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
+            {
+                _StoreCenter.Delete(item => item.ID >= 3 && item.ID <= 7);
+                var group = _StoreCenter.Get().ToList();
+
+                Assert.Equal(_DataGroup.Count-5, group.Count);
+                LogHelper.WriteLine(group.Count().ToString());
+            }
+            else
+            {
+                Assert.Throws<Exception>(
+                    () => _StoreCenter.Delete(item => item.ID >= 3 && item.ID <= 7));
+            }
+        }
+
+        [Theory]
+        [MemberData("TestData")]
+        public void QueryExist(string caseName)
+        {
+            InitCase(caseName);
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
+            {
+                var group = _StoreCenter.Exist(item => (item.ID >= 3 && item.ID <= 7) || item.ID == 100);
+                group = group.Distinct().OrderBy(item => item);
+
+                Assert.Equal(JsonConvert.SerializeObject(new[] {"3", "4", "5", "6", "7"}),
+                    JsonConvert.SerializeObject(group));
+                LogHelper.WriteLine(JsonConvert.SerializeObject(group));
+            }
+            else
+            {
+                Assert.Throws<Exception>(
+                    () => _StoreCenter.Exist(item => (item.ID >= 3 && item.ID <= 7) || item.ID == 100));
+            }
+        }
+
+        [Theory]
+        [MemberData("TestData")]
+        public void QueryCount(string caseName)
+        {
+            InitCase(caseName);
+
+            var caseInfo = GetCaseInfo<CaseInfo>(caseName);
+
+            if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
+            {
+                var cnt = _StoreCenter.Count(item => item.ID >= 3 && item.ID <= 7);
+
+                Assert.Equal(5, cnt);
+                LogHelper.WriteLine(cnt.ToString());
+            }
+            else
+            {
+                Assert.Throws<Exception>(
+                    () => _StoreCenter.Count(item => item.ID >= 3 && item.ID <= 7));
+            }
+        }
+
         #endregion
 
         #region Cache Time
