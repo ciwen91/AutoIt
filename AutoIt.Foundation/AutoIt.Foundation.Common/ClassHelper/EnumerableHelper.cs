@@ -19,6 +19,26 @@ namespace AutoIt.Foundation.Common
             return group;
         }
 
+        public static IEnumerable<T> EachWithPre<T>(this IEnumerable<T> group, Action<T,T> eachAction)
+        {
+            T pre = default(T);
+            var i = 0;
+
+            //从第二个开始遍历
+            foreach (var item in group)
+            {
+                if (i > 0)
+                {
+                    eachAction(item, pre);
+                }
+
+                pre = item;
+                i++;
+            }
+
+            return group;
+        }
+
         public static string JoinStr<T>(this IEnumerable<T> group, string seperator)
         {
            return string.Join(seperator, group);

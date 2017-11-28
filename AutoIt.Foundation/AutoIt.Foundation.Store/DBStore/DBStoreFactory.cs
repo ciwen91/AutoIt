@@ -1,6 +1,6 @@
 ﻿namespace AutoIt.Foundation.Store
 {
-    public class DBStoreFactory : DataStoreFactoryBase
+    public class DBStoreFactory : SimpleStoreFactoryBase
     {
         public override StoreType StoreType
         {

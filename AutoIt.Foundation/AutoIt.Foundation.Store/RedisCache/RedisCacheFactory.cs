@@ -2,7 +2,7 @@
 
 namespace AutoIt.Foundation.Store
 {
-    public class RedisCacheFactory : DataStoreFactoryBase
+    public class RedisCacheFactory : SimpleStoreFactoryBase
     {
         public override StoreType StoreType
         {

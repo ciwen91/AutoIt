@@ -67,7 +67,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\StoreCenter-T.cs" />
     <Compile Include="Core\StoreCenter.cs" />
     <Compile Include="Core\StoreFactory.cs" />
     <Compile Include="DBStore\DBStoreFactory.cs" />
@@ -77,7 +76,7 @@
     <Compile Include="DBStore\EFStore.cs" />
     <Compile Include="Model\EntityBase.cs" />
     <Compile Include="Core\IDataStore.cs" />
-    <Compile Include="Core\DataStoreFactoryBase.cs" />
+    <Compile Include="Core\SimpleStoreFactoryBase.cs" />
     <Compile Include="Core\IQueryableDataStore.cs" />
     <Compile Include="Core\StoreBase.cs" />
     <Compile Include="Model\EntityWithIDBase.cs" />

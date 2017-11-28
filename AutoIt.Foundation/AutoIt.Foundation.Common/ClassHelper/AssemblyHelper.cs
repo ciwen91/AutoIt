@@ -8,6 +8,16 @@ namespace AutoIt.Foundation.Common
 {
    public static class AssemblyHelper
     {
+        public static IEnumerable<T> GetRealizeInstanceGroup<T>()
+        {
+            var typeGroup = GetRealizeTypeGroup(typeof(T));
+
+            var instanceGroup = typeGroup.Select(item => (T) Activator.CreateInstance(item))
+                .ToList();
+
+            return instanceGroup;
+        }
+
         public static IEnumerable<Type> GetRealizeTypeGroup(Type assignType)
         {
             var typeGroup = AppDomain.CurrentDomain.GetAssemblies()

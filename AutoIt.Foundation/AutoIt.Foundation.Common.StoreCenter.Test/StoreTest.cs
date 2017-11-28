@@ -37,12 +37,9 @@ namespace AutoIt.Foundation.Store.Test
                 foreach (var shapeItem in storeShapeGroup)
                 {
                     _CaseGroup.Add(new CaseInfo($"{typeItem}.{shapeItem}",
-                        (StoreShape)Enum.Parse(typeof(StoreShape), shapeItem), new List<StoreConfigItem>()
+                        (StoreShape) Enum.Parse(typeof(StoreShape), shapeItem), new List<StoreConfigItem>()
                         {
-                            new StoreConfigItem()
-                            {
-                                Type = (StoreType) Enum.Parse(typeof(StoreType), typeItem)
-                            }
+                            new StoreConfigItem((StoreType) Enum.Parse(typeof(StoreType), typeItem))
                         }));
                 }
             }
@@ -79,19 +76,15 @@ namespace AutoIt.Foundation.Store.Test
 
             var caseInfo = GetCaseInfo<CaseInfo>(caseName);
 
-            var storeConfig = new StoreConfig()
-            {
-                DataType = typeof(Student),
-                Shape = caseInfo.Shape,
-                Group = JsonConvert.DeserializeObject<List<StoreConfigItem>>(JsonConvert.SerializeObject(caseInfo.ItemGroup))
-            };
+            var storeConfig = new StoreConfig(typeof(Student), caseInfo.Shape,
+                JsonConvert.DeserializeObject<List<StoreConfigItem>>(JsonConvert.SerializeObject(caseInfo.ItemGroup)));
 
             if (action != null)
             {
                 action(storeConfig);
             }
 
-            StoreCenter.SetConfig(storeConfig);
+            StoreFactory.Default.SetConfig(storeConfig);
 
             #endregion
 

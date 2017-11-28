@@ -2,7 +2,7 @@
 
 namespace AutoIt.Foundation.Store
 {
-    public class ProcCacheFactory : DataStoreFactoryBase 
+    public class ProcCacheFactory : SimpleStoreFactoryBase
     {
         public override StoreType StoreType { get { return StoreType.ProcCache; } }
 

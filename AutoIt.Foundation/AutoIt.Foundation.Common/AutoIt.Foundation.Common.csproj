@@ -60,6 +60,7 @@
     <Compile Include="Bind\BindInfo.cs" />
     <Compile Include="Bind\Binding.cs" />
     <Compile Include="ClassHelper\AssemblyHelper.cs" />
+    <Compile Include="ClassHelper\DictionaryHelper.cs" />
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
     <Compile Include="ClassHelper\StringHelper.cs" />

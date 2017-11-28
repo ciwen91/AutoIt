@@ -1,64 +1,101 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoIt.Foundation.Common;
+using AutoIt.Foundation.Common.ClassHelper;
 
 namespace AutoIt.Foundation.Store
 {
     public class StoreFactory
-   {
-       public IEnumerable<DataStoreFactoryBase> FactoryGroup = new List<DataStoreFactoryBase>()
-       {
-           new ProcCacheFactory(),
-           new RedisCacheFactory(),
-           new DBStoreFactory() 
-       };
+    {
+        public static StoreFactory Default=new StoreFactory();
 
-       public object Create2(StoreConfig config)
-       {
-           var store = typeof(StoreFactory)
-               .GetMethod(nameof(Create))
-               .MakeGenericMethod(new Type[] {config.DataType})
-               .Invoke(this, new object[] {config});
+        public IEnumerable<SimpleStoreFactoryBase> FactoryGroup = AssemblyHelper.GetRealizeInstanceGroup<SimpleStoreFactoryBase>();
+        private Dictionary<Type, object> _StoreDic = new Dictionary<Type, object>();
 
-           return store;
-       }
+        private StoreFactory()
+        {
+            
+        }
 
-       public StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
-       {
-           var group = config.Group.Select(item =>
-               {
-                   var store = Create<T>(item.Type, config.Shape);
+        #region Get
 
-                   store.IsLoadAll = config.IsLoadAll;
-                   store.AbsluteExpires = item.AbsluteExpires;
-                   store.SlideExpires = item.SlideExpires;
-                   store.MaxBufferTime = item.MaxBufferTime;
-                   store.MaxBufferCount = item.MaxBufferCount;
+        public StoreBase<T> GetStore<T>() where T : EntityBase
+        {
+            var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => GetDftConfig(typeof(T)));
 
-                   return store;
-               })
-               .ToList();
+            return store;
+        }
 
-           StoreBase<T> preMedia = null;
+        #endregion
 
-           foreach (var item in group)
-           {
-               if (preMedia != null)
-               {
-                   preMedia.NextMedia = item;
-               }
-               preMedia = item;
-           }
+        #region Config
 
-           return group.First();
-       }
+        public StoreFactory SetConfig(StoreConfig config)
+        {
+            var store = typeof(StoreFactory)
+                .GetMethod(nameof(Create))
+                .MakeGenericMethod(config.DataType)
+                .Invoke(this, new object[] { config });
 
-       private StoreBase<T> Create<T>(StoreType type, StoreShape shape) where T : EntityBase
-       {
-           var factory = FactoryGroup.First(item => item.StoreType == type);
-           var store = factory.Create<T>(shape);
+            _StoreDic[config.DataType] = store;
 
-           return store;
-       }
-   }
+            return this;
+        }
+
+        private StoreConfig GetDftConfig(Type dataType)
+        {
+            //默认为存储在数据库的键值对类型
+            var config = new StoreConfig(dataType, StoreShape.KeyValue, new List<StoreConfigItem>()
+            {
+                new StoreConfigItem(StoreType.DBStore)
+            });
+
+            return config;
+        }
+
+        #endregion
+
+        #region Create
+
+        public StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
+        {
+            //创建简单Store集合
+            var group = config.Group.Select(item =>
+            {
+                var store = CreateSimple<T>(item.Type, config.Shape, item);
+                store.IsLoadAll = config.IsLoadAll;
+
+                return store;
+            })
+                .ToList();
+
+            //将Store集合链接起来
+            group.EachWithPre((item, pre) =>
+            {
+                pre.NextMedia = item;
+            });
+
+            //返回首个Store
+            return group.First();
+        }
+
+        private StoreBase<T> CreateSimple<T>(StoreType type, StoreShape shape, StoreConfigItem configItem)
+            where T : EntityBase
+        {
+            //创建Store对象
+            var factory = FactoryGroup.First(item => item.StoreType == type);
+            var store = factory.Create<T>(shape);
+
+            //从Config里读取属性
+            store.AbsluteExpires = configItem.AbsluteExpires;
+            store.SlideExpires = configItem.SlideExpires;
+            store.MaxBufferTime = configItem.MaxBufferTime;
+            store.MaxBufferCount = configItem.MaxBufferCount;
+
+            return store;
+        }
+
+        #endregion
+    }
 }

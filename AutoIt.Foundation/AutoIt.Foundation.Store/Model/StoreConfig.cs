@@ -17,5 +17,12 @@ namespace AutoIt.Foundation.Store
 
         //存储煤质集合
         public IEnumerable<StoreConfigItem> Group { get; set; }
+
+        public StoreConfig(Type dataType,StoreShape shape,IEnumerable<StoreConfigItem> group)
+        {
+            this.DataType = dataType;
+            this.Shape = shape;
+            this.Group = group;
+        }
     }
 }
