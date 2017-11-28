@@ -20,7 +20,7 @@ namespace AutoIt.Foundation.Store
 
             foreach (var item in dbTypeGroup)
             {
-                var typeMethodInfo = methodInfo.MakeGenericMethod(new Type[] {item});
+                var typeMethodInfo = methodInfo.MakeGenericMethod(item);
                 typeMethodInfo.Invoke(modelBuilder, null);
             }
 
