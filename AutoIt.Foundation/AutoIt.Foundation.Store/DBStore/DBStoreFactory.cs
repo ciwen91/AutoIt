@@ -1,13 +1,13 @@
 ﻿namespace AutoIt.Foundation.Store
 {
-    public class DBStoreFactory : IDataStoreFactory
+    public class DBStoreFactory : DataStoreFactoryBase
     {
-        public StoreType StoreType
+        public override StoreType StoreType
         {
             get { return StoreType.DBStore; }
         }
 
-        public StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase
+        public override StoreBase<T> Create<T>(StoreShape shape)
         {
             return new EFStore<T>();
         }

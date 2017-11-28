@@ -2,11 +2,11 @@
 
 namespace AutoIt.Foundation.Store
 {
-    public class ProcCacheFactory : IDataStoreFactory 
+    public class ProcCacheFactory : DataStoreFactoryBase 
     {
-        public StoreType StoreType { get { return StoreType.ProcCache; } }
+        public override StoreType StoreType { get { return StoreType.ProcCache; } }
 
-        public StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase
+        public override StoreBase<T> Create<T>(StoreShape shape)
         {
             if (shape == StoreShape.Dic)
             {

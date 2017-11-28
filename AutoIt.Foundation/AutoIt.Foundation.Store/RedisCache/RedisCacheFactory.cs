@@ -2,14 +2,14 @@
 
 namespace AutoIt.Foundation.Store
 {
-    public class RedisCacheFactory : IDataStoreFactory
+    public class RedisCacheFactory : DataStoreFactoryBase
     {
-        public StoreType StoreType
+        public override StoreType StoreType
         {
             get { return StoreType.RedisCache; }
         }
 
-        public StoreBase<T> Create<T>(StoreShape shape) where T : EntityBase
+        public override StoreBase<T> Create<T>(StoreShape shape)
         {
             if (shape == StoreShape.Dic)
             {
