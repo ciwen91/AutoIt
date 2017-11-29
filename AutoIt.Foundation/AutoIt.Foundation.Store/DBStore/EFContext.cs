@@ -14,19 +14,29 @@ namespace AutoIt.Foundation.Store
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            var methodInfo = modelBuilder.GetType().GetMethod("Entity");
-
-            var dbTypeGroup = AssemblyHelper.GetRealizeTypeGroup(typeof(EntityBase));
-
-            foreach (var item in dbTypeGroup)
-            {
-                var typeMethodInfo = methodInfo.MakeGenericMethod(item);
-                typeMethodInfo.Invoke(modelBuilder, null);
-            }
+            //注册类型到Context
+            RegisteAllEntity(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
 
+            //表名不加后缀
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+        }
+
+        private void RegisteAllEntity(DbModelBuilder modelBuilder)
+        {
+            //获取所有实体类(继承自EntityBase)
+            var dbTypeGroup = AssemblyHelper.GetRealizeTypeGroup(typeof(EntityBase));
+
+            //获取注册方法
+            var methodInfo = modelBuilder.GetType().GetMethod("Entity");
+
+            //注册
+            dbTypeGroup.Each(item =>
+            {
+                var typeMethodInfo = methodInfo.MakeGenericMethod(item);
+                typeMethodInfo.Invoke(modelBuilder, null);
+            });
         }
     }
 }

@@ -8,6 +8,7 @@ namespace AutoIt.Foundation.Store
     {
         public EFConfiguration()
         {
+            //无需在配置文件中配置Provider
             SetProviderServices("System.Data.SqlClient", SqlProviderServices.Instance);
         }
     }

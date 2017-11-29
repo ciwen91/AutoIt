@@ -19,6 +19,17 @@ namespace AutoIt.Foundation.Common
             return group;
         }
 
+        public static IEnumerable<T> Each<T>(this IEnumerable<T> group, Action<T> eachAction)
+        {
+            foreach (var item in group)
+            {
+                eachAction(item);
+            }
+
+            return group;
+        }
+
+
         public static IEnumerable<T> EachWithPre<T>(this IEnumerable<T> group, Action<T,T> eachAction)
         {
             T pre = default(T);

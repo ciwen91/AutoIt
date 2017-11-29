@@ -10,6 +10,7 @@ namespace AutoIt.Foundation.Store
 
         static EFRepository()
         {
+            //设置配置
             DbConfiguration.SetConfiguration(new EFConfiguration());
         }
 
@@ -17,9 +18,11 @@ namespace AutoIt.Foundation.Store
         {
             get
             {
+                //创建Context
                 var conStr = ConStr.GetData();
                 var context= new EFContext(conStr);
 
+                //设置输出
                 context.Database.Log = LogHelper.WriteLine;
 
                 return context;
