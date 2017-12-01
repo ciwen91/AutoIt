@@ -26,7 +26,7 @@ namespace AutoIt.Foundation.Store
         private void RegisteAllEntity(DbModelBuilder modelBuilder)
         {
             //获取所有实体类(继承自EntityBase)
-            var dbTypeGroup = AssemblyHelper.GetRealizeTypeGroup(typeof(EntityBase));
+            var dbTypeGroup = AssemblyHelper.GetAllRealizeType(typeof(EntityBase));
 
             //获取注册方法
             var methodInfo = modelBuilder.GetType().GetMethod("Entity");

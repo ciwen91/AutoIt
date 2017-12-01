@@ -8,12 +8,8 @@ namespace AutoIt.Foundation.Store
     public abstract class StoreBase<T> : IDataStore<T> where T : EntityBase
     {
         //基本信息
-        public string StoreKey
-        {
-            get { return typeof(T).Name; }
-        }
+        public string StoreKey => typeof(T).Name;
 
-        public StoreShape Shape { get; set; }
         public StoreBase<T> NextMedia { get; set; }
 
         //加载方式
@@ -54,49 +50,41 @@ namespace AutoIt.Foundation.Store
 
         #region  IDataMedia<T>
 
-        public IEnumerable<T> Get()
-        {
-            BeforeGet(null);
-
-            if (OnlyGetCurMedia)
-            {
-                var group = GetInner();
-
-                return group;
-            }
-
-            var next = NextMedia.GetInner();
-            Add(next);
-            return next;
-        }
-
+        /// <summary>
+        /// 获取数据
+        /// </summary>
         public IEnumerable<T> Get(IEnumerable<string> keyGroup)
         {
+            //Aop
             BeforeGet(keyGroup);
 
-            if (OnlyGetCurMedia)
+            //先从当前存储获取数据
+            var cur = GetInner(keyGroup);
+
+            if (!OnlyGetCurMedia)
             {
-                return GetInner(keyGroup);
-            }
-            else
-            {
-                var cur = GetInner(keyGroup);
+                //再从下级存储获取数据
                 var nextKeyGroup = keyGroup.Except(cur.Select(item => item.Key_));
 
                 if (nextKeyGroup.Any())
                 {
-                    var next= NextMedia.Get(nextKeyGroup);
-                    var merge= cur.ToList();
+                    var next = NextMedia.Get(nextKeyGroup);
+
+                    //合并数据
+                    var merge = cur.ToList();
                     merge.AddRange(next);
                     cur = merge;
 
+                    //将下级的数据存储起来
                     AddInner(next);
                 }
-
-                return cur;
             }
-        }
 
+            return cur;
+        }
+        /// <summary>
+        /// 新增数据
+        /// </summary>
         public void Add(IEnumerable<T> group)
         {
             lock (_BufferLock)
@@ -123,77 +111,115 @@ namespace AutoIt.Foundation.Store
             BeforeUpdate(group);
             AddInner(group);
         }
+        /// <summary>
+        /// 更新数据
+        /// </summary>
         public void Update(IEnumerable<T> group)
         {
+            //先更新下级存储数据
             if (NextMedia != null)
             {
                 NextMedia.Update(group);
             }
 
+            //Aop
             BeforeUpdate(group);
+            //再更新当前存储数据
             UpdateInner(group);
         }
+        /// <summary>
+        /// 删除数据
+        /// </summary>
         public void Delete(IEnumerable<string> keyGroup)
         {
+            //先删除下级存储数据
             if (NextMedia != null)
             {
                 NextMedia.Delete(keyGroup);
             }
 
+            //Aop
             BeforeDelete(keyGroup);
+            //再删除当前存储数据
             DeleteInner(keyGroup);
         }
 
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        public IEnumerable<T> GetAll()
+        {
+            //Aop
+            BeforeGet(null);
+
+            //从当前存储获取数据
+            var group = GetInner();
+
+            return group;  
+        }
+
+        /// <summary>
+        /// 判断数据是否存在,如果存在则返回Key
+        /// </summary>
         public IEnumerable<string> Exist(IEnumerable<string> keyGroup)
         {
+            //Aop
             BeforeGet(keyGroup);
 
-            if (OnlyGetCurMedia)
+            //获取当前存储Key
+            var cur = ExistInner(keyGroup);///ToDo:Same Mode With Get
+
+            if (!OnlyGetCurMedia)
             {
-                return ExistInner(keyGroup);
-            }
-            else
-            {
-                ///ToDo:Same Mode With Get
-                var cur = ExistInner(keyGroup);
+                //获取下级存储Key
                 var nextKeyGroup = keyGroup.Except(cur);
 
                 if (nextKeyGroup.Any())
                 {
                     var next = NextMedia.Exist(nextKeyGroup);
+
+                    //合并数据
                     var merge = cur.ToList();
                     merge.AddRange(next);
                     cur = merge;
                 }
-
-                return cur;
             }
+
+            return cur;
         }
 
+        /// <summary>
+        /// 获取数据总数
+        /// </summary>
         public int Count()
         {
+            //Aop
             BeforeGet(null);
 
             if (OnlyGetCurMedia)
             {
+                //获取当前存储数据总数
                 var count = CountInner();
-
                 return count;
             }
-
-            return NextMedia.Count();
+            else
+            {
+                //获取下级存储数据总数
+                var count = NextMedia.Count();
+                return count;
+            }
         }
 
         #endregion
 
         #region IDataMedia<T> Realize
-
-        protected abstract IEnumerable<T> GetInner();
+ 
         protected abstract IEnumerable<T> GetInner(IEnumerable<string> keyGroup);
-
         protected abstract void AddInner(IEnumerable<T> group);
         protected abstract void UpdateInner(IEnumerable<T> group);
         protected abstract void DeleteInner(IEnumerable<string> keyGroup);
+
+        protected abstract IEnumerable<T> GetInner();
 
         protected abstract IEnumerable<string> ExistInner(IEnumerable<string> keyGroup);
         protected abstract int CountInner();
@@ -215,7 +241,7 @@ namespace AutoIt.Foundation.Store
                 {
                     try
                     {
-                        var group = BufferMedia.Get();
+                        var group = BufferMedia.GetAll();
 
                         _IsToBuffer = false;
                         Add(group);
@@ -235,16 +261,35 @@ namespace AutoIt.Foundation.Store
 
         #region AOP
 
+        /// <summary>
+        /// 获取前执行的操作
+        /// </summary>
         public virtual void BeforeGet(IEnumerable<string> keyGroup)
         {
-            _HasGet = true;
+            if (!_HasGet)
+            {
+                //如果是全部加载,则加载全部数据
+                if (IsLoadAll&&NextMedia!=null)
+                {
+                    var next = NextMedia.GetInner();
+                    AddInner(next);
+                }
+
+                _HasGet = true;
+            }         
         }
 
+        /// <summary>
+        /// 更新前执行的操作
+        /// </summary>
         public virtual void BeforeUpdate(IEnumerable<T> group)
         {
             
         }
 
+        /// <summary>
+        /// 删除前执行的操作
+        /// </summary>
         public virtual void BeforeDelete(IEnumerable<string> keyGroup)
         {
             
@@ -254,17 +299,22 @@ namespace AutoIt.Foundation.Store
 
         #region Common
 
-        ///ToDo:Rename
-        public bool OnlyGetCurMedia
-        {
-            get { return NextMedia == null || (IsLoadAll && _HasGet); }
-        }
+        /// <summary>
+        /// 是否只从当前存储获取数据(没有下级存储或已经加载全部数据)
+        /// </summary>
+        public bool OnlyGetCurMedia => NextMedia == null || (IsLoadAll && _HasGet);///ToDo:Rename
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string GetStoreKey(string itemKey)
         {
             return StoreKey + ":" + itemKey;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string GetStoreKey(T item)
         {
             return GetStoreKey(item.Key_);

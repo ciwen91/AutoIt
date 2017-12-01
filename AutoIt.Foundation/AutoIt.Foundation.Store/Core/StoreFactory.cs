@@ -6,11 +6,23 @@ using AutoIt.Foundation.Common.ClassHelper;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// 存储工厂
+    /// </summary>
     public class StoreFactory
     {
+        /// <summary>
+        /// 默认存储工厂
+        /// </summary>
         public static StoreFactory Default=new StoreFactory();
 
-        public IEnumerable<SimpleStoreFactoryBase> FactoryGroup = AssemblyHelper.GetRealizeInstanceGroup<SimpleStoreFactoryBase>();
+        /// <summary>
+        /// 简单存储工厂集合
+        /// </summary>
+        private IEnumerable<SimpleStoreFactoryBase> _FactoryGroup = AssemblyHelper.GetAllRealizeInstance<SimpleStoreFactoryBase>();
+        /// <summary>
+        /// 存储对象缓存
+        /// </summary>
         private Dictionary<Type, object> _StoreDic = new Dictionary<Type, object>();
 
         private StoreFactory()
@@ -20,6 +32,9 @@ namespace AutoIt.Foundation.Store
 
         #region Get
 
+        /// <summary>
+        /// 获取存储(如果不存在则返回默认存储)
+        /// </summary>
         public StoreBase<T> GetStore<T>() where T : EntityBase
         {
             var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => GetDftConfig(typeof(T)));
@@ -31,6 +46,9 @@ namespace AutoIt.Foundation.Store
 
         #region Config
 
+        /// <summary>
+        /// 设置存储配置
+        /// </summary>
         public StoreFactory SetConfig(StoreConfig config)
         {
             var store = typeof(StoreFactory)
@@ -43,6 +61,9 @@ namespace AutoIt.Foundation.Store
             return this;
         }
 
+        /// <summary>
+        /// 获取默认存储配置
+        /// </summary>
         private StoreConfig GetDftConfig(Type dataType)
         {
             //默认为存储在数据库的键值对类型
@@ -58,7 +79,10 @@ namespace AutoIt.Foundation.Store
 
         #region Create
 
-        public StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
+        /// <summary>
+        /// 根据配置创建存储
+        /// </summary>
+        private StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
         {
             //创建简单Store集合
             var group = config.Group.Select(item =>
@@ -80,11 +104,14 @@ namespace AutoIt.Foundation.Store
             return group.First();
         }
 
+        /// <summary>
+        /// 创建简单存储
+        /// </summary>
         private StoreBase<T> CreateSimple<T>(StoreType type, StoreShape shape, StoreConfigItem configItem)
             where T : EntityBase
         {
             //创建Store对象
-            var factory = FactoryGroup.First(item => item.StoreType == type);
+            var factory = _FactoryGroup.First(item => item.StoreType == type);
             var store = factory.Create<T>(shape);
 
             //从Config里读取属性

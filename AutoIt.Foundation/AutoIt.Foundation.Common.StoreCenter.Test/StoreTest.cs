@@ -123,7 +123,7 @@ namespace AutoIt.Foundation.Store.Test
 
             var caseInfo = GetCaseInfo<CaseInfo>(caseName);
 
-            var group = _StoreCenter.Get();
+            var group = _StoreCenter.GetAll();
 
             if (caseInfo.Shape == StoreShape.Dic || caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
             {
@@ -280,7 +280,7 @@ namespace AutoIt.Foundation.Store.Test
             if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
             {
                 _StoreCenter.Update(item => item.ID >= 3 && item.ID <= 7, item => new Student {Name = "李四"});
-                var group = _StoreCenter.Get().Where(item => item.Name == "李四").ToList();
+                var group = _StoreCenter.GetAll().Where(item => item.Name == "李四").ToList();
 
                 Assert.Equal(5, group.Count);
                 Assert.Equal(3, group.Min(item => item.ID));
@@ -306,7 +306,7 @@ namespace AutoIt.Foundation.Store.Test
             if (caseInfo.ItemGroup.Any(item => item.Type == StoreType.DBStore))
             {
                 _StoreCenter.Delete(item => item.ID >= 3 && item.ID <= 7);
-                var group = _StoreCenter.Get().ToList();
+                var group = _StoreCenter.GetAll().ToList();
 
                 Assert.Equal(_DataGroup.Count-5, group.Count);
                 LogHelper.WriteLine(group.Count().ToString());

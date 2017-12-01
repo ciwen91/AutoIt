@@ -19,12 +19,12 @@
   <Class Name="AutoIt.Foundation.Store.StoreFactory" Collapsed="true">
     <Position X="0.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAABAAAAgAAAAAAEIAAAAAAIAEBABAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAABAAAAgAAAAAAEIAAAAAAIAEAABAAAAABAAAA=</HashCode>
       <FileName>Core\StoreFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="AutoIt.Foundation.Store.DBStoreFactory" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="3.25" Y="7" Width="1.75" />
+    <Position X="8.75" Y="7" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAA=</HashCode>
       <FileName>DBStore\DBStoreFactory.cs</FileName>
@@ -40,7 +40,7 @@
   <Class Name="AutoIt.Foundation.Store.EFContext" Collapsed="true">
     <Position X="16.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DBStore\EFContext.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -67,7 +67,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="AutoIt.Foundation.Store.ProcCacheFactory" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="5.75" Y="7" Width="1.75" />
+    <Position X="3.75" Y="7" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAA=</HashCode>
       <FileName>ProcCache\ProcCacheFactory.cs</FileName>
@@ -95,7 +95,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="AutoIt.Foundation.Store.RedisCacheFactory" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="8.25" Y="7" Width="1.75" />
+    <Position X="6.25" Y="7" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAA=</HashCode>
       <FileName>RedisCache\RedisCacheFactory.cs</FileName>
@@ -123,7 +123,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="AutoIt.Foundation.Store.SimpleStoreFactoryBase" Collapsed="true">
-    <Position X="5.5" Y="5.75" Width="2" />
+    <Position X="6" Y="5.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAA=</HashCode>
       <FileName>Core\SimpleStoreFactoryBase.cs</FileName>

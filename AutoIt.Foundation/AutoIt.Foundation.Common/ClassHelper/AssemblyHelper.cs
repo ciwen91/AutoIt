@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AutoIt.Foundation.Common
 {
-   public static class AssemblyHelper
+    public static class AssemblyHelper
     {
-        public static IEnumerable<T> GetRealizeInstanceGroup<T>()
+        public static IEnumerable<T> GetAllRealizeInstance<T>()
         {
-            var typeGroup = GetRealizeTypeGroup(typeof(T));
+            var typeGroup = GetAllRealizeType(typeof(T));
 
             var instanceGroup = typeGroup.Select(item => (T) Activator.CreateInstance(item))
                 .ToList();
@@ -18,16 +18,16 @@ namespace AutoIt.Foundation.Common
             return instanceGroup;
         }
 
-        public static IEnumerable<Type> GetRealizeTypeGroup(Type assignType)
+        public static IEnumerable<Type> GetAllRealizeType(this Type assignType)
         {
             var typeGroup = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(
                     a =>
                         a.GetTypes()
-                            .Where(item => assignType.IsAssignableFrom(item) && item.IsClass && !item.IsAbstract))
-                .ToArray();
+                            .Where(item => item.IsClass && !item.IsAbstract&& assignType.IsAssignableFrom(item)))
+                .ToList();
 
             return typeGroup;
-        } 
+        }
     }
 }

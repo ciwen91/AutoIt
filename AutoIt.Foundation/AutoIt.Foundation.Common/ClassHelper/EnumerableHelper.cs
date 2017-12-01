@@ -19,6 +19,21 @@ namespace AutoIt.Foundation.Common
             return group;
         }
 
+        public static T FirstOrDefault<T>(T item, Func<T, T> nextFunc, Func<T, bool> whereFunc) where T : class
+        {
+            while (item != null)
+            {
+                if (whereFunc(item))
+                {
+                    return item;
+                }
+
+                item = nextFunc(item);
+            }
+
+            return null;
+        }
+
         public static IEnumerable<T> Each<T>(this IEnumerable<T> group, Action<T> eachAction)
         {
             foreach (var item in group)
