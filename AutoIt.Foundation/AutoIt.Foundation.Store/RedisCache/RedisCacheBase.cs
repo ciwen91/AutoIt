@@ -9,12 +9,13 @@ namespace AutoIt.Foundation.Store
 
         protected override void AddInner(IEnumerable<T> @group)
         {
-            Update(group);
+            UpdateInner(group);
         }
 
         protected TimeSpan? GetExpireTimeSpan()
         {
-            var expire = AbsluteExpires??SlideExpires;//???
+            //Redis不原生支持滑动过期时间
+            var expire = AbsluteExpires??SlideExpires;
 
             return expire == null ? (TimeSpan?) null : TimeSpan.FromSeconds(expire.Value);
         }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoIt.Foundation.Common;
+using AutoIt.Foundation.Common.ClassHelper;
 using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Store
@@ -11,13 +12,20 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
-            var group = _Dic?.Where(item => keyGroup.Contains(item.Key))
-                .Select(item => item.Value)
-                .ToList();
+            var dic = _Dic;
 
-            group = group ?? new List<T>();
+            if (_Dic == null)
+            {
+                return new List<T>();
+            }
+            else
+            {
+                var group = keyGroup.Select(item => dic.Get(item))
+                    .Where(item => item != null)
+                    .ToList();
 
-            return group;
+                return group;
+            }
         }
         protected override void UpdateInner(IEnumerable<T> group)
         {

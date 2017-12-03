@@ -34,7 +34,7 @@ namespace AutoIt.Foundation.Store
         /// <summary>
         /// 初始化
         /// </summary>
-        public void Init()
+        public void Init() //???何时初始化才合理
         {
             if (NextMedia != null)
             {
@@ -71,13 +71,16 @@ namespace AutoIt.Foundation.Store
                 {
                     var next = NextMedia.Get(nextKeyGroup);
 
-                    //合并数据
-                    var merge = cur.ToList();
-                    merge.AddRange(next);
-                    cur = merge;
+                    if (next.Any())
+                    {
+                        //合并数据
+                        var merge = cur.ToList();
+                        merge.AddRange(next);
+                        cur = merge;
 
-                    //将下级的数据存储起来
-                    AddInner(next);
+                        //将下级的数据存储起来
+                        AddInner(next);
+                    }
                 }
             }
 
@@ -188,10 +191,13 @@ namespace AutoIt.Foundation.Store
                 {
                     var next = NextMedia.Exist(nextKeyGroup);
 
-                    //合并数据
-                    var merge = cur.ToList();
-                    merge.AddRange(next);
-                    cur = merge;
+                    if (next.Any())
+                    {
+                        //合并数据
+                        var merge = cur.ToList();
+                        merge.AddRange(next);
+                        cur = merge;
+                    }
                 }
             }
 
@@ -262,7 +268,7 @@ namespace AutoIt.Foundation.Store
                 try
                 {
                     //先从Buffer获取所有数据
-                    var group = BufferMedia.GetAll();
+                    var group = BufferMedia.GetAll();//???
 
                     //将数据写到存储
                     _IsToBuffer = false;

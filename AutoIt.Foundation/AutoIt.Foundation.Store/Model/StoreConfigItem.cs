@@ -10,7 +10,7 @@
         public int? SlideExpires { get; set; }
 
         //缓冲
-        public int MaxBufferTime { get; set; }
+        public int MaxBufferTime { get; set; } = 60;
         public int? MaxBufferCount { get; set; }
 
         public StoreConfigItem(StoreType type)

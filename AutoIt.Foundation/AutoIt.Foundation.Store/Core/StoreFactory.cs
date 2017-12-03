@@ -37,7 +37,7 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         public StoreBase<T> GetStore<T>() where T : EntityBase
         {
-            var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => GetDftConfig(typeof(T)));
+            var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => Create<T>(null));
 
             return store;
         }
@@ -51,11 +51,13 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         public StoreFactory SetConfig(StoreConfig config)
         {
+            //创建Store
             var store = typeof(StoreFactory)
                 .GetMethod(nameof(Create))
                 .MakeGenericMethod(config.DataType)
                 .Invoke(this, new object[] { config });
 
+            //缓存Store
             _StoreDic[config.DataType] = store;
 
             return this;
@@ -66,8 +68,8 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         private StoreConfig GetDftConfig(Type dataType)
         {
-            //默认为存储在数据库的键值对类型
-            var config = new StoreConfig(dataType, StoreShape.KeyValue, new List<StoreConfigItem>()
+            //默认为存储在数据库
+            var config = new StoreConfig(dataType, StoreShape.Dic, new List<StoreConfigItem>()
             {
                 new StoreConfigItem(StoreType.DBStore)
             });
@@ -84,6 +86,8 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         private StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
         {
+            config = config ?? GetDftConfig(typeof(T));
+
             //创建简单Store集合
             var group = config.Group.Select(item =>
             {

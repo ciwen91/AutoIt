@@ -16,6 +16,7 @@ namespace AutoIt.Foundation.Store
         {
             _Repository.SetItemGroup(StoreKey, group.ToDictionary(item => item.Key_));
 
+            //设置过期时间(更新时重置过期时间)
             var timeSpan = GetExpireTimeSpan();
 
             if (timeSpan != null)
@@ -50,6 +51,7 @@ namespace AutoIt.Foundation.Store
         {
             var slide = SlideExpires;
 
+            //重新设置滑动过期时间
             if (slide != null)
             {
                 _Repository.SetExpiry(StoreKey, TimeSpan.FromSeconds(slide.Value));

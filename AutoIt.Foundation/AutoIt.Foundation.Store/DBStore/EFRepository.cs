@@ -23,7 +23,7 @@ namespace AutoIt.Foundation.Store
                 var context= new EFContext(conStr);
 
                 //设置输出
-                context.Database.Log = LogHelper.WriteLine;
+                context.Database.Log = LogHelper.WriteLine;//???
 
                 return context;
             }

@@ -10,14 +10,9 @@ namespace AutoIt.Foundation.Store
 
         protected override void AddInner(IEnumerable<T> @group)
         {
-             Update(group);
+             UpdateInner(group);
         }
-
-        protected TValue GetValue<TValue>(string key)
-        {
-            return _Repository.Contains(key) ? (TValue)_Repository.Get(key) : default(TValue);
-        }
-
+       
         protected CacheItemPolicy GetCachePolicy()
         {
             var cachePolicy = new CacheItemPolicy();
@@ -33,6 +28,11 @@ namespace AutoIt.Foundation.Store
             }
 
             return cachePolicy;
+        }
+
+        protected TValue GetValue<TValue>(string key)
+        {
+            return _Repository.Contains(key) ? (TValue)_Repository.Get(key) : default(TValue);
         }
     }
 }

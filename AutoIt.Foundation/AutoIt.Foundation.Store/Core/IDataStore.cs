@@ -33,7 +33,7 @@ namespace AutoIt.Foundation.Store
         /// <summary>
         /// 删除所有数据
         /// </summary>
-        //IEnumerable<T> DeleteAll();
+        //IEnumerable<T> DeleteAll();//???
 
         /// <summary>
         /// 判断数据是否存在,如果存在则返回Key

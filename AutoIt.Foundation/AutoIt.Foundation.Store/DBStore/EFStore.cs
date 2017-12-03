@@ -201,12 +201,12 @@ namespace AutoIt.Foundation.Store
 
         #region Dynamic 
 
-        public string GetSelectKeyStr()
+        public string GetSelectKeyStr()//???
         {
             var keyNameGroup = EntityBase.GetKeyNameGroup(typeof(T));
 
             var selectStr = keyNameGroup.JoinStr("+ '$' +");
-            selectStr =selectStr+ ".ToString()";
+            selectStr =selectStr+ ".ToString()";//???
 
             return selectStr;
         }

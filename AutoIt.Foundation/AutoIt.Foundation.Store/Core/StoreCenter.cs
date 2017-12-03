@@ -25,11 +25,11 @@ namespace AutoIt.Foundation.Store
         {
             get
             {
-               var queryStore= (IQueryableDataStore<T>) EnumerableHelper.FirstOrDefault(_Store, item => item.NextMedia, item => item is IQueryableDataStore<T>);
+               var queryStore= (IQueryableDataStore<T>) EnumerableHelper.FirstOrDefault(_Store, item => item.NextMedia, item => item is IQueryableDataStore<T>);//???
 
                 if (queryStore == null)
                 {
-                    throw new NotSupportedException($"{typeof(T)}没有支持IQueryableDataStore<{typeof(T)}>的存储容器!");
+                    throw new NotSupportedException($"{typeof(T)}没有IQueryableDataStore<{typeof(T)}>类型的存储容器!");
                 }
                 else
                 {

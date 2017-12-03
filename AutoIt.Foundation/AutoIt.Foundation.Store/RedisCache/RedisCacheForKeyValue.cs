@@ -51,6 +51,7 @@ namespace AutoIt.Foundation.Store
         {
             base.BeforeGet(keyGroup);
 
+            //重新设置滑动过期时间
             if (SlideExpires != null&&keyGroup!=null)
             {
                 keyGroup = keyGroup.Select(GetStoreKey);
