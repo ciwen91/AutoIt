@@ -243,7 +243,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(() => _StoreCenter.Query("id>=3 and id<=7"));
+                Assert.Throws<NotSupportedException>(() => _StoreCenter.Query("id>=3 and id<=7"));
             }
     }
 
@@ -265,7 +265,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(() => _StoreCenter.Query(2, 3, "id>=3 and id<=7", "id desc"));
+                Assert.Throws<NotSupportedException>(() => _StoreCenter.Query(2, 3, "id>=3 and id<=7", "id desc"));
             }
         }
 
@@ -290,7 +290,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(
+                Assert.Throws<NotSupportedException>(
                     () => _StoreCenter.Update(item => item.ID >= 3 && item.ID <= 7, item => new Student {Name = "李四"}));
             }
         }
@@ -313,7 +313,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(
+                Assert.Throws<NotSupportedException>(
                     () => _StoreCenter.Delete(item => item.ID >= 3 && item.ID <= 7));
             }
         }
@@ -337,7 +337,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(
+                Assert.Throws<NotSupportedException>(
                     () => _StoreCenter.Exist(item => (item.ID >= 3 && item.ID <= 7) || item.ID == 100));
             }
         }
@@ -359,7 +359,7 @@ namespace AutoIt.Foundation.Store.Test
             }
             else
             {
-                Assert.Throws<Exception>(
+                Assert.Throws<NotSupportedException>(
                     () => _StoreCenter.Count(item => item.ID >= 3 && item.ID <= 7));
             }
         }

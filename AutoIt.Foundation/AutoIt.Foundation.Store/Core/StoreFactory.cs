@@ -53,7 +53,7 @@ namespace AutoIt.Foundation.Store
         {
             //创建Store
             var store = typeof(StoreFactory)
-                .GetMethod(nameof(Create))
+                .GetMethod(nameof(Create), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .MakeGenericMethod(config.DataType)
                 .Invoke(this, new object[] { config });
 

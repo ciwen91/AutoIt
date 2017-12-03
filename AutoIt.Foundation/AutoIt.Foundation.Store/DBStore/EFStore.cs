@@ -205,8 +205,9 @@ namespace AutoIt.Foundation.Store
         {
             var keyNameGroup = EntityBase.GetKeyNameGroup(typeof(T));
 
-            var selectStr = keyNameGroup.JoinStr("+ '$' +");
-            selectStr =selectStr+ ".ToString()";//???
+            var selectStr = keyNameGroup
+                .Select(item=>item+".ToString()")
+                .JoinStr("+ \"$\" +");
 
             return selectStr;
         }
@@ -234,7 +235,7 @@ namespace AutoIt.Foundation.Store
         private string GetWhereStr(string key)
         {
             var whereStr = EntityBase.GetKeyNameValueDic(typeof(T), key)
-                .Select(item => $"{item.Key}='{item.Value.Replace("'","''")}'")
+                .Select(item => $"{item.Key}={item.Value}")//???
                 .JoinStr(" AND ");
 
             return whereStr;
