@@ -7,45 +7,46 @@ namespace AutoIt.Foundation.Store
 {
     public abstract class StoreBase<T> : IDataStore<T> where T : EntityBase
     {
-        //基本信息
+        //存储信息
         public string StoreKey => typeof(T).Name;
 
         public StoreBase<T> NextMedia { get; set; }
 
-        //加载方式
+        //加载模式
         private bool _HasGet { get; set; }
         public bool IsLoadAll { get; set; }
 
-        //生命周期
+        //生存周期
         public int? AbsluteExpires { get; set; }
         public int? SlideExpires { get; set; }
 
-        //缓冲
+        //数据缓冲
         private object _BufferLock = new object();
         private bool _IsToBuffer { get; set; }
         private int _BufferCount { get; set; }
-        public int? MaxBufferTime { get; set; }
+        public int MaxBufferTime { get; set; }
         public int? MaxBufferCount { get; set; }
         public StoreBase<T> BufferMedia { get; set; }
 
         //数据变化事件(内部原因)
         public Action<IEnumerable<string>> OnChange;
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         public void Init()
         {
-            if (BufferMedia != null)
+            if (NextMedia != null)
             {
-                _IsToBuffer = BufferMedia != null;
-
-                TimerTaskScheduler.Default.AddTask(new SimpleTimerTaskInfo(FlushAll, MaxBufferTime??30));
+                //处理数据变化
+                NextMedia.OnChange += keyGroup =>///???
+                {
+                    DeleteInner(keyGroup);
+                    OnChange(keyGroup);
+                };
             }
 
-
-            NextMedia.OnChange += keyGroup =>
-            {
-                DeleteInner(keyGroup);
-                OnChange(keyGroup);
-            };
+            InitBuffer();
         }
 
         #region  IDataMedia<T>
@@ -87,28 +88,37 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         public void Add(IEnumerable<T> group)
         {
-            lock (_BufferLock)
+            //如果Buffer存储不为空,则存到Buffer里
+            if (BufferMedia != null)
             {
-                if (_IsToBuffer)
+                lock (_BufferLock)
                 {
+                    if (_IsToBuffer)
+                    {
+                        //添加到Buffer
                         BufferMedia.Add(group);
-                        _BufferCount++;
+                        _BufferCount += group.Count();
 
-                        if (MaxBufferCount != null&&_BufferCount>=MaxBufferCount)
+                        //如果超出最大数量,则清空Buffer
+                        if (MaxBufferCount != null && _BufferCount >= MaxBufferCount)
                         {
-                            FlushAll();
+                            FlushBuffer();
                         }
 
-                    return;
+                        return;
+                    }
                 }
             }
 
+            //先添加下级存储数据
             if (NextMedia != null)
             {
                 NextMedia.Add(group);
             }
 
+            //Aop
             BeforeUpdate(group);
+            //再添加当前存储数据
             AddInner(group);
         }
         /// <summary>
@@ -226,33 +236,45 @@ namespace AutoIt.Foundation.Store
 
         #endregion
 
-        #region Others
+        #region Buffer
 
-        public void Delete(IEnumerable<T> group)
+        /// <summary>
+        /// 初始化Buffer
+        /// </summary>
+        private void InitBuffer()
         {
-            Delete(group.Select(GetStoreKey));
-        }
-
-        public void FlushAll()
-        {
+            //定时清空Buffer
             if (BufferMedia != null)
             {
-                lock (_BufferLock)
+                _IsToBuffer = true;
+
+                TimerTaskScheduler.Default.AddTask(new SimpleTimerTaskInfo(FlushBuffer, MaxBufferTime));
+            }      
+        }
+
+        /// <summary>
+        /// 清空Buffer
+        /// </summary>
+        private void FlushBuffer()
+        {
+            lock (_BufferLock)
+            {
+                try
                 {
-                    try
-                    {
-                        var group = BufferMedia.GetAll();
+                    //先从Buffer获取所有数据
+                    var group = BufferMedia.GetAll();
 
-                        _IsToBuffer = false;
-                        Add(group);
+                    //将数据写到存储
+                    _IsToBuffer = false;
+                    Add(group);
 
-                        BufferMedia.Delete(group);
-                        _BufferCount -= group.Count();
-                    }
-                    finally
-                    {
-                        _IsToBuffer = true;
-                    }
+                    //从Buffer中删除所有数据
+                    BufferMedia.Delete(group.Select(GetStoreKey));
+                    _BufferCount -= group.Count();
+                }
+                finally
+                {
+                    _IsToBuffer = true;
                 }
             }
         }
@@ -305,7 +327,7 @@ namespace AutoIt.Foundation.Store
         public bool OnlyGetCurMedia => NextMedia == null || (IsLoadAll && _HasGet);///ToDo:Rename
 
         /// <summary>
-        /// 
+        /// 获取项的存储键
         /// </summary>
         public string GetStoreKey(string itemKey)
         {
@@ -313,7 +335,7 @@ namespace AutoIt.Foundation.Store
         }
 
         /// <summary>
-        /// 
+        /// 获取项的存储键
         /// </summary>
         public string GetStoreKey(T item)
         {

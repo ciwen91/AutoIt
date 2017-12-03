@@ -14,7 +14,7 @@ namespace AutoIt.Foundation.Store
 
         protected TimeSpan? GetExpireTimeSpan()
         {
-            var expire = AbsluteExpires??SlideExpires;
+            var expire = AbsluteExpires??SlideExpires;//???
 
             return expire == null ? (TimeSpan?) null : TimeSpan.FromSeconds(expire.Value);
         }

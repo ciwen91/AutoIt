@@ -9,11 +9,6 @@ namespace AutoIt.Foundation.Store
     {
         #region IDataMedia
 
-        protected override IEnumerable<T> GetInner()
-        {
-            return _Dic?.Values;
-        }
-
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
             var group = _Dic?.Where(item => keyGroup.Contains(item.Key))
@@ -24,7 +19,6 @@ namespace AutoIt.Foundation.Store
 
             return group;
         }
-
         protected override void UpdateInner(IEnumerable<T> group)
         {
             var dic = _Dic;
@@ -42,7 +36,6 @@ namespace AutoIt.Foundation.Store
                 dic[item.Key_] = item;
             }
         }
-
         protected override void DeleteInner(IEnumerable<string> group)
         {
             var dic = _Dic;
@@ -54,6 +47,11 @@ namespace AutoIt.Foundation.Store
                     dic.Remove(item);
                 }
             }
+        }
+
+        protected override IEnumerable<T> GetInner()
+        {
+            return _Dic?.Values;
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
@@ -71,7 +69,6 @@ namespace AutoIt.Foundation.Store
                 return result;
             }
         }
-
         protected override int CountInner()
         {
             var dic = _Dic;
@@ -81,9 +78,6 @@ namespace AutoIt.Foundation.Store
 
         #endregion
 
-        protected Dictionary<string, T> _Dic
-        {
-            get { return GetValue<Dictionary<string, T>>(StoreKey); }
-        }
+        protected Dictionary<string, T> _Dic => GetValue<Dictionary<string, T>>(StoreKey);
     }
 }

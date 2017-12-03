@@ -11,11 +11,6 @@ namespace AutoIt.Foundation.Store
     {
         #region IDataMedia
 
-        protected override IEnumerable<T> GetInner()
-        {
-            return null;
-        }
-
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
             keyGroup = keyGroup.Select(GetStoreKey);
@@ -26,7 +21,6 @@ namespace AutoIt.Foundation.Store
 
             return group;
         }
-
         protected override void UpdateInner(IEnumerable<T> @group)
         {
             foreach (var item in group)
@@ -37,7 +31,6 @@ namespace AutoIt.Foundation.Store
                 _Repository.Set(key, item, policy);
             }
         }
-
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
             keyGroup = keyGroup.Select(GetStoreKey);
@@ -46,6 +39,11 @@ namespace AutoIt.Foundation.Store
             {
                 _Repository.Remove(item);
             }
+        }
+
+        protected override IEnumerable<T> GetInner()
+        {
+            return null;
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
@@ -57,7 +55,6 @@ namespace AutoIt.Foundation.Store
 
             return result;
         }
-
         protected override int CountInner()
         {
             return -1;

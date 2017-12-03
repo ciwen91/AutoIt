@@ -12,23 +12,18 @@ using EntityFramework.Extensions;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// EntityFramework 存储
+    /// </summary>
     public class EFStore<T>: StoreBase<T>,IQueryableDataStore<T> where T : EntityBase
     {
         protected EFRepository _Repository=new EFRepository();
 
         #region IDataMedia<T>
 
-        protected override IEnumerable<T> GetInner()
-        {
-            using (var context=_Repository.NewContext)
-            {
-                var group = context.Set<T>().ToList();
-                return group;
-            }
-        }
-
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
+            //获取过滤条件
             var whereStr = GetWhereStr(keyGroup);
 
             using (var context = _Repository.NewContext)
@@ -39,7 +34,6 @@ namespace AutoIt.Foundation.Store
                 return group;
             }
         }
-
         protected override void AddInner(IEnumerable<T> group)
         {
             using (var context = _Repository.NewContext)
@@ -49,22 +43,22 @@ namespace AutoIt.Foundation.Store
                 context.SaveChanges();
             }
         }
-
         protected override void UpdateInner(IEnumerable<T> @group)
         {
             using (var context = _Repository.NewContext)
             {
                 foreach (var item in group)
                 {
+                    //状态设为更新
                     context.Entry(item).State = EntityState.Modified;
                 }
 
                 context.SaveChanges();
             }
         }
-
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
+            //获取过滤条件
             var whereStr = GetWhereStr(keyGroup);
 
             using (var context = _Repository.NewContext)
@@ -75,10 +69,21 @@ namespace AutoIt.Foundation.Store
             }
         }
 
+        protected override IEnumerable<T> GetInner()
+        {
+            using (var context = _Repository.NewContext)
+            {
+                var group = context.Set<T>().ToList();
+                return group;
+            }
+        }
+
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
         {
+            //获取过滤条件
             var whereStr = GetWhereStr(keyGroup);
-            var selectStr = GetSelectStr();
+            //获取主键Select
+            var selectStr = GetSelectKeyStr();
 
             using (var context = _Repository.NewContext)
             {
@@ -90,7 +95,6 @@ namespace AutoIt.Foundation.Store
                 return group;
             }
         }
-
         protected override int CountInner()
         {
             using (var context = _Repository.NewContext)
@@ -168,7 +172,7 @@ namespace AutoIt.Foundation.Store
 
         public IEnumerable<string> Exist(Expression<Func<T, bool>> whereExpress)
         {
-            var selectStr = GetSelectStr();
+            var selectStr = GetSelectKeyStr();
 
             using (var context = _Repository.NewContext)
             {
@@ -197,7 +201,7 @@ namespace AutoIt.Foundation.Store
 
         #region Dynamic 
 
-        public string GetSelectStr()
+        public string GetSelectKeyStr()
         {
             var keyNameGroup = EntityBase.GetKeyNameGroup(typeof(T));
 
@@ -207,26 +211,30 @@ namespace AutoIt.Foundation.Store
             return selectStr;
         }
 
-        public string GetWhereStr(IEnumerable<string> keyGroup)
+        private string GetWhereStr(IEnumerable<string> keyGroup)
         {
             var group = keyGroup.Select(GetWhereStr)
                 .ToList();
 
             if (group.Count > 1)
             {
-                group = group.Select(item => $"({item})")
-                    .ToList();
+                return group.Select(item => $"({item})")
+                    .JoinStr(" OR ");
             }
-
-            var whereStr = group.JoinStr("OR");
-
-            return whereStr;
+            else if (group.Count == 1)
+            {
+                return group.First();
+            }
+            else
+            {
+                return "1=2";
+            }
         }
 
-        public string GetWhereStr(string key)
+        private string GetWhereStr(string key)
         {
             var whereStr = EntityBase.GetKeyNameValueDic(typeof(T), key)
-                .Select(item => $"{item.Key}={item.Value}")//??? \"
+                .Select(item => $"{item.Key}='{item.Value.Replace("'","''")}'")
                 .JoinStr(" AND ");
 
             return whereStr;
