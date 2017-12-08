@@ -165,10 +165,35 @@ namespace AutoIt.Foundation.Store
             //Aop
             BeforeGet(null);
 
-            //从当前存储获取数据
-            var group = GetInner();
+            if (OnlyGetCurMedia)
+            {
+                //从当前存储获取数据
+                var group= GetAllInner();
+                return group;
+            }
+            else
+            {
+                //从下级存储获取数据
+                var group= NextMedia.GetAllInner();
+                return group;
+            }
+        }
+        /// <summary>
+        /// 删除所有数据
+        /// </summary>
+        public void DeleteAll()
+        {
+            //删除下级数据
+            if (NextMedia != null)
+            {
+                NextMedia.DeleteAll();
+            }
 
-            return group;  
+            //Aop
+            BeforeDelete(null);
+
+            //删除本级数据
+            DeleteAllInner();
         }
 
         /// <summary>
@@ -235,7 +260,8 @@ namespace AutoIt.Foundation.Store
         protected abstract void UpdateInner(IEnumerable<T> group);
         protected abstract void DeleteInner(IEnumerable<string> keyGroup);
 
-        protected abstract IEnumerable<T> GetInner();
+        protected abstract IEnumerable<T> GetAllInner();
+        protected abstract void DeleteAllInner();
 
         protected abstract IEnumerable<string> ExistInner(IEnumerable<string> keyGroup);
         protected abstract int CountInner();
@@ -299,7 +325,7 @@ namespace AutoIt.Foundation.Store
                 //如果是全部加载,则加载全部数据
                 if (IsLoadAll&&NextMedia!=null)
                 {
-                    var next = NextMedia.GetInner();
+                    var next = NextMedia.GetAll();
                     AddInner(next);
                 }
 

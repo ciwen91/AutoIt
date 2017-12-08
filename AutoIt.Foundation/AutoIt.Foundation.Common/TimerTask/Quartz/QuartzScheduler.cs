@@ -26,7 +26,7 @@ namespace AutoIt.Foundation.Common
 
         public void Start(int threadCount)
         {
-            _Scheduler.Context["quartz.threadPool.threadCount"] = threadCount;//???
+            _Scheduler.Context["quartz.threadPool.threadCount"] = threadCount;
 
             _Scheduler.Start();
         }

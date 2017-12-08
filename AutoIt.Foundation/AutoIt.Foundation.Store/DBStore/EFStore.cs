@@ -69,13 +69,17 @@ namespace AutoIt.Foundation.Store
             }
         }
 
-        protected override IEnumerable<T> GetInner()
+        protected override IEnumerable<T> GetAllInner()
         {
             using (var context = _Repository.NewContext)
             {
                 var group = context.Set<T>().ToList();
                 return group;
             }
+        }
+        protected override void DeleteAllInner()
+        {
+            Truncate();
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)

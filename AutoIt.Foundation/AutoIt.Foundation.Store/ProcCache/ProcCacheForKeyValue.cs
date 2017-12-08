@@ -41,9 +41,13 @@ namespace AutoIt.Foundation.Store
             }
         }
 
-        protected override IEnumerable<T> GetInner()
+        protected override IEnumerable<T> GetAllInner()
         {
             return null;
+        }
+        protected override void DeleteAllInner()
+        {
+            throw new NotSupportedException("ProcCacheForKeyValue不支持DeleteAll方法");
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)

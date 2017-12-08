@@ -63,6 +63,7 @@
     <Compile Include="ClassHelper\DictionaryHelper.cs" />
     <Compile Include="ClassHelper\EnumerableHelper.cs" />
     <Compile Include="ClassHelper\MemberInfoHelper.cs" />
+    <Compile Include="ClassHelper\ObjectHelper.cs" />
     <Compile Include="ClassHelper\StringHelper.cs" />
     <Compile Include="Context\Context.cs" />
     <Compile Include="Context\Context_Old.cs" />

@@ -25,7 +25,8 @@ namespace AutoIt.Foundation.Store
         {
             get
             {
-               var queryStore= (IQueryableDataStore<T>) EnumerableHelper.FirstOrDefault(_Store, item => item.NextMedia, item => item is IQueryableDataStore<T>);//???
+                var queryStore = _Store.AsEnumerable(item => item.NextMedia)
+                    .FirstOrDefault<IDataStore<T>, IQueryableDataStore<T>>();
 
                 if (queryStore == null)
                 {
@@ -75,6 +76,13 @@ namespace AutoIt.Foundation.Store
         public IEnumerable<T> GetAll()
         {
             return _Store.GetAll();
+        }
+        /// <summary>
+        /// 删除所有数据
+        /// </summary>
+        public void DeleteAll()
+        {
+            _Store.DeleteAll();
         }
 
         /// <summary>

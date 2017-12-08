@@ -27,9 +27,14 @@ namespace AutoIt.Foundation.Store
             _Repository.RemoveGroup(keyGroup);
         }
 
-        protected override IEnumerable<T> GetInner()
+        protected override IEnumerable<T> GetAllInner()
         {
             return null;
+        }
+
+        protected override void DeleteAllInner()
+        {
+            throw new NotSupportedException("RedisCacheForKeyValue不支持DeleteAll方法");
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)

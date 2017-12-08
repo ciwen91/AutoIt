@@ -57,9 +57,13 @@ namespace AutoIt.Foundation.Store
             }
         }
 
-        protected override IEnumerable<T> GetInner()
+        protected override IEnumerable<T> GetAllInner()
         {
             return _Dic?.Values;
+        }
+        protected override void DeleteAllInner()
+        {
+            _Repository.Remove(StoreKey);
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)

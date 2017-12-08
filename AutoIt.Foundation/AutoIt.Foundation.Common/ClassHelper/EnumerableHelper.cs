@@ -34,6 +34,12 @@ namespace AutoIt.Foundation.Common
             return null;
         }
 
+        public static TResult FirstOrDefault<T, TResult>(this IEnumerable<T> group) where T : class where TResult:T
+        {
+            var elm = (TResult)group.FirstOrDefault<T>(item => item is TResult);
+            return elm;
+        }
+
         public static IEnumerable<T> Each<T>(this IEnumerable<T> group, Action<T> eachAction)
         {
             foreach (var item in group)
