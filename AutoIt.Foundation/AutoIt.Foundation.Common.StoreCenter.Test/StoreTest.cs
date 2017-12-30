@@ -336,7 +336,7 @@ namespace AutoIt.Foundation.Store.Test
                 LogHelper.WriteLine(JsonConvert.SerializeObject(group));
             }
             else
-            {
+            { 
                 Assert.Throws<NotSupportedException>(
                     () => _StoreCenter.Exist(item => (item.ID >= 3 && item.ID <= 7) || item.ID == 100));
             }
