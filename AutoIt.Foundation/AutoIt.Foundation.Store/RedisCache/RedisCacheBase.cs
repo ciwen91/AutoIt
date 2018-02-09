@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// Redis缓存基类
+    /// </summary>
     public abstract class RedisCacheBase<T> : StoreBase<T> where T : EntityBase
     {
         protected RedisRepository _Repository = new RedisRepository();

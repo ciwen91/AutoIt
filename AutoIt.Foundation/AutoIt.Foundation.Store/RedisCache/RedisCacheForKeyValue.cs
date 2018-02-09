@@ -18,7 +18,7 @@ namespace AutoIt.Foundation.Store
         {
             var expireSpan = GetExpireTimeSpan();
 
-            _Repository.SetGroup(group.ToDictionary(item => GetStoreKey(item.Key_)), expireSpan);
+            _Repository.SetGroup(group.ToDictionary(GetStoreKey), expireSpan);
         }
         protected override void DeleteInner(IEnumerable<string> keyGroup)
         {
@@ -29,12 +29,12 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetAllInner()
         {
-            return null;
+            throw new NotSupportedException($"{nameof(RedisCacheForKeyValue<T>)}不支持{nameof(GetAllInner)}方法");
         }
 
         protected override void DeleteAllInner()
         {
-            throw new NotSupportedException("RedisCacheForKeyValue不支持DeleteAll方法");
+            throw new NotSupportedException($"{nameof(RedisCacheForKeyValue<T>)}不支持{nameof(DeleteAllInner)}方法");
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
@@ -45,7 +45,7 @@ namespace AutoIt.Foundation.Store
         }
         protected override int CountInner()
         {
-            return -1;
+            throw new NotSupportedException($"{nameof(RedisCacheForKeyValue<T>)}不支持{nameof(CountInner)}方法");
         }
 
         #endregion

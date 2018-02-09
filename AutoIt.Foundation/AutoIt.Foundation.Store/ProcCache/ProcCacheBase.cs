@@ -4,15 +4,25 @@ using System.Runtime.Caching;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// 进程内缓存基类
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class ProcCacheBase<T> : StoreBase<T> where T : EntityBase
     {
         protected MemoryCache _Repository = MemoryCache.Default;
 
+        /// <summary>
+        /// Add方法和Update方法一致
+        /// </summary>
         protected override void AddInner(IEnumerable<T> @group)
         {
              UpdateInner(group);
         }
        
+        /// <summary>
+        /// 获取缓存策略
+        /// </summary>
         protected CacheItemPolicy GetCachePolicy()
         {
             var cachePolicy = new CacheItemPolicy();
@@ -28,11 +38,6 @@ namespace AutoIt.Foundation.Store
             }
 
             return cachePolicy;
-        }
-
-        protected TValue GetValue<TValue>(string key)
-        {
-            return _Repository.Contains(key) ? (TValue)_Repository.Get(key) : default(TValue);
         }
     }
 }

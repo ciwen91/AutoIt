@@ -5,15 +5,19 @@ using AutoIt.Foundation.Common;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// 存储基类
+    /// </summary>
     public abstract class StoreBase<T> : IDataStore<T> where T : EntityBase
     {
-        //存储信息
+        //存储Key
         public string StoreKey => typeof(T).Name;
-
+        //下一级存储
         public StoreBase<T> NextMedia { get; set; }
 
-        //加载模式
+        //是否已经加载数据
         private bool _HasGet { get; set; }
+        //是否一次性加载全部数据
         public bool IsLoadAll { get; set; }
 
         //生存周期
@@ -228,7 +232,6 @@ namespace AutoIt.Foundation.Store
 
             return cur;
         }
-
         /// <summary>
         /// 获取数据总数
         /// </summary>

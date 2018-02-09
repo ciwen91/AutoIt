@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// ID为主键的实体基类
+    /// </summary>
     public abstract class EntityWithIDBase : EntityBase
     {
         [Key]

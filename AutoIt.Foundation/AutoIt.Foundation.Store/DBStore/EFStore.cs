@@ -131,7 +131,6 @@ namespace AutoIt.Foundation.Store
                 return group.ToList();
             }
         }
-
         public IEnumerable<T> Query(int pageNum, int pageSize, string @where, string order = null)
         {
             using (var context = _Repository.NewContext)
@@ -163,7 +162,6 @@ namespace AutoIt.Foundation.Store
                     .Update(updateExpress);
             }
         }
-
         public void Delete(Expression<Func<T, bool>> whereExpress)
         {
             using (var context = _Repository.NewContext)
@@ -188,7 +186,6 @@ namespace AutoIt.Foundation.Store
                 return group;
             }
         }
-
         public int Count(Expression<Func<T, bool>> whereExpress)
         {
             using (var context=_Repository.NewContext)

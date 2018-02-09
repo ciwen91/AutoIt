@@ -20,8 +20,9 @@ namespace AutoIt.Foundation.Store
             }
             else
             {
-                var group = keyGroup.Select(item => dic.Get(item))
-                    .Where(item => item != null)
+                keyGroup = ExistInner(keyGroup);
+
+                var group = keyGroup.Select(item => dic[item])
                     .ToList();
 
                 return group;
@@ -90,6 +91,7 @@ namespace AutoIt.Foundation.Store
 
         #endregion
 
-        protected Dictionary<string, T> _Dic => GetValue<Dictionary<string, T>>(StoreKey);
+        protected Dictionary<string, T> _Dic
+            => _Repository.Contains(StoreKey) ? (Dictionary<string, T>) _Repository.Get(StoreKey) : null;
     }
 }

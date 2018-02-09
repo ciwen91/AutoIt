@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// 实体基类
+    /// </summary>
     public abstract class EntityBase
     {
         [JsonIgnore]

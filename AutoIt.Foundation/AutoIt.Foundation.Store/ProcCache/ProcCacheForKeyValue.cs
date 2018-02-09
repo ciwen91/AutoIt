@@ -13,11 +13,15 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetInner(IEnumerable<string> keyGroup)
         {
-            keyGroup = keyGroup.Select(GetStoreKey);
+            var group = new List<T>();
 
-            var group = keyGroup.Select(GetValue<T>)
-                    .Where(item => item != null)
-                    .ToList();
+            foreach (var item in keyGroup)
+            {
+                if (_Repository.Contains(item))
+                {
+                    group.Add((T) _Repository.Get(item));
+                }
+            }
 
             return group;
         }
@@ -43,11 +47,11 @@ namespace AutoIt.Foundation.Store
 
         protected override IEnumerable<T> GetAllInner()
         {
-            return null;
+            throw new NotSupportedException($"{nameof(ProcCacheForKeyValue<T>)}不支持{nameof(GetAllInner)}方法");
         }
         protected override void DeleteAllInner()
         {
-            throw new NotSupportedException("ProcCacheForKeyValue不支持DeleteAll方法");
+            throw new NotSupportedException($"{nameof(ProcCacheForKeyValue<T>)}不支持{nameof(DeleteAllInner)}");
         }
 
         protected override IEnumerable<string> ExistInner(IEnumerable<string> keyGroup)
@@ -61,7 +65,7 @@ namespace AutoIt.Foundation.Store
         }
         protected override int CountInner()
         {
-            return -1;
+            throw new NotSupportedException($"{nameof(ProcCacheForKeyValue<T>)}不支持{nameof(CountInner)}");
         }
 
         #endregion

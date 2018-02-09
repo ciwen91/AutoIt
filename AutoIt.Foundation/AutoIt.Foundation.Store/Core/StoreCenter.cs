@@ -17,7 +17,7 @@ namespace AutoIt.Foundation.Store
         /// <summary>
         /// 存储对象
         /// </summary>
-        private StoreBase<T> _Store = StoreFactory.Default.GetStore<T>();
+        private StoreBase<T> _Store = StoreFactory.Instance.GetStore<T>();
         /// <summary>
         /// 可查询的存储对象
         /// </summary>

@@ -84,7 +84,7 @@ namespace AutoIt.Foundation.Store.Test
                 action(storeConfig);
             }
 
-            StoreFactory.Default.SetConfig(storeConfig);
+            StoreFactory.Instance.SetConfig(storeConfig);
 
             #endregion
 

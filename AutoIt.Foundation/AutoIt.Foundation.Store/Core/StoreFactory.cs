@@ -14,16 +14,21 @@ namespace AutoIt.Foundation.Store
         /// <summary>
         /// 默认存储工厂
         /// </summary>
-        public static StoreFactory Default=new StoreFactory();
-
+        public static StoreFactory Instance=new StoreFactory();
         /// <summary>
         /// 简单存储工厂集合
         /// </summary>
-        private IEnumerable<SimpleStoreFactoryBase> _FactoryGroup = AssemblyHelper.GetAllRealizeInstance<SimpleStoreFactoryBase>();
+        private IEnumerable<SimpleStoreFactoryBase> _FactoryGroup =
+            AssemblyHelper.GetAllRealizeInstance<SimpleStoreFactoryBase>();
+
         /// <summary>
-        /// 存储对象缓存
+        /// 存储对象缓存字典
         /// </summary>
         private Dictionary<Type, object> _StoreDic = new Dictionary<Type, object>();
+        /// <summary>
+        /// 存储配置字典
+        /// </summary>
+        private Dictionary<Type, StoreConfig> _StoreConfigDic = new Dictionary<Type, StoreConfig>();
 
         private StoreFactory()
         {
@@ -37,7 +42,7 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         public StoreBase<T> GetStore<T>() where T : EntityBase
         {
-            var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => Create<T>(null));
+            var store = (StoreBase<T>)_StoreDic.GetOrSet(typeof(T), () => Create<T>());
 
             return store;
         }
@@ -51,14 +56,10 @@ namespace AutoIt.Foundation.Store
         /// </summary>
         public StoreFactory SetConfig(StoreConfig config)
         {
-            //创建Store
-            var store = typeof(StoreFactory)
-                .GetMethod(nameof(Create), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .MakeGenericMethod(config.DataType)
-                .Invoke(this, new object[] { config });
-
-            //缓存Store
-            _StoreDic[config.DataType] = store;
+            //设置Config
+            _StoreConfigDic[config.DataType] = config;
+            //移除存储缓存(下次获取时会再创建)
+            _StoreDic.Remove(config.DataType);
 
             return this;
         }
@@ -82,11 +83,11 @@ namespace AutoIt.Foundation.Store
         #region Create
 
         /// <summary>
-        /// 根据配置创建存储
+        /// 创建存储
         /// </summary>
-        private StoreBase<T> Create<T>(StoreConfig config) where T : EntityBase
+        private StoreBase<T> Create<T>() where T : EntityBase
         {
-            config = config ?? GetDftConfig(typeof(T));
+            var config = _StoreConfigDic.Get(typeof(T)) ?? GetDftConfig(typeof(T));
 
             //创建简单Store集合
             var group = config.Group.Select(item =>

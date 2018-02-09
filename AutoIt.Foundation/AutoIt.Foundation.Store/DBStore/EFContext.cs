@@ -5,6 +5,9 @@ using AutoIt.Foundation.Common;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// EF上下文(实体映射等)
+    /// </summary>
     public class EFContext : DbContext
     {
         public EFContext(string conStr) : base(conStr)

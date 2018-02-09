@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// EF配置(默认配置)
+    /// </summary>
     public class EFConfiguration : DbConfiguration
     {
         public EFConfiguration()

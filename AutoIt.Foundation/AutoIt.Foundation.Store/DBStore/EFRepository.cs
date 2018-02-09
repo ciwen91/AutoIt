@@ -4,6 +4,9 @@ using AutoIt.Foundation.Common;
 
 namespace AutoIt.Foundation.Store
 {
+    /// <summary>
+    /// EF仓储
+    /// </summary>
     public  class EFRepository
     {
         public static DependcyData<string> ConStr=new DependcyData<string>();
