@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
-
+  
 namespace AutoIt.Foundation.Store.Test
 {
     public class StoreTest:TestBase
