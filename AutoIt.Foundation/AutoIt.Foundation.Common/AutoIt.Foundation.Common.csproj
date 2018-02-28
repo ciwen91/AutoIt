@@ -68,14 +68,14 @@
     <Compile Include="Configuration\Context\Context.cs" />
     <Compile Include="Configuration\Context\Context_Old.cs" />
     <Compile Include="Configuration\Context\DependcyData.cs" />
-    <Compile Include="DataStruct\KeyValue\Core\IKeyValue.cs" />
-    <Compile Include="DataStruct\KeyValue\Core\IKeyObjValue.cs" />
-    <Compile Include="DataStruct\KeyValue\KeyValueForDicGroup.cs" />
-    <Compile Include="DataStruct\KeyValue\KeyValueForObjDicGroup.cs" />
-    <Compile Include="DataStruct\KeyValue\KeyValueHelper.cs" />
-    <Compile Include="DataStruct\KeyValue\ObjDictionary.cs" />
-    <Compile Include="DataStruct\LinePoint.cs" />
-    <Compile Include="DataStruct\Point.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\Core\IKeyValue.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\Core\IKeyObjValue.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\KeyValueForDicGroup.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\KeyValueForObjDicGroup.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\KeyValueHelper.cs" />
+    <Compile Include="Basic\DataStruct\KeyValue\ObjDictionary.cs" />
+    <Compile Include="Basic\DataStruct\LinePoint.cs" />
+    <Compile Include="Basic\DataStruct\Point.cs" />
     <Compile Include="Expression\ExpressionVisitor.cs" />
     <Compile Include="Expression\MemberVisitor.cs" />
     <Compile Include="Expression\LangAnaly\Lang\CalculateLangManager.cs" />
@@ -120,7 +120,7 @@
     <Compile Include="Task\TimerTask\Quartz\QuartzScheduler.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DataStruct\KeyValue\KeyValue.cd" />
+    <None Include="Basic\DataStruct\KeyValue\KeyValue.cd" />
     <None Include="Expression\LangAnaly\LangAnaly.cd" />
     <None Include="packages.config" />
   </ItemGroup>
