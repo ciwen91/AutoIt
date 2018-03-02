@@ -41,6 +41,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
       <Private>True</Private>
@@ -67,6 +68,12 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Basic\ClassHelper\AssemblyHelperTest.cs" />
+    <Compile Include="Basic\ClassHelper\DictionaryHelperTest.cs" />
+    <Compile Include="Basic\ClassHelper\EnumerableHelperTest.cs" />
+    <Compile Include="Basic\ClassHelper\MemberInfoHelperTest.cs" />
+    <Compile Include="Basic\ClassHelper\ObjectHelperTest.cs" />
+    <Compile Include="Basic\ClassHelper\StringHelperTest.cs" />
     <Compile Include="Context\DepencyDataTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -74,6 +81,10 @@
     <ProjectReference Include="..\AutoIt.Foundation.Common\AutoIt.Foundation.Common.csproj">
       <Project>{aa5a1883-4eb2-48f0-86a3-376dadc19b56}</Project>
       <Name>AutoIt.Foundation.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AutoIt.Foundation.TestBase\AutoIt.Foundation.TestBase.csproj">
+      <Project>{3963bbca-4c75-4a35-8e4b-b47780bdd31d}</Project>
+      <Name>AutoIt.Foundation.TestBase</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

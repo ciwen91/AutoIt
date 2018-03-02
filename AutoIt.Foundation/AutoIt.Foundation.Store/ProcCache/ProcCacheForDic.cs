@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoIt.Foundation.Common;
-using AutoIt.Foundation.Common.ClassHelper;
 using Newtonsoft.Json;
 
 namespace AutoIt.Foundation.Store

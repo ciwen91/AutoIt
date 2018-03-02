@@ -4,8 +4,14 @@ using System.Reflection;
 
 namespace AutoIt.Foundation.Common
 {
+    /// <summary>
+    /// 成员元信息帮助类
+    /// </summary>
     public static class MemberInfoHelper
     {
+        /// <summary>
+        /// 获取对象的成员值
+        /// </summary>
         public static object GetValue(this MemberInfo memberInfo, object obj)
         {
             if (memberInfo.MemberType == MemberTypes.Field)
@@ -22,6 +28,9 @@ namespace AutoIt.Foundation.Common
             }
         }
 
+        /// <summary>
+        /// 设置对象的成员值
+        /// </summary>
         public static MemberInfo SetValue(this MemberInfo memberInfo, object obj, object val)
         {
             if (memberInfo.MemberType == MemberTypes.Field)

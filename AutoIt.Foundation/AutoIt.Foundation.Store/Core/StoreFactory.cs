@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoIt.Foundation.Common;
-using AutoIt.Foundation.Common.ClassHelper;
 
 namespace AutoIt.Foundation.Store
 {

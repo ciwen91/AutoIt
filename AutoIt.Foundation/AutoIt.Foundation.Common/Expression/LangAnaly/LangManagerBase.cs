@@ -49,8 +49,8 @@ namespace AutoIt.Foundation.Common.LangAnaly
                                if (preWhiteSpace != null)
                                {
                                    gramerVal = preWhiteSpace + gramerVal;
-                                   var newPoint = val.PrePoint(preWhiteSpace.Length,
-                                       new LinePoint(gramer.Index, gramer.Col, gramer.Line));
+                                   var newPoint = val.PrePoint(new LinePoint(gramer.Index, gramer.Col, gramer.Line),
+                                       preWhiteSpace.Length);
                                    gramer.Index = newPoint.Index;
                                    gramer.Line = newPoint.Y;
                                    gramer.Col = newPoint.X;

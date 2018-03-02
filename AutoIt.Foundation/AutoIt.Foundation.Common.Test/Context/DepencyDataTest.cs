@@ -1,12 +1,12 @@
 ﻿using System;
 using AutoIt.Foundation.Common;
-using AutoIt.Foundation.Common.Test.Core;
+using AutoIt.Foundation.TestBase;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace AutoIt.Foundation.Common.Test
 {
-    public class DepencyDataTest:TestBase
+    public class DepencyDataTest:UnitTestBase
     {
         private static DependcyData<int> _DepencyData1 = new DependcyData<int>();
         private static DependcyData<int> _DepencyData2 = new DependcyData<int>();
